@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- CLI now performs a safe upgrade when a `.cursor` folder exists without `.ai-kit-manifest.json` (no overwrites; conflicts become `.new`).
+- (Add changes here)
 
 ### Fixed
 
@@ -28,6 +28,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 
 - (Add security fixes here)
+
+---
+
+## [1.2.0] - 2026-01-18
+
+### Changed
+
+- CLI now performs a safe upgrade when a `.cursor` folder exists without `.ai-kit-manifest.json` (no overwrites; conflicts become `.new`).
 
 ---
 
@@ -83,11 +91,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date       | Highlights                          |
 | ------- | ---------- | ----------------------------------- |
+| 1.2.0   | 2026-01-18 | Safe upgrade without manifest       |
 | 1.1.0   | 2026-01-XX | ESLint rules, marker scripts, tests |
 | 1.0.0   | 2026-01-XX | Initial release                     |
 
 ---
 
-[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/interniums/create-ai-kit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/interniums/create-ai-kit/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/interniums/create-ai-kit/releases/tag/v1.0.0
