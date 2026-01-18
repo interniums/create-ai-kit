@@ -196,12 +196,29 @@ ls -la AGENTS.md
 ls -la scripts/docs-update/
 ```
 
-### Test 3: Collision Detection
+### Test 3: Re-run Behavior (No-op)
 
 ```bash
-# Run again in same directory (should warn)
+# Run again in same directory (should be a no-op)
 node /path/to/create-ai-kit/bin/create-ai-kit.js
-# Expected: "⚠️ A .cursor folder already exists."
+# Expected: exits 0, no overwrites
+```
+
+### Test 3b: Safe Upgrade (Existing .cursor Without Manifest)
+
+```bash
+# Simulate a .cursor folder that exists without a manifest
+rm -f .ai-kit-manifest.json
+
+# Optional: modify a file to trigger a conflict
+echo "# Modified" >> .cursor/commands/build.md
+
+# Run again without --force (should safe-upgrade)
+node /path/to/create-ai-kit/bin/create-ai-kit.js
+
+# Expected:
+# - prints a safe-upgrade message about missing manifest
+# - creates .new files for conflicts
 ```
 
 ### Test 4: Force Upgrade

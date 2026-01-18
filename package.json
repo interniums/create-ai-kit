@@ -8,7 +8,12 @@
   "scripts": {
     "test": "node --test test/*.test.js",
     "preview": "node bin/create-ai-kit.js --dry-run",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "release:check": "echo '\\n📋 Before releasing, complete PRE-RELEASE-CHECKLIST.md\\n' && echo 'Steps:\\n  1. Review PRE-RELEASE-CHECKLIST.md\\n  2. Run: npm test\\n  3. Run: npm audit\\n  4. Run: npm pack --dry-run\\n  5. Publish: npm publish\\n'",
+    "docs:update": "node scripts/docs-update/generate-context.js",
+    "docs:check": "node scripts/docs-update/check-markers.js",
+    "docs:find-markers": "node scripts/docs-update/find-markers.js",
+    "docs:verify-inline": "node scripts/docs-update/verify-inline.js"
   },
   "keywords": [
     "ai-kit",
@@ -46,6 +51,7 @@
     "bin/",
     "templates/",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "CHANGELOG.md"
   ]
 }

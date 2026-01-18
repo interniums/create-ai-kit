@@ -204,7 +204,7 @@ describe('AI Kit CLI', () => {
     });
   });
 
-  describe('Force Mode', () => {
+  describe('Upgrade Behavior', () => {
     let tempDir;
 
     beforeEach(() => {
@@ -219,7 +219,7 @@ describe('AI Kit CLI', () => {
       cleanupDir(tempDir);
     });
 
-    it('should fail without --force when .cursor exists but no manifest', () => {
+    it('should safely upgrade when .cursor exists without a manifest', () => {
       // First, create the .cursor folder via initial scaffold
       runCLI(tempDir, ['--yes']);
 
@@ -229,14 +229,38 @@ describe('AI Kit CLI', () => {
         fs.unlinkSync(manifestPath);
       }
 
-      // Now try to run again without --force (should fail)
+      // Modify a non-preserved file to trigger a conflict
+      const templateRulePath = path.join(tempDir, '.cursor/rules/_template.mdc');
+      fs.writeFileSync(templateRulePath, '# Custom Rule\n');
+
+      // Now try to run again without --force (safe upgrade)
       const result = runCLI(tempDir, []);
 
-      assert.strictEqual(result.exitCode, 1, 'Should exit with code 1');
-      assert.ok(
-        result.stderr.includes('already exists') || result.stdout.includes('already exists'),
-        'Should warn about existing .cursor'
-      );
+      const newFilePath = `${templateRulePath}.new`;
+      const originalContent = fs.readFileSync(templateRulePath, 'utf-8');
+
+      assert.strictEqual(result.exitCode, 0, 'Should exit with code 0');
+      assert.ok(fs.existsSync(newFilePath), 'Should create .new file for conflicts');
+      assert.strictEqual(originalContent, '# Custom Rule\n', 'Original file should be preserved');
+      assert.ok(fs.existsSync(manifestPath), 'Should create manifest after safe upgrade');
+    });
+
+    it('should not create .new files when templates match', () => {
+      // First, create files and remove manifest
+      runCLI(tempDir, ['--yes']);
+
+      const manifestPath = path.join(tempDir, '.ai-kit-manifest.json');
+      if (fs.existsSync(manifestPath)) {
+        fs.unlinkSync(manifestPath);
+      }
+
+      // Run safe upgrade without changes
+      const result = runCLI(tempDir, []);
+
+      const newFilePath = path.join(tempDir, '.cursor/rules/_template.mdc.new');
+      assert.strictEqual(result.exitCode, 0, 'Should exit with code 0');
+      assert.ok(!fs.existsSync(newFilePath), 'Should not create .new files');
+      assert.ok(fs.existsSync(manifestPath), 'Should create manifest after safe upgrade');
     });
 
     it('should preserve user-modified files and create .new files', () => {

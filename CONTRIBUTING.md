@@ -134,6 +134,24 @@ When opening an issue, please include:
 - Expected vs actual behavior
 - Any error messages
 
+## Release Process (Maintainers)
+
+Before publishing a new release:
+
+1. Complete **all items** in `PRE-RELEASE-CHECKLIST.md`
+2. Run the pre-release reminder:
+   ```bash
+   npm run release:check
+   ```
+3. Update `CHANGELOG.md` with the new version
+4. Bump version in `package.json`
+5. Run full test suite: `npm test`
+6. Publish: `npm publish`
+7. Tag the release: `git tag -a vX.X.X -m "vX.X.X"`
+8. Push tags: `git push origin vX.X.X`
+
+The pre-release checklist covers code quality, security, documentation, testing, and post-release verification. No release should skip this checklist.
+
 ## License
 
 By contributing to create-ai-kit, you agree that your contributions will be licensed under the [MIT License](LICENSE).

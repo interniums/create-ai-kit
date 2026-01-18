@@ -40,6 +40,8 @@ npx create-ai-kit --force
 
 User-modified files will create `.new` versions instead of overwriting.
 
+If a `.cursor` folder already exists without a manifest, running without `--force` will do a safe upgrade and create `.new` files for any conflicts.
+
 ## After Installation
 
 1. Open Cursor (Cmd+Shift+I for Composer)

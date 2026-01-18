@@ -169,11 +169,12 @@ async function main() {
   const manifestPath = path.join(PROJECT_ROOT, MANIFEST_FILE);
   const hasCursor = fs.existsSync(cursorDir);
   const hasManifest = fs.existsSync(manifestPath);
+  const safeUpgradeWithoutManifest = hasCursor && !hasManifest && !options.force;
 
-  if (hasCursor && !options.force && !hasManifest) {
-    console.error(chalk.red('⚠️  A .cursor folder already exists.'));
-    console.error('   Run with --force to upgrade/overwrite.');
-    process.exit(1);
+  if (safeUpgradeWithoutManifest) {
+    console.log(chalk.yellow('⚠️  A .cursor folder already exists without a manifest.'));
+    console.log(chalk.gray('   Proceeding with a safe upgrade (no overwrites).'));
+    console.log(chalk.gray('   Conflicts will be written as .new files.'));
   }
 
   // 2. Load Manifest if exists
@@ -265,9 +266,12 @@ async function main() {
 
       // Check if file was modified by user compared to LAST manifest
       const lastChecksum = manifest.files[targetRelPath];
-      const userModified = lastChecksum && lastChecksum !== currentChecksum;
+      const hasBaseline = Boolean(lastChecksum);
+      const userModified =
+        (hasBaseline && lastChecksum !== currentChecksum) ||
+        (!hasBaseline && safeUpgradeWithoutManifest);
 
-      if (options.force) {
+      if (options.force || safeUpgradeWithoutManifest) {
         if (userModified) {
           // User modified file: create .new
           newFiles.push({ path: targetRelPath + '.new', content: templateContent });
