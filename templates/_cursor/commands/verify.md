@@ -42,6 +42,7 @@ Files touched in current task, or files explicitly mentioned.
 7. **Local Checks:**
    - Run lint check — must pass
    - Run type check — must pass
+   - Run placeholder check — `node scripts/placeholder-check.js` (or `npm run hydrate:check`)
    - Manually verify behavior changes (check UI, API responses, database state, etc.)
 
 8. **Auto-Fix Before Reporting:**

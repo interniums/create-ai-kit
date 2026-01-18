@@ -12,14 +12,13 @@ Enforces that `@docs-update` markers are addressed within a configurable timefra
 
 ## Marker Format
 
-```javascript
-// Basic marker (triggers warning by default - no date)
-// @docs-update
+Use dated markers by default. Undated markers are discouraged.
 
+```javascript
 // With date - will error if older than maxAgeDays
 // @docs-update(2024-01-15)
 
-// With date and reason
+// With date and reason (recommended)
 // @docs-update(2024-01-15: Added new auth flow, update security.md)
 ```
 

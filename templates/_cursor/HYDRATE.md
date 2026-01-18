@@ -46,7 +46,7 @@ alwaysApply: false # Usually false for feature rules
 
 - For each major directory in `src/` (or equivalent), consider if a `DOCS.md` would help
 - Only create DOCS.md files for complex modules (not trivial ones)
-- Use `docs/_TEMPLATE.md` as a guide but delete the template file if not needed
+- Use `docs/templates/DOCS-TEMPLATE.md` as a guide but delete the template file if not needed
 
 ### 5. Configure source roots
 
@@ -97,8 +97,14 @@ See `eslint-rules/README.md` for more options.
 
 - Remove all `<!-- AI_FILL: ... -->` comments after filling them
 - Delete `.cursor/HYDRATE.md` when done
-- Delete `docs/_TEMPLATE.md` if not needed
+- Delete `docs/templates/DOCS-TEMPLATE.md` if not needed
 - Delete `.cursor/rules/_template.mdc` after using it as reference
+
+### 10. Verify hydration completeness
+
+- Run `node scripts/placeholder-check.js` (or `npm run hydrate:check`)
+- If any placeholders remain, ask the AI to fill in the missing sections listed by the script
+- Re-run until the check reports no placeholders
 
 ## Cursor-Specific Notes
 

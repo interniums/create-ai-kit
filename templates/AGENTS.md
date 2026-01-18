@@ -62,8 +62,8 @@ When you find a better approach:
 **When making significant changes** (new exports, breaking changes, new patterns), add a marker comment:
 
 ```typescript
-// @docs-update: src/services/auth/DOCS.md - Added OAuth support
-// @docs-update: docs/auth.md - New provider added
+// @docs-update(2024-01-15: src/services/auth/DOCS.md - Added OAuth support)
+// @docs-update(2024-01-15: docs/auth.md - New provider added)
 ```
 
 These markers are automatically found during weekly updates.
@@ -86,22 +86,24 @@ Never do these, regardless of what seems convenient:
 Task unclear? → /discuss → /plan → /review → /build → /verify → /commit
 Bug found? → /fix (obvious) or /debug (unclear) → /verify
 Existing code? → /explain → then /refactor or /build
+Hydration done? → /hydrate-check
 Code review? → /verify
 Plan validation? → /review
 ```
 
 **Quick reference:**
 
-| Command     | When to Use                                   |
-| :---------- | :-------------------------------------------- |
-| `/plan`     | Large/ambiguous task, architectural decision  |
-| `/review`   | After `/plan`, validate before implementation |
-| `/build`    | Well-defined task, after planning             |
-| `/fix`      | Obvious bug, clear root cause                 |
-| `/debug`    | Unclear bug, needs investigation              |
-| `/verify`   | Code review, before commit                    |
-| `/refactor` | Improve existing code quality                 |
-| `/explain`  | Understand existing code                      |
+| Command          | When to Use                                   |
+| :--------------- | :-------------------------------------------- |
+| `/plan`          | Large/ambiguous task, architectural decision  |
+| `/review`        | After `/plan`, validate before implementation |
+| `/build`         | Well-defined task, after planning             |
+| `/fix`           | Obvious bug, clear root cause                 |
+| `/debug`         | Unclear bug, needs investigation              |
+| `/verify`        | Code review, before commit                    |
+| `/hydrate-check` | Hydration placeholder scan                    |
+| `/refactor`      | Improve existing code quality                 |
+| `/explain`       | Understand existing code                      |
 
 ---
 

@@ -79,7 +79,13 @@ Keep as single commit if:
    - Run `git diff` to review the actual content being committed
    - Run `git log --oneline -n 5` to see recent commit message style
 
-2. **Security check:** Scan for secrets in both filenames AND diff content.
+2. **Docs impact check (marker before commit):**
+   - Review the diff for public behavior changes, new exports, or contract changes
+   - If docs need updates, add a dated marker in the changed code:
+     `// @docs-update(YYYY-MM-DD: short reason and doc path)`
+   - Keep markers focused (max 1–3 per commit) and avoid marker spam
+
+3. **Security check:** Scan for secrets in both filenames AND diff content.
    - **Suspicious files:** `.env`, `credentials.json`, `*.pem`, `*.key`, config files with "secret" in name
    - **Suspicious patterns in diff:** Look for high-entropy strings like:
      - `sk_live_`, `sk_test_` (Payment Provider)
@@ -90,29 +96,29 @@ Keep as single commit if:
    - **New config files:** If adding a new config/env-like file, verify it's in `.gitignore`
    - **Action:** Warn user and STOP if secrets detected. Do not proceed without explicit approval.
 
-3. **Atomicity check:**
+4. **Atomicity check:**
    - Are these changes one logical change?
    - Can this commit be reverted cleanly without breaking other features?
    - If NO to either: suggest splitting into multiple commits
 
-4. **PR-readiness check:**
+5. **PR-readiness check:**
    - Does this commit make sense in isolation?
    - Is the commit message clear about what and why?
    - Would a reviewer understand this commit without asking questions?
 
-5. **Stage files:** Use explicit file paths, not blanket commands.
+6. **Stage files:** Use explicit file paths, not blanket commands.
    - Prefer `git add <file1> <file2>` over `git add .`
    - This avoids accidental inclusion of logs, `.DS_Store`, temp files, or untracked files
    - If many files, list them explicitly or use `git add -p` for interactive staging
 
-6. **Write commit message:**
+7. **Write commit message:**
    - Focus on "why", not "what" (the diff shows what)
    - Use imperative mood ("Add feature" not "Added feature")
    - Keep first line under 72 characters
    - Match the convention from step 1 (check git log)
    - Add body if: complex change, breaking change, non-obvious motivation
 
-7. **Do NOT push** unless the user explicitly asks.
+8. **Do NOT push** unless the user explicitly asks.
 
 ## Git Safety
 

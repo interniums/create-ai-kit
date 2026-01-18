@@ -38,4 +38,4 @@ someFunction();
 
 - [Link to related doc]
 
-**Last Updated**: [Date]
+**Last Updated**: [YYYY-MM-DD]

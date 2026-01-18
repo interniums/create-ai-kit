@@ -81,6 +81,7 @@ This checklist must be completed before every release. No exceptions.
 - [ ] No broken relative paths within templates
 - [ ] Template markdown renders correctly
 - [ ] No orphaned or unused template files
+- [ ] Placeholder check passes in a hydrated test project (`node scripts/placeholder-check.js`)
 
 ---
 
@@ -229,7 +230,8 @@ Run all tests below. Record results in the table.
 | 11  | Project detection (React)     | Create with react dep, verify detection        | ⬜     |       |
 | 12  | Project detection (Python)    | Create requirements.txt, verify detection      | ⬜     |       |
 | 13  | Clipboard copy                | Verify HYDRATE.md copied to clipboard          | ⬜     |       |
-| 14  | Global link test              | `npm link` then `create-ai-kit --dry-run`      | ⬜     |       |
+| 14  | Placeholder check             | `node scripts/placeholder-check.js`            | ⬜     |       |
+| 15  | Global link test              | `npm link` then `create-ai-kit --dry-run`      | ⬜     |       |
 
 ### Detailed Test Scripts
 
@@ -262,7 +264,7 @@ echo "# Modified" >> .cursor/commands/build.md
 node /path/to/ai-kit/bin/create-ai-kit.js --force --yes
 # Verify: build.md.new created if build.md was in manifest
 
-# Test 14: Global link
+# Test 15: Global link
 cd /path/to/ai-kit
 npm link
 mkdir -p /tmp/test-global && cd /tmp/test-global
@@ -282,6 +284,7 @@ test -f .cursor/HYDRATE.md && echo "✓ .cursor/HYDRATE.md"
 test -f .cursor/ai-kit.config.json && echo "✓ .cursor/ai-kit.config.json"
 test -f AGENTS.md && echo "✓ AGENTS.md"
 test -d scripts/docs-update && echo "✓ scripts/docs-update/"
+test -f scripts/placeholder-check.js && echo "✓ scripts/placeholder-check.js"
 test -f .ai-kit-manifest.json && echo "✓ .ai-kit-manifest.json"
 ```
 
@@ -293,6 +296,7 @@ Expected command files:
 - [ ] `.cursor/commands/discuss.md`
 - [ ] `.cursor/commands/explain.md`
 - [ ] `.cursor/commands/fix.md`
+- [ ] `.cursor/commands/hydrate-check.md`
 - [ ] `.cursor/commands/plan.md`
 - [ ] `.cursor/commands/refactor.md`
 - [ ] `.cursor/commands/review.md`

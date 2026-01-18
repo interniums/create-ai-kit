@@ -54,13 +54,14 @@ create-ai-kit/
 │   └── create-ai-kit.js      # CLI entry point (executable)
 ├── templates/
 │   ├── _cursor/                 # Renamed to .cursor on install
-│   │   ├── commands/            # 10 workflow commands
+│   │   ├── commands/            # 11 workflow commands
 │   │   │   ├── build.md
 │   │   │   ├── commit.md
 │   │   │   ├── debug.md
 │   │   │   ├── discuss.md
 │   │   │   ├── explain.md
 │   │   │   ├── fix.md
+│   │   │   ├── hydrate-check.md
 │   │   │   ├── plan.md
 │   │   │   ├── refactor.md
 │   │   │   ├── review.md
@@ -70,14 +71,20 @@ create-ai-kit/
 │   │   │   └── _template.mdc    # Template for new rules
 │   │   └── HYDRATE.md           # AI hydration prompt
 │   ├── scripts/
-│   │   └── docs-update/
-│   │       ├── generate-context.js
-│   │       ├── verify-inline.js
-│   │       ├── find-markers.sh
-│   │       ├── file-doc-map.template.json
-│   │       └── README.md
+│   │   ├── docs-update/
+│   │   │   ├── generate-context.js
+│   │   │   ├── verify-inline.js
+│   │   │   ├── find-markers.sh
+│   │   │   ├── file-doc-map.template.json
+│   │   │   ├── prompt-template.md
+│   │   │   ├── MARKER-GUIDE.md
+│   │   │   └── README.md
+│   │   └── placeholder-check.js
 │   ├── docs/
-│   │   └── _TEMPLATE.md
+│   │   ├── README.md
+│   │   └── templates/
+│   │       ├── DOCS-TEMPLATE.md
+│   │       └── WEEKLY-UPDATE-INPUT.md
 │   └── AGENTS.md                # Agent guide skeleton
 ├── .gitignore
 ├── .npmignore                   # (optional) exclude dev files
@@ -97,7 +104,7 @@ mkdir -p create-ai-kit/bin
 mkdir -p create-ai-kit/templates/_cursor/commands
 mkdir -p create-ai-kit/templates/_cursor/rules
 mkdir -p create-ai-kit/templates/scripts/docs-update
-mkdir -p create-ai-kit/templates/docs
+mkdir -p create-ai-kit/templates/docs/templates
 cd create-ai-kit
 ```
 
@@ -194,6 +201,7 @@ node /path/to/create-ai-kit/bin/create-ai-kit.js
 ls -la .cursor/
 ls -la AGENTS.md
 ls -la scripts/docs-update/
+ls -la scripts/placeholder-check.js
 ```
 
 ### Test 3: Re-run Behavior (No-op)
@@ -220,6 +228,15 @@ node /path/to/create-ai-kit/bin/create-ai-kit.js
 # - prints a safe-upgrade message about missing manifest
 # - creates .new files for conflicts
 ```
+
+### Test 3c: Placeholder Check (Post-hydration)
+
+```bash
+# Run after hydration is complete
+node scripts/placeholder-check.js
+```
+
+Expected output: “No placeholders found”.
 
 ### Test 4: Force Upgrade
 
@@ -364,7 +381,7 @@ AI Kit scaffolding tool for Cursor IDE.
 
 ### Features
 
-- 10 workflow commands (/plan, /build, /verify, etc.)
+- 11 workflow commands (/plan, /build, /verify, /hydrate-check, etc.)
 - AI hydration system for project-specific setup
 - Documentation maintenance scripts
 - Safe upgrade mechanism with checksums

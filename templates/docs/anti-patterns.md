@@ -7,13 +7,15 @@
 
 ## General
 
-| ❌ Anti-Pattern            | ✅ Do Instead                 | Why                                           |
-| -------------------------- | ----------------------------- | --------------------------------------------- |
-| Silently swallowing errors | Log or propagate with context | Hidden failures are impossible to debug       |
-| Magic strings/numbers      | Use constants or enums        | Typos cause silent bugs, harder to refactor   |
-| God files (500+ lines)     | Split by responsibility       | Harder to test, review, and maintain          |
-| Premature abstraction      | Wait for 3+ use cases         | Wrong abstractions are worse than duplication |
-| Comments explaining what   | Comments explaining why       | Code should be self-documenting for "what"    |
+| ❌ Anti-Pattern                          | ✅ Do Instead                                 | Why                                           |
+| ---------------------------------------- | --------------------------------------------- | --------------------------------------------- |
+| Silently swallowing errors               | Log or propagate with context                 | Hidden failures are impossible to debug       |
+| Magic strings/numbers                    | Use constants or enums                        | Typos cause silent bugs, harder to refactor   |
+| God files (500+ lines)                   | Split by responsibility                       | Harder to test, review, and maintain          |
+| Premature abstraction                    | Wait for 3+ use cases                         | Wrong abstractions are worse than duplication |
+| Comments explaining what                 | Comments explaining why                       | Code should be self-documenting for "what"    |
+| Leaving AI_FILL placeholders             | Finish hydration and re-run placeholder check | Incomplete context leads to wrong decisions   |
+| Manifest drift (`.ai-kit-manifest.json`) | Regenerate via CLI upgrade or delete manifest | Upgrades mis-detect changes and create noise  |
 
 ## React / Frontend
 

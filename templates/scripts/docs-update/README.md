@@ -17,6 +17,8 @@ This system helps keep documentation in sync with code changes:
 | --------------------- | ------------------------------------------- |
 | `file-doc-map.json`   | Maps file patterns to related documentation |
 | `generate-context.js` | Generates context package for AI analysis   |
+| `prompt-template.md`  | Base prompt for AI doc updates              |
+| `MARKER-GUIDE.md`     | Marker format reference                     |
 | `update-context.json` | Generated output (gitignored)               |
 
 ## Usage
@@ -45,13 +47,13 @@ The script will:
 - Ask to use the WEEKLY-UPDATE-INPUT.md file
 - Analyze git changes for that period
 - Map changed files to affected docs
-- Collect `@docs-update` markers from code comments
+- Collect `@docs-update(YYYY-MM-DD: reason)` markers from code comments
 - Output `update-context.json`
 
 ### 3. Generate Doc Updates
 
 1. Copy contents of `update-context.json`
-2. Open `prompt-template.md` (create one if missing)
+2. Open `scripts/docs-update/prompt-template.md`
 3. Use with your preferred AI assistant (Claude, GPT, etc.)
 4. Paste the context into the prompt
 5. AI generates doc updates with confidence scores
@@ -90,9 +92,11 @@ When you add a new service or feature:
 Developers and AI can mark code that needs doc updates:
 
 ```typescript
-// @docs-update: src/services/auth/DOCS.md - Added OAuth support
-// @docs-update: docs/auth.md - New provider section
+// @docs-update(2024-01-15: src/services/auth/DOCS.md - Added OAuth support)
+// @docs-update(2024-01-15: docs/auth.md - New provider section)
 ```
+
+See `scripts/docs-update/MARKER-GUIDE.md` for format details.
 
 ### Finding Markers
 

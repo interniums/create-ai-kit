@@ -53,7 +53,7 @@ Production-ready implementation.
 10. **Docs Marker:** If changing exports or patterns, add marker comment:
 
     ```typescript
-    // @docs-update: path/to/DOCS.md - Description of change
+    // @docs-update(2024-01-15: path/to/DOCS.md - Description of change)
     ```
 
     These markers are temporary - they're collected by the docs update script.
@@ -61,5 +61,7 @@ Production-ready implementation.
 11. **Verification:** Run lint and type checks, fix introduced issues before finishing.
 
 ## Project Scripts
+
+- `node scripts/placeholder-check.js` (or `npm run hydrate:check`) — verify hydration completeness
 
 <!-- AI_FILL: Add project specific scripts here (e.g. npm run lint, npm run type-check) -->

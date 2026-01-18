@@ -225,7 +225,7 @@ function main() {
         console.log(formatGrepStyle(result.file, result.markers));
       }
 
-      console.log('\n💡 Use @docs-update(reason) to document why docs need updating.');
+      console.log('\n💡 Use @docs-update(YYYY-MM-DD: reason) to document why docs need updating.');
     }
   }
 

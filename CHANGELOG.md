@@ -31,6 +31,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] - 2026-01-18
+
+### Added
+
+- Hydration placeholder check script (`scripts/placeholder-check.js`) and `/hydrate-check` command (11 total commands now).
+- `hydrate:check` npm script added during scaffolding.
+
+### Changed
+
+- Updated docs and release guides to include placeholder verification and real-world learnings.
+
+---
+
 ## [1.2.0] - 2026-01-18
 
 ### Changed
@@ -91,13 +104,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date       | Highlights                          |
 | ------- | ---------- | ----------------------------------- |
+| 1.3.0   | 2026-01-18 | Hydration check + docs improvements |
 | 1.2.0   | 2026-01-18 | Safe upgrade without manifest       |
 | 1.1.0   | 2026-01-XX | ESLint rules, marker scripts, tests |
 | 1.0.0   | 2026-01-XX | Initial release                     |
 
 ---
 
-[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/interniums/create-ai-kit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/interniums/create-ai-kit/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/interniums/create-ai-kit/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/interniums/create-ai-kit/releases/tag/v1.0.0

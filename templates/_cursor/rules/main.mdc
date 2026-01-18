@@ -6,9 +6,10 @@ alwaysApply: true
 
 # AI Kit
 
-<!-- ai-kit-version: 1.2.0 -->
+<!-- ai-kit-version: 1.3.0 -->
 
 On first interaction with a new task, read `AGENTS.md` in the project root.
+After hydration, run `/hydrate-check` to confirm placeholders are cleared.
 
 It contains:
 
@@ -26,6 +27,7 @@ Use native Cursor commands (type `/` in chat) for common workflows:
 - `/plan` - Architectural blueprint before coding
 - `/build` - Production-ready implementation
 - `/verify` - Code review and safety check
+- `/hydrate-check` - Placeholder scan after hydration
 - `/fix` - Quick targeted correction
 - `/debug` - Root cause analysis
 - `/refactor` - Improve code quality
@@ -44,7 +46,7 @@ Commands are defined in `.cursor/commands/` - each loads only when invoked.
 **When making significant changes** (new exports, breaking changes, new patterns), add a marker comment:
 
 ```typescript
-// @docs-update: path/to/DOCS.md - Description of change
+// @docs-update(2024-01-15: path/to/DOCS.md - Description of change)
 ```
 
 Remember: You may challenge documented patterns when you find more secure, performant, or modern solutions. Present alternatives, explain tradeoffs, and ask permission before diverging.
