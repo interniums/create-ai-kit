@@ -28,7 +28,11 @@ const DEFAULT_CONFIG = {
   ],
 };
 
-const INTERNAL_IGNORE_PREFIXES = ['scripts/docs-update/', '.cursor/commands/'];
+const INTERNAL_IGNORE_PREFIXES = [
+  'scripts/docs-update/',
+  'scripts/placeholder-check.js',
+  '.cursor/commands/',
+];
 
 const TEXT_EXTENSIONS = new Set([
   '.md',

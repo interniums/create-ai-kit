@@ -6,7 +6,7 @@ alwaysApply: true
 
 # AI Kit
 
-<!-- ai-kit-version: 1.3.0 -->
+<!-- ai-kit-version: 1.3.1 -->
 
 On first interaction with a new task, read `AGENTS.md` in the project root.
 After hydration, run `/hydrate-check` to confirm placeholders are cleared.

@@ -1,9 +1,9 @@
 {
   "name": "create-ai-kit",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Scaffold AI Kit - AI-friendly documentation and workflow system for Cursor IDE",
   "bin": {
-    "create-ai-kit": "./bin/create-ai-kit.js"
+    "create-ai-kit": "bin/create-ai-kit.js"
   },
   "scripts": {
     "test": "node --test test/*.test.js",
