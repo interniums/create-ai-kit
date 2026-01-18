@@ -1,0 +1,44 @@
+# AI Kit
+
+<!-- ai-kit-version: 1.0.0 -->
+
+On first interaction with a new task, read `AGENTS.md` in the project root.
+
+It contains:
+
+- Documentation Index (keyword → doc file mapping)
+- Architecture quick reference
+- Intelligent Dissent Protocol (when to suggest modern improvements)
+- Critical anti-patterns to avoid
+
+For file-specific patterns, see the other `.mdc` files in this folder—they auto-load based on file type.
+
+## Commands
+
+Use native Cursor commands (type `/` in chat) for common workflows:
+
+- `/plan` - Architectural blueprint before coding
+- `/build` - Production-ready implementation
+- `/verify` - Code review and safety check
+- `/fix` - Quick targeted correction
+- `/debug` - Root cause analysis
+- `/refactor` - Improve code quality
+- `/commit` - Create git commit
+- `/discuss` - Technical debate
+- `/explain` - Code walkthrough
+
+Commands are defined in `.cursor/commands/` - each loads only when invoked.
+
+## Documentation Policy
+
+**DO NOT** update documentation in real-time during feature development. This creates noise, merge conflicts, and token waste.
+
+**Instead:** Use the batch update workflow.
+
+**When making significant changes** (new exports, breaking changes, new patterns), add a marker comment:
+
+```typescript
+// @docs-update: path/to/DOCS.md - Description of change
+```
+
+Remember: You may challenge documented patterns when you find more secure, performant, or modern solutions. Present alternatives, explain tradeoffs, and ask permission before diverging.

@@ -1,0 +1,15 @@
+{
+  "description": "Maps file patterns to related documentation files. Used by generate-context.js to identify which docs need updating based on changed files.",
+  "mappings": [
+    {
+      "pattern": ".cursor/rules/**",
+      "docs": ["AGENTS.md", "docs/README.md"],
+      "keywords": ["cursor", "rules", "mdc", "agent"]
+    },
+    {
+      "pattern": "AGENTS.md",
+      "docs": ["docs/README.md"],
+      "keywords": ["agent", "dissent", "documentation index"]
+    }
+  ]
+}
