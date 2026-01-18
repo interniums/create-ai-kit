@@ -88,9 +88,7 @@ function verifyReferences() {
   // Check .cursor/rules/*.mdc
   const rulesDir = path.join(ROOT_DIR, '.cursor', 'rules');
   if (fs.existsSync(rulesDir)) {
-    const ruleFiles = fs
-      .readdirSync(rulesDir)
-      .filter((f) => f.endsWith('.mdc'));
+    const ruleFiles = fs.readdirSync(rulesDir).filter((f) => f.endsWith('.mdc'));
     for (const file of ruleFiles) {
       docsFiles.push(path.join(rulesDir, file));
     }
@@ -121,9 +119,7 @@ function main() {
 
   if (missing.length === 0) {
     console.log('✅ All DOCS.md references are valid!\n');
-    console.log(
-      `Checked ${results.length} references across documentation files.`
-    );
+    console.log(`Checked ${results.length} references across documentation files.`);
     process.exit(0);
   }
 
@@ -135,9 +131,7 @@ function main() {
   }
 
   console.log(`\n${missing.length} missing reference(s) found.`);
-  console.log(
-    'Please create the missing DOCS.md files or update the references.'
-  );
+  console.log('Please create the missing DOCS.md files or update the references.');
   process.exit(1);
 }
 

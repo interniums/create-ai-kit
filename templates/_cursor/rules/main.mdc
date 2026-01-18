@@ -1,6 +1,12 @@
+---
+description: Core AI Kit configuration - read AGENTS.md on first interaction
+globs: 
+alwaysApply: true
+---
+
 # AI Kit
 
-<!-- ai-kit-version: 1.0.0 -->
+<!-- ai-kit-version: 1.1.0 -->
 
 On first interaction with a new task, read `AGENTS.md` in the project root.
 

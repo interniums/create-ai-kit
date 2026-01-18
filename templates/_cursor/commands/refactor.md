@@ -16,18 +16,18 @@ Improve code quality without changing behavior.
 
 ## Refactoring Pattern Catalog
 
-| Pattern | When to Use | Risk Level | Example |
-| --- | --- | --- | --- |
-| **Rename** | Unclear variable/function names | 🟢 Safe | `data` → `userProfile` |
-| **Extract Function** | Duplication, >15 lines, complex logic | 🟢 Safe | Pull out validation logic |
-| **Extract Component** | JSX duplication, >50 lines | 🟡 Medium | Extract `<Card>` |
-| **Introduce Parameter Object** | Function has >3 params | 🟢 Safe | `(a,b,c,d)` → `(options)` |
-| **Consolidate Handlers** | Multiple similar event handlers | 🟡 Medium | Merge `onClick` handlers |
-| **Extract Service** | Business logic in components | 🟡 Medium | Move logic to service |
-| **Replace Conditional with Polymorphism** | Long if/else or switch | 🟠 Risky | Strategy pattern |
-| **Inline Function** | One-liner called once | 🟢 Safe | Remove unnecessary abstraction |
-| **Move to Shared** | Used in 3+ places | 🟡 Medium | Move to `@/utils` or `@/hooks` |
-| **Add Types** | `any` or missing types | 🟢 Safe | Add proper TypeScript types |
+| Pattern                                   | When to Use                           | Risk Level | Example                        |
+| ----------------------------------------- | ------------------------------------- | ---------- | ------------------------------ |
+| **Rename**                                | Unclear variable/function names       | 🟢 Safe    | `data` → `userProfile`         |
+| **Extract Function**                      | Duplication, >15 lines, complex logic | 🟢 Safe    | Pull out validation logic      |
+| **Extract Component**                     | JSX duplication, >50 lines            | 🟡 Medium  | Extract `<Card>`               |
+| **Introduce Parameter Object**            | Function has >3 params                | 🟢 Safe    | `(a,b,c,d)` → `(options)`      |
+| **Consolidate Handlers**                  | Multiple similar event handlers       | 🟡 Medium  | Merge `onClick` handlers       |
+| **Extract Service**                       | Business logic in components          | 🟡 Medium  | Move logic to service          |
+| **Replace Conditional with Polymorphism** | Long if/else or switch                | 🟠 Risky   | Strategy pattern               |
+| **Inline Function**                       | One-liner called once                 | 🟢 Safe    | Remove unnecessary abstraction |
+| **Move to Shared**                        | Used in 3+ places                     | 🟡 Medium  | Move to `@/utils` or `@/hooks` |
+| **Add Types**                             | `any` or missing types                | 🟢 Safe    | Add proper TypeScript types    |
 
 ### Risk Levels
 
@@ -38,14 +38,12 @@ Improve code quality without changing behavior.
 ## Protocol
 
 1. **Establish Baseline (required before any changes):**
-
    - Run lint and type checks — **abort if either fails**
    - If code is already broken, use `/fix` first, then return to refactor
 
 2. **Read Context:** Understand current implementation, its callers, and dependencies.
 
 3. **Identify Issues:**
-
    - Duplication (same code in multiple places)
    - Excessive complexity (deeply nested conditionals, >50 line functions)
    - Poor naming (unclear what variables/functions do)
@@ -56,13 +54,11 @@ Improve code quality without changing behavior.
 4. **Select Pattern:** Choose refactoring pattern(s) from catalog above.
 
 5. **Plan Incremental Steps:**
-
    - Break large refactors into safe, testable steps
    - Each step should compile and pass tests
    - Example: Rename → Extract → Move (not all at once)
 
 6. **Transform:** Group related atomic refactors into a single coherent change.
-
    - Extract function/component
    - Rename for clarity
    - Consolidate duplicates
@@ -71,7 +67,6 @@ Improve code quality without changing behavior.
    _Note: "One pattern at a time" means don't mix unrelated refactors (e.g., renaming + architecture change). Related changes to the same code path should be a single commit._
 
 7. **Verify (execute, don't assume):**
-
    - Run lint and type checks — must pass
    - Manually verify behavior unchanged (check UI, API responses, etc.)
 
@@ -116,17 +111,17 @@ Improve code quality without changing behavior.
 
 ## Common Refactoring Triggers
 
-| Code Smell | Pattern to Apply | Example |
-| --- | --- | --- |
-| Duplicate code in 3+ places | Extract Function or Component | Same validation logic repeated |
-| Function >30 lines | Extract Function | Break into smaller pieces |
-| Component >100 lines | Extract Component | Split into smaller components |
-| Unclear variable name | Rename | `data` → `userProfile` |
-| >3 function parameters | Introduce Parameter Object | `{...options}` |
-| Long if/else chains | Extract Function or Strategy | Pull logic into named functions |
-| Business logic in components | Extract Service | Move to `@/services/` |
-| Tight coupling | Dependency Injection | Pass dependencies as params |
-| Missing types | Add Types | Replace `any` with proper types |
+| Code Smell                   | Pattern to Apply              | Example                         |
+| ---------------------------- | ----------------------------- | ------------------------------- |
+| Duplicate code in 3+ places  | Extract Function or Component | Same validation logic repeated  |
+| Function >30 lines           | Extract Function              | Break into smaller pieces       |
+| Component >100 lines         | Extract Component             | Split into smaller components   |
+| Unclear variable name        | Rename                        | `data` → `userProfile`          |
+| >3 function parameters       | Introduce Parameter Object    | `{...options}`                  |
+| Long if/else chains          | Extract Function or Strategy  | Pull logic into named functions |
+| Business logic in components | Extract Service               | Move to `@/services/`           |
+| Tight coupling               | Dependency Injection          | Pass dependencies as params     |
+| Missing types                | Add Types                     | Replace `any` with proper types |
 
 ## Project Scripts
 

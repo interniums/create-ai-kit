@@ -1,15 +1,46 @@
-# Rule Name, glob pattern(s) for applicable files: ['**/*.ts', '**/*.tsx']
+---
+# Frontmatter Reference (delete this comment block after using):
+#
+# description: Brief summary shown in Cursor's rule list (required)
+# globs: File patterns that trigger this rule (optional, leave empty for manual rules)
+# alwaysApply: true/false - if true, applies to ALL files regardless of globs (optional)
+#
+# Examples:
+#   globs: "**/*.tsx"           # Single pattern
+#   globs: ["**/*.ts", "**/*.tsx"]  # Multiple patterns
+#   globs:                      # Empty - rule must be manually invoked or @-mentioned
+#
+# Common patterns:
+#   **/*.ts, **/*.tsx          # TypeScript files
+#   src/components/**          # Component directory
+#   **/api/**/*.ts             # API routes
+#   **/*.test.ts               # Test files
+#   **/hooks/*.ts              # React hooks
+---
+
+# Rule Name
 
 <!-- AI_FILL: Define the purpose of this rule and what files it applies to. -->
 
 ## Core Principles
 
-<!-- AI_FILL: List the core principles for this domain/feature. -->
+<!-- AI_FILL: List 3-5 core principles for this domain/feature. Example:
+- Separation of concerns: UI components should not contain business logic
+- Single responsibility: Each module handles one thing well
+-->
 
-## Best Practices
+## Patterns
 
-<!-- AI_FILL: List specific best practices. -->
+<!-- AI_FILL: Show preferred code patterns with examples. Include:
+- Directory structure if relevant
+- Code snippets for common operations
+- Import conventions
+-->
 
 ## Anti-Patterns
 
-<!-- AI_FILL: List specific anti-patterns to avoid. -->
+<!-- AI_FILL: List specific things to avoid. Example:
+| ❌ Don't | ✅ Do Instead | Why |
+|----------|---------------|-----|
+| Direct DOM manipulation | Use refs or state | React controls the DOM |
+-->

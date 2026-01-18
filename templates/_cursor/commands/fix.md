@@ -10,7 +10,6 @@ Quick targeted correction for obvious issues.
 ## Protocol
 
 1. **Evidence (required):** State the exact file + line/function and the one-sentence root cause.
-
    - If you cannot produce this confidently, use `/debug` instead.
 
 2. **Locate:** Find the exact line/function causing the issue.
@@ -18,7 +17,6 @@ Quick targeted correction for obvious issues.
 3. **Correct:** Apply minimal change to fix the problem.
 
 4. **Verify (both):**
-
    - **Syntax/Lint:** Run project lint command (e.g. `npm run lint`)
    - **Types:** Run project type-check command (e.g. `npm run type-check`)
    - **Logic:** Manually verify the bug is fixed (check UI, API response, logs, etc.)

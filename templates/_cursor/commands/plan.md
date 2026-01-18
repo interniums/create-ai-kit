@@ -11,19 +11,16 @@ Create an architectural blueprint before coding.
 ## Protocol
 
 1. **Read Context:**
-
    - Read `AGENTS.md` → use the Documentation Index to find relevant docs
    - Match task keywords to docs (e.g., "auth" → `docs/auth.md` → `src/services/auth/DOCS.md`)
    - Check inline `DOCS.md` in folders you'll touch
 
 2. **Verify Against Code (required):**
-
    - Read actual type definitions and interfaces in `src/` that the plan depends on
    - If docs contradict code, **code wins**—note the discrepancy and plan based on actual signatures
    - Check existing implementations for behavior assumptions
 
 3. **Deep Analysis:**
-
    - **Corner Cases:** Empty/null, race conditions, boundaries (min/max/zero), partial failures, network timeouts
    - **Security:** Auth at each boundary, input validation, data exposure, rate limiting needs
    - **Performance:** Query complexity, bundle impact, caching strategy, server load
@@ -83,9 +80,9 @@ Create an architectural blueprint before coding.
 
 ### Risks & Mitigation
 
-| Risk | Impact | Probability | Mitigation | Rollback Plan |
-| --- | --- | --- | --- | --- |
-| ... | High/Med/Low | High/Med/Low | ... | ... |
+| Risk | Impact       | Probability  | Mitigation | Rollback Plan |
+| ---- | ------------ | ------------ | ---------- | ------------- |
+| ...  | High/Med/Low | High/Med/Low | ...        | ...           |
 
 ### Backward Compatibility
 

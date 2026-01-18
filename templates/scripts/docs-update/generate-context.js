@@ -49,6 +49,52 @@ const readline = require('readline');
  * @property {Record<string, {path: string, exists: boolean, lastUpdated?: string}>} existingDocState
  */
 
+// Default config values
+const DEFAULT_CONFIG = {
+  sourceRoots: ['src/', 'app/', 'lib/', 'pages/', 'packages/'],
+  excludePatterns: [
+    '**/node_modules/**',
+    '**/dist/**',
+    '**/build/**',
+    '**/.next/**',
+    '**/.git/**',
+    '**/coverage/**',
+  ],
+  docsRoot: 'docs/',
+};
+
+/**
+ * Load AI Kit config from .cursor/ai-kit.config.json
+ * Falls back to sensible defaults if not found
+ */
+function loadConfig() {
+  const configPath = path.join(process.cwd(), '.cursor/ai-kit.config.json');
+
+  if (fs.existsSync(configPath)) {
+    try {
+      const content = fs.readFileSync(configPath, 'utf-8');
+      const config = JSON.parse(content);
+
+      // Filter out AI_FILL placeholder entries
+      if (config.sourceRoots) {
+        config.sourceRoots = config.sourceRoots.filter((root) => !root.includes('AI_FILL'));
+        // Fall back to defaults if all entries were placeholders
+        if (config.sourceRoots.length === 0) {
+          console.warn('⚠️  No source roots configured in ai-kit.config.json. Using defaults.');
+          config.sourceRoots = DEFAULT_CONFIG.sourceRoots;
+        }
+      }
+
+      return { ...DEFAULT_CONFIG, ...config };
+    } catch (e) {
+      console.warn('⚠️  Could not parse ai-kit.config.json. Using defaults.');
+      return DEFAULT_CONFIG;
+    }
+  }
+
+  return DEFAULT_CONFIG;
+}
+
 // Load file-doc mapping
 function loadDocMapping() {
   const mapPath = path.join(__dirname, 'file-doc-map.json');
@@ -68,13 +114,37 @@ function isValidDate(dateStr) {
   return /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
 }
 
+/**
+ * Check if a file path matches any exclude pattern
+ * @param {string} filePath
+ * @param {string[]} excludePatterns
+ * @returns {boolean}
+ */
+function isExcluded(filePath, excludePatterns) {
+  return excludePatterns.some((pattern) => {
+    // Convert glob pattern to regex
+    const regex = new RegExp(pattern.replace(/\*\*\/?/g, '.*').replace(/\*/g, '[^/]*'));
+    return regex.test(filePath);
+  });
+}
+
+/**
+ * Check if a file is in one of the configured source roots
+ * @param {string} filePath
+ * @param {string[]} sourceRoots
+ * @returns {boolean}
+ */
+function isInSourceRoot(filePath, sourceRoots) {
+  return sourceRoots.some((root) => filePath.startsWith(root));
+}
+
 // Get git diff for period
-function getGitDiff(fromDate, toDate) {
+function getGitDiff(fromDate, toDate, config) {
   if (!isValidDate(fromDate) || !isValidDate(toDate)) {
     console.error('Invalid date format. Use YYYY-MM-DD.');
     return [];
   }
-  
+
   try {
     const output = execSync(
       `git log --since="${fromDate}" --until="${toDate}T23:59:59" --pretty=format: --name-status --diff-filter=ACDMR`,
@@ -96,8 +166,12 @@ function getGitDiff(fromDate, toDate) {
         const [status, filePath, newPath] = line.split('\t');
         const actualPath = newPath || filePath;
 
-        // Modify this filter if you want to track files outside src/
-        if (actualPath && (actualPath.startsWith('src/') || actualPath.startsWith('pages/'))) {
+        // Use config-based filtering instead of hardcoded paths
+        if (
+          actualPath &&
+          isInSourceRoot(actualPath, config.sourceRoots) &&
+          !isExcluded(actualPath, config.excludePatterns)
+        ) {
           files.set(actualPath, {
             path: actualPath,
             additions: 0,
@@ -119,7 +193,7 @@ function getGitStats(fromDate, toDate) {
   if (!isValidDate(fromDate) || !isValidDate(toDate)) {
     return { additions: 0, deletions: 0, filesChanged: 0 };
   }
-  
+
   try {
     const output = execSync(
       `git log --since="${fromDate}" --until="${toDate}T23:59:59" --pretty=tformat: --shortstat`,
@@ -206,8 +280,7 @@ function getDocState(docPath) {
 function parseTasks(input) {
   const tasks = [];
   // More lenient regex to handle whitespace variations
-  const taskRegex =
-    /###\s*Task\s+\d+\s*:\s*\[(\w+)\]\s+(.+)\n([\s\S]*?)(?=###\s*Task|\n##\s+|$)/g;
+  const taskRegex = /###\s*Task\s+\d+\s*:\s*\[(\w+)\]\s+(.+)\n([\s\S]*?)(?=###\s*Task|\n##\s+|$)/g;
 
   let match;
   while ((match = taskRegex.exec(input)) !== null) {
@@ -243,16 +316,11 @@ async function main() {
   const toDate = await question('To date (YYYY-MM-DD): ');
 
   // Check for input file
-  const inputPath = path.join(
-    process.cwd(),
-    'docs/templates/WEEKLY-UPDATE-INPUT.md'
-  );
+  const inputPath = path.join(process.cwd(), 'docs/templates/WEEKLY-UPDATE-INPUT.md');
   let tasks = [];
 
   if (fs.existsSync(inputPath)) {
-    const useFile = await question(
-      'Use docs/templates/WEEKLY-UPDATE-INPUT.md? (y/n): '
-    );
+    const useFile = await question('Use docs/templates/WEEKLY-UPDATE-INPUT.md? (y/n): ');
     if (useFile.toLowerCase() === 'y') {
       const content = fs.readFileSync(inputPath, 'utf-8');
       tasks = parseTasks(content);
@@ -264,9 +332,7 @@ async function main() {
     console.log('\nEnter tasks (empty line to finish):');
     let taskNum = 1;
     while (true) {
-      const taskInput = await question(
-        `Task ${taskNum} (e.g., "[FEAT] Add Login"): `
-      );
+      const taskInput = await question(`Task ${taskNum} (e.g., "[FEAT] Add Login"): `);
       if (!taskInput.trim()) break;
 
       const match = taskInput.match(/\[(\w+)\]\s+(.+)/);
@@ -278,13 +344,13 @@ async function main() {
         });
         taskNum++;
       } else {
-          // Fallback if format is not matched perfectly
-          tasks.push({
-              type: 'MISC',
-              title: taskInput,
-              description: []
-          });
-          taskNum++;
+        // Fallback if format is not matched perfectly
+        tasks.push({
+          type: 'MISC',
+          title: taskInput,
+          description: [],
+        });
+        taskNum++;
       }
     }
   }
@@ -293,11 +359,14 @@ async function main() {
 
   console.log('\n🔍 Analyzing git changes...');
 
-  // Load mappings
+  // Load config and mappings
+  const config = loadConfig();
   const mappings = loadDocMapping();
 
+  console.log(`   Using source roots: ${config.sourceRoots.join(', ')}`);
+
   // Get git data
-  const changedFiles = getGitDiff(fromDate, toDate);
+  const changedFiles = getGitDiff(fromDate, toDate, config);
   const stats = getGitStats(fromDate, toDate);
 
   console.log(`   Found ${changedFiles.length} changed files`);
@@ -308,13 +377,10 @@ async function main() {
   console.log(`   ${affectedDocs.length} docs may need updating`);
 
   // Get doc states
-  const existingDocState = affectedDocs.reduce(
-    (acc, doc) => {
-      acc[doc] = getDocState(doc);
-      return acc;
-    },
-    {}
-  );
+  const existingDocState = affectedDocs.reduce((acc, doc) => {
+    acc[doc] = getDocState(doc);
+    return acc;
+  }, {});
 
   // Build context
   const context = {
@@ -350,9 +416,7 @@ async function main() {
 
   console.log('\n🤖 Next steps:');
   console.log('   1. Review scripts/docs-update/update-context.json');
-  console.log(
-    '   2. Use prompt-template.md with an AI to generate doc updates'
-  );
+  console.log('   2. Use prompt-template.md with an AI to generate doc updates');
   console.log('   3. Review and commit the changes');
 }
 

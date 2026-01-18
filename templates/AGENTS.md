@@ -14,7 +14,8 @@
 Use this table to find relevant documentation. **Read the docs before modifying core systems.**
 
 | Keywords | Documentation | When to Read |
-| :--- | :--- | :--- |
+| :------- | :------------ | :----------- |
+
 <!-- AI_FILL: detailed table of documentation files based on project structure -->
 
 ---
@@ -91,16 +92,16 @@ Plan validation? → /review
 
 **Quick reference:**
 
-| Command | When to Use |
-| :--- | :--- |
-| `/plan` | Large/ambiguous task, architectural decision |
-| `/review` | After `/plan`, validate before implementation |
-| `/build` | Well-defined task, after planning |
-| `/fix` | Obvious bug, clear root cause |
-| `/debug` | Unclear bug, needs investigation |
-| `/verify` | Code review, before commit |
-| `/refactor` | Improve existing code quality |
-| `/explain` | Understand existing code |
+| Command     | When to Use                                   |
+| :---------- | :-------------------------------------------- |
+| `/plan`     | Large/ambiguous task, architectural decision  |
+| `/review`   | After `/plan`, validate before implementation |
+| `/build`    | Well-defined task, after planning             |
+| `/fix`      | Obvious bug, clear root cause                 |
+| `/debug`    | Unclear bug, needs investigation              |
+| `/verify`   | Code review, before commit                    |
+| `/refactor` | Improve existing code quality                 |
+| `/explain`  | Understand existing code                      |
 
 ---
 

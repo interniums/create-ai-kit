@@ -13,11 +13,11 @@ This system helps keep documentation in sync with code changes:
 
 ## Files
 
-| File | Description |
-| --- | --- |
-| `file-doc-map.json` | Maps file patterns to related documentation |
-| `generate-context.js` | Generates context package for AI analysis |
-| `update-context.json` | Generated output (gitignored) |
+| File                  | Description                                 |
+| --------------------- | ------------------------------------------- |
+| `file-doc-map.json`   | Maps file patterns to related documentation |
+| `generate-context.js` | Generates context package for AI analysis   |
+| `update-context.json` | Generated output (gitignored)               |
 
 ## Usage
 

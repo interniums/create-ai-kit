@@ -143,12 +143,7 @@ cd create-ai-kit
   "engines": {
     "node": ">=14"
   },
-  "files": [
-    "bin/",
-    "templates/",
-    "README.md",
-    "LICENSE"
-  ]
+  "files": ["bin/", "templates/", "README.md", "LICENSE"]
 }
 ```
 
@@ -256,6 +251,7 @@ npm pack --dry-run
 ```
 
 This shows exactly what files will be published. Verify:
+
 - `bin/create-ai-kit.js` is included
 - `templates/` folder is included
 - `node_modules/` is NOT included
@@ -350,17 +346,20 @@ npm publish
 AI Kit scaffolding tool for Cursor IDE.
 
 ### Features
+
 - 10 workflow commands (/plan, /build, /verify, etc.)
 - AI hydration system for project-specific setup
 - Documentation maintenance scripts
 - Safe upgrade mechanism with checksums
 
 ### Usage
+
 \`\`\`bash
 npx create-ai-kit
 \`\`\`
 
 ### Requirements
+
 - Node.js 14+
 - Cursor IDE (for AI hydration)
 ```
@@ -371,11 +370,11 @@ npx create-ai-kit
 
 ### Semantic Versioning
 
-| Change Type | Version Bump | Example |
-|-------------|--------------|---------|
-| Bug fixes, typos | PATCH | 1.0.0 → 1.0.1 |
-| New commands, features | MINOR | 1.0.0 → 1.1.0 |
-| Breaking changes | MAJOR | 1.0.0 → 2.0.0 |
+| Change Type            | Version Bump | Example       |
+| ---------------------- | ------------ | ------------- |
+| Bug fixes, typos       | PATCH        | 1.0.0 → 1.0.1 |
+| New commands, features | MINOR        | 1.0.0 → 1.1.0 |
+| Breaking changes       | MAJOR        | 1.0.0 → 2.0.0 |
 
 ### Update Workflow
 
@@ -410,6 +409,7 @@ When releasing, also update the version in `templates/_cursor/rules/main.mdc`:
 ### "npm ERR! 403 Forbidden"
 
 Package name already taken. Try:
+
 - Scoped name: `@yourname/create-ai-kit`
 - Alternative name: `cursor-ai-kit`, `ai-kit-cli`
 
@@ -441,12 +441,7 @@ Check `files` array in `package.json`:
 
 ```json
 {
-  "files": [
-    "bin/",
-    "templates/",
-    "README.md",
-    "LICENSE"
-  ]
+  "files": ["bin/", "templates/", "README.md", "LICENSE"]
 }
 ```
 

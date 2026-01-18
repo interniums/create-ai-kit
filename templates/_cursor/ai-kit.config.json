@@ -1,0 +1,14 @@
+{
+  "sourceRoots": [
+    "<!-- AI_FILL: Add your source directories, e.g. 'src/', 'app/', 'lib/', 'packages/' -->"
+  ],
+  "excludePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/.git/**",
+    "**/coverage/**"
+  ],
+  "docsRoot": "docs/"
+}

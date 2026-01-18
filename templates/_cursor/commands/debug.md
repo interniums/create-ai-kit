@@ -12,12 +12,12 @@ Root cause analysis for non-obvious issues.
 
 ### 1. **Classify the Issue**
 
-| Type | Characteristics | Tools | Strategy |
-| --- | --- | --- | --- |
-| **Known Error** | Stack trace, error message | Read error, check line | Direct to source |
-| **Mystery** | Works sometimes, fails others | Logging, reproduction | Hypothesis-driven |
-| **Performance** | Slow, frozen, memory leak | Profiler, Network tab | Measure first |
-| **Hydration** | "Text content mismatch" | Browser console | SSR vs client diff |
+| Type            | Characteristics               | Tools                  | Strategy           |
+| --------------- | ----------------------------- | ---------------------- | ------------------ |
+| **Known Error** | Stack trace, error message    | Read error, check line | Direct to source   |
+| **Mystery**     | Works sometimes, fails others | Logging, reproduction  | Hypothesis-driven  |
+| **Performance** | Slow, frozen, memory leak     | Profiler, Network tab  | Measure first      |
+| **Hydration**   | "Text content mismatch"       | Browser console        | SSR vs client diff |
 
 ### 2. **Gather Evidence**
 
@@ -125,20 +125,20 @@ Suggest a type, guard, test, or rule to prevent this class of error.
 
 ## Framework-Specific Issues
 
-| Error | Likely Cause | Fix |
-| --- | --- | --- |
-| Hydration mismatch | Server/client render difference | Check `typeof window`, Date.now(), Math.random(), conditional rendering |
-| "Cannot read property of undefined" in SSR | Client-only API (window, localStorage) | Add `typeof window !== 'undefined'` guard |
-| Middleware infinite loop | Redirect to same URL | Check middleware logic, add conditions |
-| API route CORS error | Missing CORS headers | Add CORS middleware to API route |
-| Server timeout | Slow database query, external API | Add timeout, check query performance |
+| Error                                      | Likely Cause                           | Fix                                                                     |
+| ------------------------------------------ | -------------------------------------- | ----------------------------------------------------------------------- |
+| Hydration mismatch                         | Server/client render difference        | Check `typeof window`, Date.now(), Math.random(), conditional rendering |
+| "Cannot read property of undefined" in SSR | Client-only API (window, localStorage) | Add `typeof window !== 'undefined'` guard                               |
+| Middleware infinite loop                   | Redirect to same URL                   | Check middleware logic, add conditions                                  |
+| API route CORS error                       | Missing CORS headers                   | Add CORS middleware to API route                                        |
+| Server timeout                             | Slow database query, external API      | Add timeout, check query performance                                    |
 
 ## Common Debugging Patterns
 
-| Symptom | Likely Cause | Check |
-| --- | --- | --- |
-| "undefined is not a function" | Missing import or wrong export | Check import path, named vs default export |
-| "Cannot read property X of undefined" | Async data accessed before load | Check loading states, optional chaining |
-| "Hydration mismatch" | Server/client render difference | Check for `typeof window`, date/random usage |
-| "Network error" | CORS, wrong URL, server down | Check browser Network tab, API route exists |
-| Silent failure | Swallowed error in catch block | Check for empty catch blocks, add logging |
+| Symptom                               | Likely Cause                    | Check                                        |
+| ------------------------------------- | ------------------------------- | -------------------------------------------- |
+| "undefined is not a function"         | Missing import or wrong export  | Check import path, named vs default export   |
+| "Cannot read property X of undefined" | Async data accessed before load | Check loading states, optional chaining      |
+| "Hydration mismatch"                  | Server/client render difference | Check for `typeof window`, date/random usage |
+| "Network error"                       | CORS, wrong URL, server down    | Check browser Network tab, API route exists  |
+| Silent failure                        | Swallowed error in catch block  | Check for empty catch blocks, add logging    |

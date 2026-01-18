@@ -1,12 +1,14 @@
 {
   "name": "create-ai-kit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Scaffold AI Kit - AI-friendly documentation and workflow system for Cursor IDE",
   "bin": {
     "create-ai-kit": "./bin/create-ai-kit.js"
   },
   "scripts": {
-    "test": "node bin/create-ai-kit.js --dry-run"
+    "test": "node --test test/*.test.js",
+    "preview": "node bin/create-ai-kit.js --dry-run",
+    "format": "prettier --write ."
   },
   "keywords": [
     "ai-kit",
@@ -36,6 +38,9 @@
   },
   "engines": {
     "node": ">=14"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.0"
   },
   "files": [
     "bin/",

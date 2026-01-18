@@ -87,14 +87,14 @@ npx create-ai-kit --dry-run
 
 ### Test Results Log
 
-| Test | Status | Notes |
-|------|--------|-------|
-| Dry run | ⬜ | |
-| Fresh install | ⬜ | |
-| Collision detection | ⬜ | |
-| Force upgrade | ⬜ | |
-| Global link | ⬜ | |
-| Package tarball | ⬜ | |
+| Test                | Status | Notes |
+| ------------------- | ------ | ----- |
+| Dry run             | ⬜     |       |
+| Fresh install       | ⬜     |       |
+| Collision detection | ⬜     |       |
+| Force upgrade       | ⬜     |       |
+| Global link         | ⬜     |       |
+| Package tarball     | ⬜     |       |
 
 ---
 
@@ -117,12 +117,14 @@ npm pack --dry-run
 ```
 
 **Verify these files are included:**
+
 - `bin/create-ai-kit.js`
 - `templates/` (entire folder)
 - `README.md`
 - `LICENSE`
 
 **Verify these are NOT included:**
+
 - `node_modules/`
 - `.env` or any secrets
 - Test files
@@ -195,12 +197,13 @@ Go to: Releases → "Create a new release"
 
 **Description:**
 
-```markdown
+````markdown
 ## 🎉 Initial Release
 
 AI Kit scaffolding tool for Cursor IDE.
 
 ### Features
+
 - 10 workflow commands (`/plan`, `/build`, `/verify`, `/fix`, `/debug`, `/refactor`, `/commit`, `/discuss`, `/explain`, `/review`)
 - AI hydration system for automatic project-specific configuration
 - Documentation maintenance scripts with weekly update workflow
@@ -212,17 +215,21 @@ AI Kit scaffolding tool for Cursor IDE.
 ```bash
 npx create-ai-kit
 ```
+````
 
 ### Requirements
+
 - Node.js 14+
 - [Cursor IDE](https://cursor.sh) (for AI hydration)
 
 ### Files Created
+
 - `.cursor/commands/` - 10 workflow command definitions
 - `.cursor/rules/` - AI behavior rules
 - `AGENTS.md` - Agent onboarding guide
 - `scripts/docs-update/` - Documentation maintenance tools
-```
+
+````
 
 ---
 
@@ -251,19 +258,19 @@ test -f .ai-kit-manifest.json && echo "✓ Manifest exists"
 test -d scripts/docs-update && echo "✓ Docs scripts exist"
 
 echo "Post-release verification complete!"
-```
+````
 
 ---
 
 ## 📅 Release Timeline
 
-| Phase | Duration | Tasks |
-|-------|----------|-------|
-| **Pre-release** | 1-2 hours | Update metadata, test locally |
-| **Testing** | 2-3 hours | Run all test scenarios |
-| **npm Publish** | 15 min | Publish and verify |
-| **GitHub Setup** | 30 min | Repo, release, tags |
-| **Post-release** | 30 min | Verification, announcements |
+| Phase            | Duration  | Tasks                         |
+| ---------------- | --------- | ----------------------------- |
+| **Pre-release**  | 1-2 hours | Update metadata, test locally |
+| **Testing**      | 2-3 hours | Run all test scenarios        |
+| **npm Publish**  | 15 min    | Publish and verify            |
+| **GitHub Setup** | 30 min    | Repo, release, tags           |
+| **Post-release** | 30 min    | Verification, announcements   |
 
 **Total estimated time:** ~5 hours
 

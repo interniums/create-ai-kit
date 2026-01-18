@@ -14,7 +14,6 @@ Files touched in current task, or files explicitly mentioned.
 ## Protocol
 
 1. **Plan Compliance (if plan exists):** Cross-check implementation against the original plan:
-
    - All planned steps implemented?
    - Any requirements missed or partially done?
    - Scope respected (no unplanned changes)?
@@ -25,12 +24,10 @@ Files touched in current task, or files explicitly mentioned.
 2. **Static Analysis:** Check for unused imports, dead code, type mismatches.
 
 3. **Logic Check:** Look for:
-
    - Race conditions, unhandled promises, infinite loops
    - **Security:** Input sanitization on user data, auth checks on new API routes, exposed secrets, SQL/NoSQL injection vectors, XSS in rendered content
 
 4. **Convention Check:** Match against project patterns:
-
    - Component patterns, handler extraction
    - Type conventions, naming
    - API handler patterns
@@ -43,7 +40,6 @@ Files touched in current task, or files explicitly mentioned.
 <!-- AI_FILL: Add project specific risk checks (e.g. payments, analytics, etc.) -->
 
 7. **Local Checks:**
-
    - Run lint check — must pass
    - Run type check — must pass
    - Manually verify behavior changes (check UI, API responses, database state, etc.)

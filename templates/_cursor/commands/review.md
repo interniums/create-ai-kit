@@ -13,18 +13,18 @@ Validate a plan before implementation.
 
 Run through this checklist systematically:
 
-| Category | Checks | How to Verify |
-| --- | --- | --- |
-| **Completeness** | All requirements mapped to steps? Missing functionality? | List requirements → check each has a step |
-| **Order** | Dependencies respected? Optimal sequence? | Draw dependency graph, check if earlier steps enable later ones |
-| **Redundancy** | Duplicate steps? Unnecessary work? | Look for repeated actions or overlapping steps |
-| **Edge Cases** | Error paths handled? Boundary conditions? Rollback strategy? | Check plan mentions: null/empty, failures, timeouts, rollback |
-| **Risks** | All risks identified? Mitigation strategies adequate? | Each risk has: probability, impact, mitigation, rollback |
-| **Verification** | Test plan covers critical paths? Manual checks specified? | Check plan has verification steps for key functionality |
-| **Scope** | Matches requirements? Over/under-engineered? | Compare implementation complexity to problem complexity |
-| **Context** | All relevant docs were read? Code verified against docs? | Check "Context Read" section lists relevant docs |
-| **Anti-patterns** | Plan avoids documented anti-patterns from `AGENTS.md`? | Cross-reference against Critical Anti-Patterns table |
-| **Blockers** | Blockers truly blocking? Can any be resolved now? | For each blocker, can it be answered with docs or code read? |
+| Category          | Checks                                                       | How to Verify                                                   |
+| ----------------- | ------------------------------------------------------------ | --------------------------------------------------------------- |
+| **Completeness**  | All requirements mapped to steps? Missing functionality?     | List requirements → check each has a step                       |
+| **Order**         | Dependencies respected? Optimal sequence?                    | Draw dependency graph, check if earlier steps enable later ones |
+| **Redundancy**    | Duplicate steps? Unnecessary work?                           | Look for repeated actions or overlapping steps                  |
+| **Edge Cases**    | Error paths handled? Boundary conditions? Rollback strategy? | Check plan mentions: null/empty, failures, timeouts, rollback   |
+| **Risks**         | All risks identified? Mitigation strategies adequate?        | Each risk has: probability, impact, mitigation, rollback        |
+| **Verification**  | Test plan covers critical paths? Manual checks specified?    | Check plan has verification steps for key functionality         |
+| **Scope**         | Matches requirements? Over/under-engineered?                 | Compare implementation complexity to problem complexity         |
+| **Context**       | All relevant docs were read? Code verified against docs?     | Check "Context Read" section lists relevant docs                |
+| **Anti-patterns** | Plan avoids documented anti-patterns from `AGENTS.md`?       | Cross-reference against Critical Anti-Patterns table            |
+| **Blockers**      | Blockers truly blocking? Can any be resolved now?            | For each blocker, can it be answered with docs or code read?    |
 
 ## Specific Checks by Category
 
@@ -162,10 +162,10 @@ NEEDS REVISION - Add browser fallback and cancellation handling before building
 
 ## Comparison with `/verify`
 
-| Aspect | `/review` | `/verify` |
-| --- | --- | --- |
-| **Stage** | After plan, before build | After build, before commit |
-| **Input** | Plan document | Code files |
-| **Focus** | Completeness, order, scope | Logic, security, conventions |
-| **Output** | MISSING/OPTIMIZE/WARN | CRITICAL/WARN/INFO |
-| **Verdict** | APPROVED / NEEDS REVISION | PASS / NEEDS FIXES |
+| Aspect      | `/review`                  | `/verify`                    |
+| ----------- | -------------------------- | ---------------------------- |
+| **Stage**   | After plan, before build   | After build, before commit   |
+| **Input**   | Plan document              | Code files                   |
+| **Focus**   | Completeness, order, scope | Logic, security, conventions |
+| **Output**  | MISSING/OPTIMIZE/WARN      | CRITICAL/WARN/INFO           |
+| **Verdict** | APPROVED / NEEDS REVISION  | PASS / NEEDS FIXES           |

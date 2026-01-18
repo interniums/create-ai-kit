@@ -18,28 +18,24 @@ Production-ready implementation.
 4. **Handler Safety:** Extract all logic from UI handlers into named functions.
 
 5. **State Management:**
-
    - Simple local state: `useState` (or equivalent)
    - Complex logic: Extract to custom hooks/composables
    - Shared state: Use existing Context/Store
    - Never put complex business logic inside effects in components
 
 6. **UI & Styling:**
-
    - Use project's UI library components
    - Use theme tokens (colors, spacing)
    - No inline styles, no raw CSS (unless project standard)
    - Reuse components; don't invent new primitives unless explicitly asked
 
 7. **Data Fetching:**
-
    - Use service layer functions
    - Never use raw fetch/axios in components
    - Handle loading and error states explicitly
 
 8. **Anti-Patterns:**
    See full table in `AGENTS.md` → Critical Anti-Patterns section. Key ones:
-
    - No `any` types
    - No hardcoded routes
    - No inline handler logic
@@ -49,7 +45,6 @@ Production-ready implementation.
    - No raw strings in URLs
 
 9. **UI Guardrails:**
-
    - Prevent double-submits for async actions
    - Confirm destructive actions
    - Accessibility: keyboard support, visible focus

@@ -36,18 +36,15 @@ When explaining code, always identify:
 1. **Read:** Load the relevant files/functions.
 
 2. **Define Boundaries:**
-
    - Identify the scope: single function, module, or feature
    - Stop tracing at: external libraries, API boundaries, database calls
    - If scope is unclear, ask: "Should I trace into X or treat it as a black box?"
 
 3. **Trace:** Follow the execution flow from entry point within boundaries.
-
    - Note the happy path first
    - Then note error/edge case paths
 
 4. **Explain:** Break down in plain language:
-
    - **What it does:** Purpose in one sentence
    - **How it works:** Step-by-step mechanism
    - **Patterns used:** Identify standard patterns (Factory, Observer, HOC, etc.) rather than guessing original author's intent
@@ -55,14 +52,12 @@ When explaining code, always identify:
    - **Side effects:** State changes, API calls, localStorage, cookies, etc.
 
 5. **Assess Code Quality:**
-
    - Security: Auth checks present? Input validation? Data exposure risks?
    - Performance: Any obvious bottlenecks? N+1 queries? Unnecessary re-renders?
    - Maintainability: Clear naming? Reasonable complexity? Good separation of concerns?
    - Edge cases: Null handling? Empty states? Boundary conditions?
 
 6. **Flag Gotchas:** Highlight potential issues observed during the read:
-
    - Edge cases that might not be handled
    - Performance concerns (N+1 queries, unnecessary re-renders, large loops)
    - Assumptions in the code that could break (e.g., "assumes user is always logged in")
