@@ -62,9 +62,13 @@ When you find a better approach:
 **When making significant changes** (new exports, breaking changes, new patterns), add a marker comment:
 
 ```typescript
-// @docs-update(2024-01-15: src/services/auth/DOCS.md - Added OAuth support)
-// @docs-update(2024-01-15: docs/auth.md - New provider added)
+// @docs-update(2024-01-15): src/services/auth/DOCS.md - Added OAuth support
+// @docs-update(2024-01-15): docs/auth.md - New provider added
 ```
+
+Markers are the default for doc-worthy changes and are auto-added during `/plan` and `/commit`.
+Keep 1–3 markers per commit to avoid spam.
+Manual shortcut: use the VS Code snippet `docs-upd`.
 
 These markers are automatically found during weekly updates.
 

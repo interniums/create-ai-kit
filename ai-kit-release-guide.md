@@ -73,8 +73,8 @@ create-ai-kit/
 │   ├── scripts/
 │   │   ├── docs-update/
 │   │   │   ├── generate-context.js
+│   │   │   ├── check-markers.js
 │   │   │   ├── verify-inline.js
-│   │   │   ├── find-markers.sh
 │   │   │   ├── file-doc-map.template.json
 │   │   │   ├── prompt-template.md
 │   │   │   ├── MARKER-GUIDE.md

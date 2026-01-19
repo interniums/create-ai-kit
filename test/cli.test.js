@@ -348,13 +348,3 @@ describe('Marker Check Script', () => {
   });
 });
 
-describe('Find Markers Script', () => {
-  it('should exist and be valid JavaScript', () => {
-    const scriptPath = path.join(TEMPLATES_DIR, 'scripts/docs-update/find-markers.js');
-    assert.ok(fs.existsSync(scriptPath), 'find-markers.js should exist');
-
-    const content = fs.readFileSync(scriptPath, 'utf-8');
-    assert.ok(content.includes('@docs-update'), 'Should search for @docs-update markers');
-    assert.ok(content.includes('--json'), 'Should support JSON output mode');
-  });
-});

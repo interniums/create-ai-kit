@@ -349,7 +349,7 @@ async function main() {
         'hydrate:check': 'node scripts/placeholder-check.js',
         'docs:update': 'node scripts/docs-update/generate-context.js',
         'docs:check': 'node scripts/docs-update/check-markers.js',
-        'docs:find-markers': 'node scripts/docs-update/find-markers.js',
+        'docs:check:ci': 'node scripts/docs-update/check-markers.js --ci',
         'docs:verify-inline': 'node scripts/docs-update/verify-inline.js',
       };
 

@@ -70,7 +70,7 @@ Improve code quality without changing behavior.
    - Run lint and type checks — must pass
    - Manually verify behavior unchanged (check UI, API responses, etc.)
 
-8. **Document:** If significant, add `// @docs-update(YYYY-MM-DD: reason)` marker.
+8. **Document:** If significant, add `// @docs-update(YYYY-MM-DD): path/to/doc.md - description` marker.
 
 ## Output Format
 

@@ -6,10 +6,11 @@ Weekly human-triggered documentation update workflow.
 
 This system helps keep documentation in sync with code changes:
 
-1. **Human provides**: Period dates + completed tasks
-2. **Script analyzes**: Git diff + maps to affected docs
-3. **AI generates**: Draft documentation updates with confidence scores
-4. **Human reviews**: Approves, modifies, or rejects updates
+1. **Markers added**: Agent adds dated markers for doc-worthy changes
+2. **Human provides**: Period dates + completed tasks
+3. **Script analyzes**: Git diff + maps to affected docs
+4. **AI generates**: Draft documentation updates with confidence scores
+5. **Human reviews**: Approves, modifies, or rejects updates
 
 ## Files
 
@@ -23,7 +24,16 @@ This system helps keep documentation in sync with code changes:
 
 ## Usage
 
-### 1. Prepare Input
+### 1. Add Markers (default)
+
+Markers are the default for doc-worthy changes (new exports, breaking changes, new patterns).
+The agent adds them during `/plan` and `/commit`.
+Keep 1–3 markers per commit to avoid spam.
+
+Manual shortcut (devs): use the VS Code snippet `docs-upd` to insert:
+`// @docs-update(YYYY-MM-DD): path/to/doc.md - description`
+
+### 2. Prepare Input
 
 Edit `docs/templates/WEEKLY-UPDATE-INPUT.md` with:
 
@@ -31,7 +41,7 @@ Edit `docs/templates/WEEKLY-UPDATE-INPUT.md` with:
 - Completed tasks with types ([FEAT], [FIX], [REFACTOR], etc.)
 - Optional notes
 
-### 2. Generate Context
+### 3. Generate Context
 
 ```bash
 # Run the context generator
@@ -47,10 +57,10 @@ The script will:
 - Ask to use the WEEKLY-UPDATE-INPUT.md file
 - Analyze git changes for that period
 - Map changed files to affected docs
-- Collect `@docs-update(YYYY-MM-DD: reason)` markers from code comments
+- Collect `@docs-update(YYYY-MM-DD): path/to/doc.md - description` markers from code comments
 - Output `update-context.json`
 
-### 3. Generate Doc Updates
+### 4. Generate Doc Updates
 
 1. Copy contents of `update-context.json`
 2. Open `scripts/docs-update/prompt-template.md`
@@ -58,7 +68,7 @@ The script will:
 4. Paste the context into the prompt
 5. AI generates doc updates with confidence scores
 
-### 4. Review and Apply
+### 5. Review and Apply
 
 - **HIGH confidence**: Merge recommended
 - **MEDIUM confidence**: Review carefully
@@ -92,18 +102,29 @@ When you add a new service or feature:
 Developers and AI can mark code that needs doc updates:
 
 ```typescript
-// @docs-update(2024-01-15: src/services/auth/DOCS.md - Added OAuth support)
-// @docs-update(2024-01-15: docs/auth.md - New provider section)
+// @docs-update(2024-01-15): src/services/auth/DOCS.md - Added OAuth support
+// @docs-update(2024-01-15): docs/auth.md - New provider section
 ```
 
 See `scripts/docs-update/MARKER-GUIDE.md` for format details.
 
 ### Finding Markers
 
-Search for all markers before running the update:
+Run `npm run docs:check` to list all markers with status.
 
-```bash
-npm run docs:find-markers
-```
+## Weekly Flow (recommended)
 
-This shows all pending doc updates with file locations and context.
+1. Run `npm run docs:check` to see marker status
+2. Run `npm run docs:update` to generate update context
+3. Apply doc changes and remove markers
+
+## Enforcement
+
+- Days 1–7: OK
+- Days 8–14: warning
+- Day 15+: error
+
+## Optional Strict Enforcement
+
+- Add ESLint rules from `eslint-rules/README.md` to warn/error on stale markers
+- Use `npm run docs:check:ci` in CI to fail on expired markers

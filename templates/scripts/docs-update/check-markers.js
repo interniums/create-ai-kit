@@ -1,22 +1,33 @@
 #!/usr/bin/env node
-
 /**
  * Documentation Marker Checker
  *
- * Scans source files for @docs-update markers and reports them.
- * Exit codes:
- *   0 - No markers found
- *   1 - Markers found (docs need updating)
+ * Finds @docs-update markers in the codebase and reports their status.
  *
  * Usage:
- *   node scripts/docs-update/check-markers.js
- *   npm run docs:check
+ *   node scripts/docs-update/check-markers.js [options]
+ *
+ * Options:
+ *   --max-days <n>    Max age before marker is expired (default: 14)
+ *   --warn-days <n>   Days before expiration to warn (default: 7)
+ *   --json            Output as JSON
+ *   --ci              Exit with error code if expired markers found
+ *   --quiet           Only show errors (expired/missing/invalid)
  */
 
 /* eslint-disable no-console */
 
 const fs = require('fs');
 const path = require('path');
+
+// CLI config
+const CONFIG = {
+  maxDays: 14,
+  warnDays: 7,
+  json: false,
+  ci: false,
+  quiet: false,
+};
 
 // Default config
 const DEFAULT_CONFIG = {
@@ -28,20 +39,56 @@ const DEFAULT_CONFIG = {
     '**/.next/**',
     '**/.git/**',
     '**/coverage/**',
+    '**/scripts/docs-update/**',
+    '**/eslint-rules/**',
   ],
 };
 
-// Marker patterns to search for
-const MARKER_PATTERNS = [
-  /@docs-update(?:\([^)]*\))?/i,
-  /\/\/\s*TODO:\s*docs/i,
-  /\/\*\s*TODO:\s*docs/i,
-  /#\s*TODO:\s*docs/i,
-];
+const IGNORE_EXTENSIONS = ['.json', '.md', '.map', '.lock'];
+const IGNORE_FILES = ['scripts/docs-update/check-markers.js'];
 
-// Date extraction from @docs-update(YYYY-MM-DD) or @docs-update(YYYY-MM-DD: reason)
-const DATE_REGEX = /@docs-update\((\d{4}-\d{2}-\d{2})(?:\s*:\s*[^)]*)?\)/i;
-const MAX_AGE_DAYS = 14;
+// Marker patterns - must start in comment context
+const MARKER_WITH_DATE =
+  /(?:\/\/|\/\*|\*)\s*@docs-update\((\d{4}-\d{2}-\d{2})\):\s*(.+)/g;
+const MARKER_WITHOUT_DATE = /(?:\/\/|\/\*|\*)\s*@docs-update:\s*(.+)/g;
+
+/**
+ * Parse command line arguments
+ */
+function parseArgs() {
+  const args = process.argv.slice(2);
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+
+    if (arg === '--max-days' && args[i + 1]) {
+      CONFIG.maxDays = parseInt(args[++i], 10);
+    } else if (arg === '--warn-days' && args[i + 1]) {
+      CONFIG.warnDays = parseInt(args[++i], 10);
+    } else if (arg === '--json') {
+      CONFIG.json = true;
+    } else if (arg === '--ci') {
+      CONFIG.ci = true;
+    } else if (arg === '--quiet') {
+      CONFIG.quiet = true;
+    } else if (arg === '--help') {
+      console.log(`
+Documentation Marker Checker
+
+Usage: node check-markers.js [options]
+
+Options:
+  --max-days <n>    Max age before marker is expired (default: 14)
+  --warn-days <n>   Days before expiration to warn (default: 7)
+  --json            Output as JSON
+  --ci              Exit with error code if expired markers found
+  --quiet           Only show errors (expired/missing/invalid)
+  --help            Show this help message
+`);
+      process.exit(0);
+    }
+  }
+}
 
 /**
  * Load config from .cursor/ai-kit.config.json
@@ -56,13 +103,22 @@ function loadConfig() {
 
       // Filter out AI_FILL placeholders
       if (config.sourceRoots) {
-        config.sourceRoots = config.sourceRoots.filter((root) => !root.includes('AI_FILL'));
+        config.sourceRoots = config.sourceRoots.filter(
+          (root) => !root.includes('AI_FILL'),
+        );
         if (config.sourceRoots.length === 0) {
           config.sourceRoots = DEFAULT_CONFIG.sourceRoots;
         }
       }
 
-      return { ...DEFAULT_CONFIG, ...config };
+      return {
+        ...DEFAULT_CONFIG,
+        ...config,
+        excludePatterns: [
+          ...DEFAULT_CONFIG.excludePatterns,
+          ...(config.excludePatterns || []),
+        ],
+      };
     } catch {
       return DEFAULT_CONFIG;
     }
@@ -76,7 +132,9 @@ function loadConfig() {
  */
 function isExcluded(filePath, excludePatterns) {
   return excludePatterns.some((pattern) => {
-    const regex = new RegExp(pattern.replace(/\*\*\/?/g, '.*').replace(/\*/g, '[^/]*'));
+    const regex = new RegExp(
+      pattern.replace(/\*\*\/?/g, '.*').replace(/\*/g, '[^/]*'),
+    );
     return regex.test(filePath);
   });
 }
@@ -129,7 +187,10 @@ function findSourceFiles(dir, config, files = []) {
     if (entry.isDirectory()) {
       findSourceFiles(fullPath, config, files);
     } else if (entry.isFile() && isSourceFile(fullPath)) {
-      files.push(fullPath);
+      const ext = path.extname(entry.name);
+      if (!IGNORE_EXTENSIONS.includes(ext)) {
+        files.push(fullPath);
+      }
     }
   }
 
@@ -137,141 +198,276 @@ function findSourceFiles(dir, config, files = []) {
 }
 
 /**
- * Calculate age in days from a date string
+ * Parse a date string in YYYY-MM-DD format
  */
-function getAgeDays(dateStr) {
-  const date = new Date(dateStr + 'T00:00:00');
-  if (isNaN(date.getTime())) return null;
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+function parseDate(dateStr) {
+  const match = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+
+  const [, year, month, day] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+  if (
+    date.getFullYear() !== Number(year) ||
+    date.getMonth() !== Number(month) - 1 ||
+    date.getDate() !== Number(day)
+  ) {
+    return null;
+  }
+
+  return date;
 }
 
 /**
- * Scan a file for markers
+ * Calculate days between two dates
  */
-function scanFileForMarkers(filePath) {
+function daysBetween(from, to) {
+  const msPerDay = 24 * 60 * 60 * 1000;
+  return Math.floor((to - from) / msPerDay);
+}
+
+/**
+ * Get marker status
+ */
+function getMarkerStatus(dateStr, today) {
+  if (!dateStr) {
+    return { status: 'missing-date', message: 'Missing timestamp' };
+  }
+
+  const markerDate = parseDate(dateStr);
+  if (!markerDate) {
+    return { status: 'invalid-date', message: `Invalid date: ${dateStr}` };
+  }
+
+  if (markerDate > today) {
+    return { status: 'invalid-date', message: `Future date: ${dateStr}` };
+  }
+
+  const daysOld = daysBetween(markerDate, today);
+  const daysLeft = CONFIG.maxDays - daysOld;
+
+  if (daysOld > CONFIG.maxDays) {
+    return {
+      status: 'expired',
+      daysOld,
+      message: `Expired ${daysOld - CONFIG.maxDays} days ago`,
+    };
+  }
+
+  if (daysLeft <= CONFIG.warnDays) {
+    return {
+      status: 'warning',
+      daysLeft,
+      message: `Expires in ${daysLeft} days`,
+    };
+  }
+
+  return {
+    status: 'ok',
+    daysLeft,
+    message: `${daysLeft} days remaining`,
+  };
+}
+
+/**
+ * Find markers in a file
+ */
+function findMarkersInFile(filePath, today) {
   const content = fs.readFileSync(filePath, 'utf-8');
   const lines = content.split('\n');
   const markers = [];
 
-  lines.forEach((line, index) => {
-    for (const pattern of MARKER_PATTERNS) {
-      if (pattern.test(line)) {
-        // Check for dated marker
-        const dateMatch = line.match(DATE_REGEX);
-        let status = 'undated';
-        let ageDays = null;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const lineNum = i + 1;
 
-        if (dateMatch) {
-          ageDays = getAgeDays(dateMatch[1]);
-          if (ageDays !== null) {
-            status = ageDays > MAX_AGE_DAYS ? 'expired' : 'valid';
-          }
-        }
+    const withDateMatches = [...line.matchAll(MARKER_WITH_DATE)];
+    for (const match of withDateMatches) {
+      const [, dateStr, description] = match;
+      const status = getMarkerStatus(dateStr, today);
 
-        markers.push({
-          line: index + 1,
-          content: line.trim(),
-          status,
-          ageDays,
-        });
-        break; // Only report once per line
-      }
+      markers.push({
+        file: filePath,
+        line: lineNum,
+        date: dateStr,
+        description: description.trim(),
+        ...status,
+      });
     }
-  });
+
+    MARKER_WITHOUT_DATE.lastIndex = 0;
+    const withoutDateMatches = [...line.matchAll(MARKER_WITHOUT_DATE)];
+    for (const match of withoutDateMatches) {
+      if (withDateMatches.length > 0) continue;
+
+      const [, description] = match;
+      const status = getMarkerStatus(null, today);
+
+      markers.push({
+        file: filePath,
+        line: lineNum,
+        date: null,
+        description: description.trim(),
+        ...status,
+      });
+    }
+  }
 
   return markers;
+}
+
+/**
+ * Format output for console
+ */
+function formatConsoleOutput(markers) {
+  const grouped = {
+    expired: markers.filter((m) => m.status === 'expired'),
+    'missing-date': markers.filter((m) => m.status === 'missing-date'),
+    'invalid-date': markers.filter((m) => m.status === 'invalid-date'),
+    warning: markers.filter((m) => m.status === 'warning'),
+    ok: markers.filter((m) => m.status === 'ok'),
+  };
+
+  const today = new Date().toISOString().split('T')[0];
+  const lines = [];
+
+  lines.push('');
+  lines.push('Documentation Marker Report');
+  lines.push('='.repeat(50));
+  lines.push('');
+
+  if (grouped.expired.length > 0) {
+    lines.push('EXPIRED MARKERS (require immediate action)');
+    lines.push('-'.repeat(50));
+    for (const m of grouped.expired) {
+      lines.push(`  ${m.file}:${m.line}`);
+      lines.push(`    Date: ${m.date} (${m.message})`);
+      lines.push(`    ${m.description}`);
+      lines.push('');
+    }
+  }
+
+  if (grouped['missing-date'].length > 0) {
+    lines.push('MISSING TIMESTAMP (old format - please update)');
+    lines.push('-'.repeat(50));
+    lines.push(`    New format: @docs-update(${today}): path - description`);
+    lines.push('');
+    for (const m of grouped['missing-date']) {
+      lines.push(`  ${m.file}:${m.line}`);
+      lines.push(`    ${m.description}`);
+      lines.push('');
+    }
+  }
+
+  if (grouped['invalid-date'].length > 0) {
+    lines.push('INVALID DATE FORMAT');
+    lines.push('-'.repeat(50));
+    for (const m of grouped['invalid-date']) {
+      lines.push(`  ${m.file}:${m.line}`);
+      lines.push(`    ${m.message}`);
+      lines.push('');
+    }
+  }
+
+  if (!CONFIG.quiet && grouped.warning.length > 0) {
+    lines.push('EXPIRING SOON');
+    lines.push('-'.repeat(50));
+    for (const m of grouped.warning) {
+      lines.push(`  ${m.file}:${m.line}`);
+      lines.push(`    Date: ${m.date} (${m.message})`);
+      lines.push(`    ${m.description}`);
+      lines.push('');
+    }
+  }
+
+  if (!CONFIG.quiet && grouped.ok.length > 0) {
+    lines.push('ACTIVE MARKERS');
+    lines.push('-'.repeat(50));
+    for (const m of grouped.ok) {
+      lines.push(`  ${m.file}:${m.line}`);
+      lines.push(`    Date: ${m.date} (${m.message})`);
+      lines.push(`    ${m.description}`);
+      lines.push('');
+    }
+  }
+
+  lines.push('='.repeat(50));
+  lines.push('Summary:');
+  lines.push(`  Total markers: ${markers.length}`);
+  lines.push(
+    `  Expired: ${
+      grouped.expired.length +
+      grouped['missing-date'].length +
+      grouped['invalid-date'].length
+    }`,
+  );
+  lines.push(`  Expiring soon: ${grouped.warning.length}`);
+  lines.push(`  OK: ${grouped.ok.length}`);
+  lines.push('');
+
+  if (markers.length > 0) {
+    lines.push('Next: run npm run docs:update');
+    lines.push('');
+  }
+
+  return lines.join('\n');
 }
 
 /**
  * Main function
  */
 function main() {
+  parseArgs();
+
   const config = loadConfig();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const allMarkers = [];
 
-  console.log('🔍 Scanning for documentation markers...\n');
-
-  // Scan each source root
   for (const root of config.sourceRoots) {
     const rootPath = path.join(process.cwd(), root);
     const files = findSourceFiles(rootPath, config);
 
     for (const file of files) {
-      const markers = scanFileForMarkers(file);
+      const relativePath = path.relative(process.cwd(), file);
+      if (
+        IGNORE_FILES.some(
+          (ignored) =>
+            relativePath === ignored || relativePath.startsWith(ignored),
+        )
+      ) {
+        continue;
+      }
 
-      if (markers.length > 0) {
-        const relativePath = path.relative(process.cwd(), file);
-        allMarkers.push({
-          file: relativePath,
-          markers,
-        });
+      try {
+        const markers = findMarkersInFile(file, today);
+        allMarkers.push(...markers);
+      } catch {
+        // Skip unreadable files
       }
     }
   }
 
-  // Categorize markers
-  let expiredCount = 0;
-  let undatedCount = 0;
-  let validCount = 0;
-
-  for (const fileResult of allMarkers) {
-    for (const marker of fileResult.markers) {
-      if (marker.status === 'expired') expiredCount++;
-      else if (marker.status === 'undated') undatedCount++;
-      else validCount++;
-    }
+  for (const marker of allMarkers) {
+    marker.file = path.relative(process.cwd(), marker.file);
   }
 
-  // Report results
-  if (allMarkers.length === 0) {
-    console.log('✅ No documentation markers found.\n');
-    process.exit(0);
+  if (CONFIG.json) {
+    console.log(JSON.stringify(allMarkers, null, 2));
+  } else {
+    console.log(formatConsoleOutput(allMarkers));
   }
 
-  const totalMarkers = expiredCount + undatedCount + validCount;
-  console.log(`Found ${totalMarkers} marker(s) in ${allMarkers.length} file(s):\n`);
-
-  for (const fileResult of allMarkers) {
-    console.log(`  📄 ${fileResult.file}`);
-    for (const marker of fileResult.markers) {
-      let statusIcon = '⚪';
-      let statusText = '';
-
-      if (marker.status === 'expired') {
-        statusIcon = '🔴';
-        statusText = ` [EXPIRED: ${marker.ageDays} days old]`;
-      } else if (marker.status === 'undated') {
-        statusIcon = '🟡';
-        statusText = ' [no date]';
-      } else if (marker.status === 'valid') {
-        statusIcon = '🟢';
-        statusText = ` [${marker.ageDays} days]`;
-      }
-
-      console.log(`     ${statusIcon} Line ${marker.line}${statusText}`);
-      console.log(`        ${marker.content}`);
-    }
-    console.log('');
+  if (CONFIG.ci) {
+    const hasErrors = allMarkers.some(
+      (m) =>
+        m.status === 'expired' ||
+        m.status === 'missing-date' ||
+        m.status === 'invalid-date',
+    );
+    process.exit(hasErrors ? 1 : 0);
   }
-
-  // Summary
-  if (expiredCount > 0) {
-    console.log(`❌ ${expiredCount} expired marker(s) (older than ${MAX_AGE_DAYS} days)`);
-  }
-  if (undatedCount > 0) {
-    console.log(`⚠️  ${undatedCount} marker(s) without dates`);
-  }
-  if (validCount > 0) {
-    console.log(`✅ ${validCount} valid marker(s)`);
-  }
-
-  console.log('\n💡 Run `npm run docs:update` to generate update context.');
-  console.log('💡 Use @docs-update(YYYY-MM-DD) format to track marker age.\n');
-
-  // Exit with error if any expired markers
-  process.exit(expiredCount > 0 ? 1 : 0);
 }
 
 main();

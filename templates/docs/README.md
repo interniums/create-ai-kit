@@ -23,11 +23,18 @@ Use this table to find the right doc quickly.
 
 Use the batch update workflow for significant changes:
 
-1. Add a marker with a date and reason:
-   `@docs-update(YYYY-MM-DD: what changed and where to update docs)`
+1. Add a marker (default for doc-worthy changes):
+   `// @docs-update(YYYY-MM-DD): path/to/doc.md - description`
 2. Run `npm run docs:update` to generate context
 3. Update the affected docs
 4. Remove the marker
+
+Manual shortcut: use the VS Code snippet `docs-upd` to insert the marker.
+
+**Enforcement:**
+- Days 1–7: OK
+- Days 8–14: warning
+- Day 15+: error
 
 Template inputs live in `docs/templates/`.
 

@@ -53,7 +53,7 @@ Production-ready implementation.
 10. **Docs Marker:** If changing exports or patterns, add marker comment:
 
     ```typescript
-    // @docs-update(2024-01-15: path/to/DOCS.md - Description of change)
+    // @docs-update(2024-01-15): path/to/DOCS.md - Description of change
     ```
 
     These markers are temporary - they're collected by the docs update script.

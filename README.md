@@ -89,8 +89,8 @@ If a `.cursor` folder already exists without a manifest, running without `--forc
 scripts/
 ├── docs-update/       # Documentation maintenance scripts
 │   ├── generate-context.js
+│   ├── check-markers.js
 │   ├── verify-inline.js
-│   ├── find-markers.sh
 │   ├── file-doc-map.json
 │   ├── prompt-template.md
 │   ├── MARKER-GUIDE.md
@@ -128,37 +128,34 @@ This approach means:
 
 ## Docs Update Markers
 
-When you change behavior or exports, add a dated marker to the code:
+Markers are the default for doc-worthy changes (new exports, breaking changes, new patterns).
+The agent auto-adds markers during `/plan` and `/commit`.
 
-`// @docs-update(YYYY-MM-DD: short reason and doc path)`
+`// @docs-update(YYYY-MM-DD): path/to/doc.md - description`
+
+Manual shortcut: use the VS Code snippet `docs-upd`.
 
 These markers are temporary. The docs update tooling collects them, helps you
 decide which docs to change, and then you remove the markers once docs are updated.
 
 ## Docs Update Workflow
 
-1. Add markers where docs need changes.
+1. Run `npm run docs:check` to see all markers.
 2. Fill `docs/templates/WEEKLY-UPDATE-INPUT.md` with period + tasks.
 3. Run `npm run docs:update` to generate `scripts/docs-update/update-context.json`.
 4. Paste that JSON into `scripts/docs-update/prompt-template.md`.
 5. Use your AI tool to draft doc updates, then apply them manually.
 6. Remove the markers.
 
-## Lite Mode (Inline Docs)
+Enforcement:
+- Days 1–7: OK
+- Days 8–14: warning
+- Day 15+: error
 
-If the full workflow feels heavy, you can update docs inline:
+## Optional Inline Docs (rare)
 
-- Update the relevant `DOCS.md` or `docs/*.md` in the same PR/commit.
-- Skip `WEEKLY-UPDATE-INPUT.md` and `docs:update` for small changes.
-- Use markers only for large or risky changes.
-
-Example:
-
-- Change: Add a new endpoint
-- Docs: Update `docs/api.md` in the same commit
-- No marker needed
-
-This trades batching for speed and simplicity.
+For tiny, low-risk changes, you can update the relevant `DOCS.md` or `docs/*.md`
+in the same PR. Markers are still the default for doc-worthy changes.
 
 ## Extending Your Docs Setup
 
@@ -177,7 +174,7 @@ Common scripts added to `package.json`:
 - `hydrate:check` → scan for `AI_FILL` and template leftovers
 - `docs:update` → build the context for doc updates
 - `docs:check` → check marker age/format
-- `docs:find-markers` → list all markers
+- `docs:check:ci` → fail CI if expired markers exist
 - `docs:verify-inline` → verify inline doc references
 
 ## What's Included

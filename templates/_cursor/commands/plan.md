@@ -20,7 +20,13 @@ Create an architectural blueprint before coding.
    - If docs contradict code, **code wins**—note the discrepancy and plan based on actual signatures
    - Check existing implementations for behavior assumptions
 
-3. **Deep Analysis:**
+3. **Docs Markers (required):**
+   - Markers are the default for doc-worthy changes (new exports, breaking changes, new patterns)
+   - Add markers after planning:
+     `// @docs-update(YYYY-MM-DD): path/to/doc.md - description`
+   - Keep markers focused (max 1–3 per commit)
+
+4. **Deep Analysis:**
    - **Corner Cases:** Empty/null, race conditions, boundaries (min/max/zero), partial failures, network timeouts
    - **Security:** Auth at each boundary, input validation, data exposure, rate limiting needs
    - **Performance:** Query complexity, bundle impact, caching strategy, server load
@@ -28,11 +34,11 @@ Create an architectural blueprint before coding.
    - **Risks:** Probability × Impact, mitigation strategies, rollback plan
    - **Backward Compatibility:** Breaking changes, migration path, feature flags
 
-4. **Output:** Generate a Markdown checklist of implementation steps
+5. **Output:** Generate a Markdown checklist of implementation steps
 
-5. **Constraint Check:** Verify against `AGENTS.md` → Critical Anti-Patterns table
+6. **Constraint Check:** Verify against `AGENTS.md` → Critical Anti-Patterns table
 
-6. **Blockers:** List any missing information or decisions needed
+7. **Blockers:** List any missing information or decisions needed
 
 ## Output Format
 
@@ -49,6 +55,10 @@ Create an architectural blueprint before coding.
 
 - [ ] Step 1: ...
 - [ ] Step 2: ...
+
+### Docs Markers
+
+- [ ] List 1–3 marker locations and doc paths
 
 ### Corner Cases Analyzed
 

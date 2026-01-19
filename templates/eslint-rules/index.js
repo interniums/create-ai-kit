@@ -11,7 +11,8 @@
  *      {
  *        plugins: { 'local-rules': localRules },
  *        rules: {
- *          'local-rules/docs-update-marker': ['error', { maxAgeDays: 14 }]
+ *          'local-rules/docs-marker-expiry': ['error', { maxDays: 14 }],
+ *          'local-rules/docs-marker-expiring': ['warn', { maxDays: 14, warnDays: 7 }]
  *        }
  *      }
  *    ];
@@ -20,17 +21,20 @@
  *    module.exports = {
  *      plugins: ['./eslint-rules'],
  *      rules: {
- *        './eslint-rules/docs-update-marker': ['error', { maxAgeDays: 14 }]
+ *        './eslint-rules/docs-marker-expiry': ['error', { maxDays: 14 }],
+ *        './eslint-rules/docs-marker-expiring': ['warn', { maxDays: 14, warnDays: 7 }]
  *      }
  *    };
  */
 
 'use strict';
 
-const docsUpdateMarker = require('./docs-update-marker');
+const docsMarkerExpiry = require('./docs-marker-expiry');
+const docsMarkerExpiring = require('./docs-marker-expiring');
 
 module.exports = {
   rules: {
-    'docs-update-marker': docsUpdateMarker,
+    'docs-marker-expiry': docsMarkerExpiry,
+    'docs-marker-expiring': docsMarkerExpiring,
   },
 };

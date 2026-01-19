@@ -4,22 +4,22 @@ Custom ESLint rules to enforce documentation workflow discipline.
 
 ## Rules
 
-### `docs-update-marker`
+### `docs-marker-expiry` (error)
 
-Enforces that `@docs-update` markers are addressed within a configurable timeframe.
+Errors when `@docs-update` markers are expired, missing timestamps, or invalid.
 
-**Why?** Markers left in code for too long indicate stale documentation. This rule ensures markers are either resolved (docs updated) or consciously renewed.
+### `docs-marker-expiring` (warning)
+
+Warns when `@docs-update` markers are approaching expiration.
+
+**Why?** Stale markers indicate documentation drift. These rules keep updates timely without forcing real-time doc edits.
 
 ## Marker Format
 
-Use dated markers by default. Undated markers are discouraged.
+Use dated markers by default:
 
 ```javascript
-// With date - will error if older than maxAgeDays
-// @docs-update(2024-01-15)
-
-// With date and reason (recommended)
-// @docs-update(2024-01-15: Added new auth flow, update security.md)
+// @docs-update(2024-01-15): docs/security.md - Added new auth flow
 ```
 
 ## Setup
@@ -35,7 +35,8 @@ module.exports = [
       'local-rules': localRules,
     },
     rules: {
-      'local-rules/docs-update-marker': ['error', { maxAgeDays: 14 }],
+      'local-rules/docs-marker-expiry': ['error', { maxDays: 14 }],
+      'local-rules/docs-marker-expiring': ['warn', { maxDays: 14, warnDays: 7 }],
     },
   },
 ];
@@ -47,7 +48,8 @@ module.exports = [
 module.exports = {
   plugins: ['./eslint-rules'],
   rules: {
-    './eslint-rules/docs-update-marker': ['error', { maxAgeDays: 14 }],
+    './eslint-rules/docs-marker-expiry': ['error', { maxDays: 14 }],
+    './eslint-rules/docs-marker-expiring': ['warn', { maxDays: 14, warnDays: 7 }],
   },
 };
 ```
@@ -59,7 +61,8 @@ module.exports = {
   "eslintConfig": {
     "plugins": ["./eslint-rules"],
     "rules": {
-      "./eslint-rules/docs-update-marker": ["error", { "maxAgeDays": 14 }]
+      "./eslint-rules/docs-marker-expiry": ["error", { "maxDays": 14 }],
+      "./eslint-rules/docs-marker-expiring": ["warn", { "maxDays": 14, "warnDays": 7 }]
     }
   }
 }
@@ -67,26 +70,25 @@ module.exports = {
 
 ## Configuration Options
 
-| Option            | Type    | Default | Description                                     |
-| ----------------- | ------- | ------- | ----------------------------------------------- |
-| `maxAgeDays`      | number  | 14      | Days before a dated marker becomes an error     |
-| `requireDate`     | boolean | false   | If true, markers without dates are errors       |
-| `warnWithoutDate` | boolean | true    | If true, markers without dates trigger warnings |
+### `docs-marker-expiry`
+
+| Option   | Type   | Default | Description                                 |
+| -------- | ------ | ------- | ------------------------------------------- |
+| `maxDays` | number | 14      | Days before a dated marker becomes an error |
+
+### `docs-marker-expiring`
+
+| Option    | Type   | Default | Description                              |
+| --------- | ------ | ------- | ---------------------------------------- |
+| `maxDays` | number | 14      | Max age in days before marker expires    |
+| `warnDays` | number | 7       | Days before expiration to start warning  |
 
 ### Examples
 
 ```javascript
-// Strict mode - require dates on all markers
-'local-rules/docs-update-marker': ['error', {
-  maxAgeDays: 7,
-  requireDate: true
-}]
-
-// Lenient mode - only check dated markers
-'local-rules/docs-update-marker': ['warn', {
-  maxAgeDays: 30,
-  warnWithoutDate: false
-}]
+// Strict mode - 14-day expiry with 7-day warnings
+'local-rules/docs-marker-expiry': ['error', { maxDays: 14 }]
+'local-rules/docs-marker-expiring': ['warn', { maxDays: 14, warnDays: 7 }]
 ```
 
 ## Workflow
@@ -94,7 +96,7 @@ module.exports = {
 1. **Add marker when making changes:**
 
    ```javascript
-   // @docs-update(2024-01-15: Refactored auth to use JWT)
+   // @docs-update(2024-01-15): docs/security.md - Refactored auth to use JWT
    function authenticate() { ... }
    ```
 
@@ -105,7 +107,7 @@ module.exports = {
 
 3. **If you need more time:**
    - Update the date to extend the deadline
-   - Add a reason explaining the delay
+   - Keep the description accurate
 
 ## CI Integration
 
@@ -117,4 +119,4 @@ Add to your CI pipeline to fail builds with stale markers:
   run: npm run lint
 ```
 
-The rule will cause `eslint` to exit with code 1 if any markers are expired.
+The `docs-marker-expiry` rule will cause `eslint` to exit with code 1 if any markers are expired or invalid.

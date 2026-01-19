@@ -79,10 +79,10 @@ Keep as single commit if:
    - Run `git diff` to review the actual content being committed
    - Run `git log --oneline -n 5` to see recent commit message style
 
-2. **Docs impact check (marker before commit):**
+2. **Docs impact check (before commit):**
    - Review the diff for public behavior changes, new exports, or contract changes
-   - If docs need updates, add a dated marker in the changed code:
-     `// @docs-update(YYYY-MM-DD: short reason and doc path)`
+   - Add dated markers in the changed code when docs need updates:
+     `// @docs-update(YYYY-MM-DD): path/to/doc.md - description`
    - Keep markers focused (max 1–3 per commit) and avoid marker spam
 
 3. **Security check:** Scan for secrets in both filenames AND diff content.

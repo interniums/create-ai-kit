@@ -1,0 +1,9 @@
+{
+    "docs-update-marker": {
+        "prefix": "docs-upd",
+        "body": [
+            "// @docs-update(${CURRENT_YEAR}-${CURRENT_MONTH}-${CURRENT_DATE}): ${1:path/to/doc.md} - ${2:description}"
+        ],
+        "description": "Insert a docs update marker"
+    }
+}

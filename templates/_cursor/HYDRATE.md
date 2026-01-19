@@ -61,9 +61,9 @@ alwaysApply: false # Usually false for feature rules
 - Fill in `mappings` based on this project's structure (e.g. mapping `src/features/*` to docs)
 - Ensure the JSON is valid
 
-### 7. Configure ESLint rule (recommended)
+### 7. Configure ESLint rules (optional, strict mode)
 
-Add the `docs-update-marker` ESLint rule to enforce documentation hygiene:
+Add the docs marker rules to enforce documentation hygiene:
 
 ```javascript
 // eslint.config.js (flat config)
@@ -73,17 +73,19 @@ module.exports = [
   {
     plugins: { 'local-rules': localRules },
     rules: {
-      'local-rules/docs-update-marker': ['error', { maxAgeDays: 14 }],
+      'local-rules/docs-marker-expiry': ['error', { maxDays: 14 }],
+      'local-rules/docs-marker-expiring': ['warn', { maxDays: 14, warnDays: 7 }],
     },
   },
 ];
 ```
 
-This rule:
+These rules:
 
-- Errors on `@docs-update` markers older than 14 days
-- Warns on markers without dates
-- Use format: `@docs-update(2024-01-15: reason)`
+- Error on `@docs-update` markers older than `maxDays`
+- Error on missing/invalid timestamps
+- Warn when markers are close to expiring
+- Use format: `@docs-update(2024-01-15): path/to/doc.md - description`
 
 See `eslint-rules/README.md` for more options.
 

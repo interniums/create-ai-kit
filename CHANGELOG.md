@@ -31,6 +31,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.4.0] - 2026-01-19
+
+### Added
+
+- Dated marker snippet (`docs-upd`) in template VS Code snippets.
+- `docs:check:ci` script for CI enforcement of expired markers.
+- `docs-marker-expiry` and `docs-marker-expiring` ESLint rules for marker freshness.
+
+### Changed
+
+- Docs-update flow now defaults to agent-added markers in `/plan` and `/commit`.
+- Marker format standardized to `// @docs-update(YYYY-MM-DD): path/to/doc.md - description`.
+- `check-markers.js` upgraded with status buckets and CLI flags.
+- Docs updated to reflect enforcement windows and weekly workflow.
+
+### Removed
+
+- `find-markers.js` and `find-markers.sh` scripts (use `docs:check` instead).
+
 ## [1.3.1] - 2026-01-18
 
 ### Fixed
