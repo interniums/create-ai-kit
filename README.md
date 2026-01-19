@@ -1,6 +1,6 @@
 # create-ai-kit
 
-[![npm version](https://badge.fury.io/js/create-ai-kit.svg)](https://www.npmjs.com/package/create-ai-kit)
+[![npm version](https://img.shields.io/npm/v/create-ai-kit)](https://www.npmjs.com/package/create-ai-kit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Scaffold **AI Kit** — an AI-friendly documentation and workflow system for [Cursor IDE](https://cursor.sh).
