@@ -61,7 +61,8 @@ create-ai-kit/
 │   │   │   ├── discuss.md
 │   │   │   ├── explain.md
 │   │   │   ├── fix.md
-│   │   │   ├── hydrate-check.md
+│   │   │   ├── hydrate-check.md       # Deprecated alias
+│   │   │   ├── hydrate-verify.md
 │   │   │   ├── plan.md
 │   │   │   ├── refactor.md
 │   │   │   ├── review.md
@@ -79,7 +80,8 @@ create-ai-kit/
 │   │   │   ├── prompt-template.md
 │   │   │   ├── MARKER-GUIDE.md
 │   │   │   └── README.md
-│   │   └── placeholder-check.js
+│   │   ├── placeholder-check.js     # Internal (used by hydrate-verify)
+│   │   └── hydrate-verify.js
 │   ├── docs/
 │   │   ├── README.md
 │   │   └── templates/
@@ -201,7 +203,7 @@ node /path/to/create-ai-kit/bin/create-ai-kit.js
 ls -la .cursor/
 ls -la AGENTS.md
 ls -la scripts/docs-update/
-ls -la scripts/placeholder-check.js
+ls -la scripts/hydrate-verify.js
 ```
 
 ### Test 3: Re-run Behavior (No-op)
@@ -233,7 +235,7 @@ node /path/to/create-ai-kit/bin/create-ai-kit.js
 
 ```bash
 # Run after hydration is complete
-node scripts/placeholder-check.js
+node scripts/hydrate-verify.js
 ```
 
 Expected output: “No placeholders found”.
@@ -381,7 +383,7 @@ AI Kit scaffolding tool for Cursor IDE.
 
 ### Features
 
-- 11 workflow commands (/plan, /build, /verify, /hydrate-check, etc.)
+- 11 workflow commands (/plan, /build, /verify, /hydrate-verify, etc.)
 - AI hydration system for project-specific setup
 - Documentation maintenance scripts
 - Safe upgrade mechanism with checksums

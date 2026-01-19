@@ -62,6 +62,6 @@ Production-ready implementation.
 
 ## Project Scripts
 
-- `node scripts/placeholder-check.js` (or `npm run hydrate:check`) — verify hydration completeness
+- `node scripts/hydrate-verify.js` (or `npm run hydrate:verify`) — verify hydration completeness
 
 <!-- AI_FILL: Add project specific scripts here (e.g. npm run lint, npm run type-check) -->

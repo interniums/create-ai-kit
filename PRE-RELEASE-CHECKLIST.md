@@ -81,7 +81,7 @@ This checklist must be completed before every release. No exceptions.
 - [ ] No broken relative paths within templates
 - [ ] Template markdown renders correctly
 - [ ] No orphaned or unused template files
-- [ ] Placeholder check passes in a hydrated test project (`node scripts/placeholder-check.js`)
+- [ ] Hydration verify passes in a hydrated test project (`node scripts/hydrate-verify.js`)
 
 ---
 
@@ -231,7 +231,7 @@ Run all tests below. Record results in the table.
 | 12  | Project detection (Python)    | Create requirements.txt, verify detection      | ⬜     |       |
 | 13  | Clipboard copy                | Verify HYDRATE.md copied to clipboard          | ⬜     |       |
 | 14  | Prompt fallback file          | `docs/hydration-prompt.md` created on install  | ⬜     |       |
-| 15  | Placeholder check             | `node scripts/placeholder-check.js`            | ⬜     |       |
+| 15  | Hydration verify              | `node scripts/hydrate-verify.js`               | ⬜     |       |
 | 16  | Global link test              | `npm link` then `create-ai-kit --dry-run`      | ⬜     |       |
 
 ### Detailed Test Scripts
@@ -286,6 +286,7 @@ test -f .cursor/ai-kit.config.json && echo "✓ .cursor/ai-kit.config.json"
 test -f AGENTS.md && echo "✓ AGENTS.md"
 test -d scripts/docs-update && echo "✓ scripts/docs-update/"
 test -f scripts/placeholder-check.js && echo "✓ scripts/placeholder-check.js"
+test -f scripts/hydrate-verify.js && echo "✓ scripts/hydrate-verify.js"
 test -f .ai-kit-manifest.json && echo "✓ .ai-kit-manifest.json"
 ```
 
@@ -298,6 +299,7 @@ Expected command files:
 - [ ] `.cursor/commands/explain.md`
 - [ ] `.cursor/commands/fix.md`
 - [ ] `.cursor/commands/hydrate-check.md`
+- [ ] `.cursor/commands/hydrate-verify.md`
 - [ ] `.cursor/commands/plan.md`
 - [ ] `.cursor/commands/refactor.md`
 - [ ] `.cursor/commands/review.md`

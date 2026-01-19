@@ -6,11 +6,11 @@ alwaysApply: true
 
 # AI Kit
 
-<!-- ai-kit-version: 1.5.0 -->
+<!-- ai-kit-version: 1.6.0 -->
 
 On first interaction with a new task, read `AGENTS.md` in the project root.
 If present, read `.cursor/rules/app-context.mdc` for a minimal app snapshot.
-After hydration, run `/hydrate-check` to confirm placeholders are cleared.
+After hydration, run `/hydrate-verify` to confirm files, config, and placeholders.
 
 It contains:
 
@@ -28,7 +28,8 @@ Use native Cursor commands (type `/` in chat) for common workflows:
 - `/plan` - Architectural blueprint before coding
 - `/build` - Production-ready implementation
 - `/verify` - Code review and safety check
-- `/hydrate-check` - Placeholder scan after hydration
+- `/hydrate-verify` - Hydration verification (files + config + placeholders)
+- `/hydrate-check` - Deprecated alias of `/hydrate-verify`
 - `/fix` - Quick targeted correction
 - `/debug` - Root cause analysis
 - `/refactor` - Improve code quality

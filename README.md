@@ -17,7 +17,8 @@ npx create-ai-kit
 2. **Creates** `AGENTS.md` skeleton with AI_FILL tokens for project-specific content
 3. **Installs** docs-update scripts for weekly documentation maintenance
 4. **Adds** a hydration placeholder check script
-5. **Copies** a hydration prompt to your clipboard and saves it to `docs/hydration-prompt.md`
+5. **Adds** a hydration verification script (files + config + placeholders)
+6. **Copies** a hydration prompt to your clipboard and saves it to `docs/hydration-prompt.md`
 
 ## Usage
 
@@ -63,7 +64,9 @@ If a `.cursor` folder already exists without a manifest, running without `--forc
 1. Open Cursor (Cmd+Shift+I for Composer)
 2. Paste the hydration prompt (clipboard or `docs/hydration-prompt.md`)
 3. Let the AI configure your project by filling in `<!-- AI_FILL: ... -->` blocks
-4. Run `node scripts/placeholder-check.js` (or `npm run hydrate:check`) to confirm hydration is complete
+4. Note: hydration on large projects can take a while — let it finish
+5. If the agent cannot write to `.cursor/`, run the steps locally or grant permission
+6. Run `npm run hydrate:verify` (or `node scripts/hydrate-verify.js`) to confirm required files, config, and placeholders
 
 ## Files Created
 
@@ -77,6 +80,7 @@ If a `.cursor` folder already exists without a manifest, running without `--forc
 │   ├── explain.md
 │   ├── fix.md
 │   ├── hydrate-check.md
+│   ├── hydrate-verify.md
 │   ├── plan.md
 │   ├── refactor.md
 │   ├── review.md
@@ -96,7 +100,8 @@ scripts/
 │   ├── prompt-template.md
 │   ├── MARKER-GUIDE.md
 │   └── README.md
-└── placeholder-check.js # Hydration placeholder scan
+├── placeholder-check.js # Internal placeholder scan (used by hydrate-verify)
+└── hydrate-verify.js    # Hydration verification (files + config + placeholders)
 
 AGENTS.md              # Agent onboarding guide
 docs/
@@ -174,7 +179,8 @@ This keeps the update workflow accurate without making it heavier.
 
 Common scripts added to `package.json`:
 
-- `hydrate:check` → scan for `AI_FILL` and template leftovers
+- `hydrate:verify` → unified hydration check (files + config + placeholders)
+- `hydrate:check` → alias of `hydrate:verify` (kept for compatibility)
 - `docs:update` → build the context for doc updates
 - `docs:check` → check marker age/format
 - `docs:check:ci` → fail CI if expired markers exist
@@ -187,12 +193,14 @@ Common scripts added to `package.json`:
 | `/plan`                | Create implementation blueprints     |
 | `/build`               | Production-ready code generation     |
 | `/verify`              | Code review and safety checks        |
-| `/hydrate-check`       | Hydration placeholder scan           |
+| `/hydrate-check`       | Deprecated alias of `/hydrate-verify` |
+| `/hydrate-verify`      | Hydration verification (files + config) |
 | `/debug`               | Root cause analysis                  |
 | `/commit`              | Git commit with best practices       |
 | `AGENTS.md`            | AI onboarding guide for your project |
 | `docs-update/`         | Weekly documentation sync scripts    |
-| `placeholder-check.js` | Hydration completeness check         |
+| `placeholder-check.js` | Internal placeholder scan (used by hydrate-verify) |
+| `hydrate-verify.js`    | Required files + config + placeholders |
 
 ## Real-World Learnings (Universe Repo)
 

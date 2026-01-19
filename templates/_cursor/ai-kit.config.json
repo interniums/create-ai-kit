@@ -10,5 +10,6 @@
     "**/.git/**",
     "**/coverage/**"
   ],
-  "docsRoot": "docs/"
+  "docsRoot": "docs/",
+  "requiredDocs": []
 }

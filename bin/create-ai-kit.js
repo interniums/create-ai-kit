@@ -346,7 +346,8 @@ async function main() {
       pkg.scripts = pkg.scripts || {};
 
       const newScripts = {
-        'hydrate:check': 'node scripts/placeholder-check.js',
+        'hydrate:verify': 'node scripts/hydrate-verify.js',
+        'hydrate:check': 'node scripts/hydrate-verify.js',
         'docs:update': 'node scripts/docs-update/generate-context.js',
         'docs:check': 'node scripts/docs-update/check-markers.js',
         'docs:check:ci': 'node scripts/docs-update/check-markers.js --ci',
@@ -436,7 +437,7 @@ async function main() {
     console.log('  1. Open Cursor (Cmd+Shift+I for Composer)');
     console.log('  2. Paste the prompt (Cmd+V or docs/hydration-prompt.md)');
     console.log('  3. Let the AI configure your project');
-    console.log('  4. Run node scripts/placeholder-check.js after hydration');
+    console.log('  4. Run node scripts/hydrate-verify.js after hydration');
   }
 }
 

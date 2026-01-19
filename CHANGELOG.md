@@ -31,6 +31,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.6.0] - 2026-01-19
+
+### Added
+
+- Hydration verification script (`scripts/hydrate-verify.js`) and `/hydrate-verify` command.
+- `hydrate:verify` npm script during scaffolding (with `hydrate:check` as an alias).
+
+### Changed
+
+- Hydration instructions now point to the unified verification command.
+
+---
+
 ## [1.5.0] - 2026-01-19
 
 ### Added
