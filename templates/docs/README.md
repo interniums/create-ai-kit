@@ -32,6 +32,7 @@ Use the batch update workflow for significant changes:
 Manual shortcut: use the VS Code snippet `docs-upd` to insert the marker.
 
 **Enforcement:**
+
 - Days 1–7: OK
 - Days 8–14: warning
 - Day 15+: error

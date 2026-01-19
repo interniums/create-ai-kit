@@ -28,19 +28,19 @@ This checklist must be completed before every release. No exceptions.
 
 ### Version Bump
 
-- [ ] Version in `package.json` is updated appropriately:
+- [x] Version in `package.json` is updated appropriately:
   - **Patch** (`x.x.X`): Bug fixes, typo corrections, minor improvements
   - **Minor** (`x.X.0`): New features, new commands, new templates
   - **Major** (`X.0.0`): Breaking changes, major rewrites, removed features
-- [ ] Version follows semver strictly (no arbitrary bumps)
+- [x] Version follows semver strictly (no arbitrary bumps)
 - [ ] If this is a breaking change, documented in BREAKING CHANGES section
 
 ### Changelog
 
-- [ ] CHANGELOG.md exists and is updated (or create one if missing)
-- [ ] New version section added with:
-  - [ ] Date of release
-  - [ ] List of changes categorized: Added, Changed, Fixed, Removed, Security
+- [x] CHANGELOG.md exists and is updated (or create one if missing)
+- [x] New version section added with:
+  - [x] Date of release
+  - [x] List of changes categorized: Added, Changed, Fixed, Removed, Security
   - [ ] Breaking changes highlighted with ⚠️
   - [ ] Migration notes if applicable
 
@@ -50,7 +50,7 @@ This checklist must be completed before every release. No exceptions.
 
 ### Syntax & Linting
 
-- [ ] `npm run format` executed (Prettier)
+- [x] `npm run format` executed (Prettier)
 - [ ] No syntax errors in any `.js` files
 - [ ] No syntax errors in any `.md` template files
 - [ ] All JSON files are valid (`package.json`, config files, etc.)
@@ -96,7 +96,7 @@ This checklist must be completed before every release. No exceptions.
 
 ### Dependencies
 
-- [ ] `npm audit` shows no high/critical vulnerabilities
+- [x] `npm audit` shows no high/critical vulnerabilities
 - [ ] Dependencies are up to date (check for major version updates)
 - [ ] No unnecessary dependencies (review `package.json`)
 - [ ] All dependencies have appropriate licenses (MIT, Apache, BSD)
@@ -179,7 +179,7 @@ node -e "console.log(JSON.stringify(require('./package.json'), null, 2))"
 npm test
 ```
 
-- [ ] All tests pass
+- [x] All tests pass
 - [ ] No skipped tests without documented reason
 - [ ] Test coverage is adequate for critical paths:
   - [ ] Dry run mode
@@ -230,8 +230,9 @@ Run all tests below. Record results in the table.
 | 11  | Project detection (React)     | Create with react dep, verify detection        | ⬜     |       |
 | 12  | Project detection (Python)    | Create requirements.txt, verify detection      | ⬜     |       |
 | 13  | Clipboard copy                | Verify HYDRATE.md copied to clipboard          | ⬜     |       |
-| 14  | Placeholder check             | `node scripts/placeholder-check.js`            | ⬜     |       |
-| 15  | Global link test              | `npm link` then `create-ai-kit --dry-run`      | ⬜     |       |
+| 14  | Prompt fallback file          | `docs/hydration-prompt.md` created on install  | ⬜     |       |
+| 15  | Placeholder check             | `node scripts/placeholder-check.js`            | ⬜     |       |
+| 16  | Global link test              | `npm link` then `create-ai-kit --dry-run`      | ⬜     |       |
 
 ### Detailed Test Scripts
 
@@ -240,13 +241,13 @@ Run all tests below. Record results in the table.
 mkdir -p /tmp/test-dry-run && cd /tmp/test-dry-run
 npm init -y
 node /path/to/ai-kit/bin/create-ai-kit.js --dry-run
-# Verify: No files created, output lists files
+# Verify: No files created (including docs/hydration-prompt.md), output lists files
 
 # Test 2: Fresh install
 mkdir -p /tmp/test-fresh && cd /tmp/test-fresh
 npm init -y
 node /path/to/ai-kit/bin/create-ai-kit.js --yes
-# Verify: .cursor/, AGENTS.md, scripts/, manifest exist
+# Verify: .cursor/, AGENTS.md, scripts/, manifest exist, docs/hydration-prompt.md created
 
 # Test 4: Re-run without --force (should be a no-op)
 node /path/to/ai-kit/bin/create-ai-kit.js --yes
@@ -313,7 +314,7 @@ cd /path/to/ai-kit
 npm pack --dry-run
 ```
 
-- [ ] Output lists expected files
+- [x] Output lists expected files
 - [ ] No test files included
 - [ ] No .env or secret files included
 - [ ] Package size is reasonable (< 500KB)

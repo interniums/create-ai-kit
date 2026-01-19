@@ -48,8 +48,7 @@ const IGNORE_EXTENSIONS = ['.json', '.md', '.map', '.lock'];
 const IGNORE_FILES = ['scripts/docs-update/check-markers.js'];
 
 // Marker patterns - must start in comment context
-const MARKER_WITH_DATE =
-  /(?:\/\/|\/\*|\*)\s*@docs-update\((\d{4}-\d{2}-\d{2})\):\s*(.+)/g;
+const MARKER_WITH_DATE = /(?:\/\/|\/\*|\*)\s*@docs-update\((\d{4}-\d{2}-\d{2})\):\s*(.+)/g;
 const MARKER_WITHOUT_DATE = /(?:\/\/|\/\*|\*)\s*@docs-update:\s*(.+)/g;
 
 /**
@@ -103,9 +102,7 @@ function loadConfig() {
 
       // Filter out AI_FILL placeholders
       if (config.sourceRoots) {
-        config.sourceRoots = config.sourceRoots.filter(
-          (root) => !root.includes('AI_FILL'),
-        );
+        config.sourceRoots = config.sourceRoots.filter((root) => !root.includes('AI_FILL'));
         if (config.sourceRoots.length === 0) {
           config.sourceRoots = DEFAULT_CONFIG.sourceRoots;
         }
@@ -114,10 +111,7 @@ function loadConfig() {
       return {
         ...DEFAULT_CONFIG,
         ...config,
-        excludePatterns: [
-          ...DEFAULT_CONFIG.excludePatterns,
-          ...(config.excludePatterns || []),
-        ],
+        excludePatterns: [...DEFAULT_CONFIG.excludePatterns, ...(config.excludePatterns || [])],
       };
     } catch {
       return DEFAULT_CONFIG;
@@ -132,9 +126,7 @@ function loadConfig() {
  */
 function isExcluded(filePath, excludePatterns) {
   return excludePatterns.some((pattern) => {
-    const regex = new RegExp(
-      pattern.replace(/\*\*\/?/g, '.*').replace(/\*/g, '[^/]*'),
-    );
+    const regex = new RegExp(pattern.replace(/\*\*\/?/g, '.*').replace(/\*/g, '[^/]*'));
     return regex.test(filePath);
   });
 }
@@ -396,10 +388,8 @@ function formatConsoleOutput(markers) {
   lines.push(`  Total markers: ${markers.length}`);
   lines.push(
     `  Expired: ${
-      grouped.expired.length +
-      grouped['missing-date'].length +
-      grouped['invalid-date'].length
-    }`,
+      grouped.expired.length + grouped['missing-date'].length + grouped['invalid-date'].length
+    }`
   );
   lines.push(`  Expiring soon: ${grouped.warning.length}`);
   lines.push(`  OK: ${grouped.ok.length}`);
@@ -432,10 +422,7 @@ function main() {
     for (const file of files) {
       const relativePath = path.relative(process.cwd(), file);
       if (
-        IGNORE_FILES.some(
-          (ignored) =>
-            relativePath === ignored || relativePath.startsWith(ignored),
-        )
+        IGNORE_FILES.some((ignored) => relativePath === ignored || relativePath.startsWith(ignored))
       ) {
         continue;
       }
@@ -461,10 +448,7 @@ function main() {
 
   if (CONFIG.ci) {
     const hasErrors = allMarkers.some(
-      (m) =>
-        m.status === 'expired' ||
-        m.status === 'missing-date' ||
-        m.status === 'invalid-date',
+      (m) => m.status === 'expired' || m.status === 'missing-date' || m.status === 'invalid-date'
     );
     process.exit(hasErrors ? 1 : 0);
   }

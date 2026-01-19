@@ -3,6 +3,8 @@
 You are configuring the AI Kit for this project. I have just installed
 template files that contain `<!-- AI_FILL: ... -->` blocks.
 
+If you need to reference this prompt later, it is saved to `docs/hydration-prompt.md`.
+
 ## Your Tasks
 
 ### 1. Read the project context (be specific, save tokens)
@@ -15,8 +17,12 @@ template files that contain `<!-- AI_FILL: ... -->` blocks.
 ### 2. Hydrate the templates
 
 - Open `AGENTS.md` and replace all `<!-- AI_FILL: ... -->` blocks with specific content for this project
+- Fill `.cursor/rules/app-context.mdc` with a minimal app snapshot (keep it minimal)
 - The `.cursor/rules/main.mdc` file has `alwaysApply: true` - it loads for every conversation. Keep it focused on navigation (pointing to AGENTS.md) and available commands
 - If you identify major features (auth, payments, API), create corresponding `.cursor/rules/<feature>.mdc` files **only** when there is clear evidence in code or docs
+- Domain examples when applicable: `payments.mdc`, `analytics.mdc`, `api-routes.mdc`, `database.mdc`, `react.mdc`, `typescript.mdc`
+
+**Plan mode note:** Hydrate `AGENTS.md` and `.cursor/rules/app-context.mdc` first to improve context coverage.
 
 ### 3. Create feature-specific rules (optional)
 

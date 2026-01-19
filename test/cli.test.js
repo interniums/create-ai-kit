@@ -347,4 +347,3 @@ describe('Marker Check Script', () => {
     assert.ok(content.includes('@docs-update'), 'Should search for @docs-update markers');
   });
 });
-

@@ -63,8 +63,7 @@ module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description:
-        'Enforce @docs-update markers have timestamps and are not expired',
+      description: 'Enforce @docs-update markers have timestamps and are not expired',
       category: 'Best Practices',
       recommended: true,
     },
@@ -73,10 +72,8 @@ module.exports = {
         'Documentation marker expired {{ daysAgo }} days ago (max: {{ maxDays }} days). Update docs and remove marker, or refresh the date if still WIP.',
       missingTimestamp:
         '@docs-update marker missing timestamp. Use format: @docs-update({{ today }}): path - description',
-      invalidDate:
-        '@docs-update marker has invalid date "{{ date }}". Use format: YYYY-MM-DD',
-      futureDate:
-        '@docs-update marker has future date "{{ date }}". Use today\'s date or earlier.',
+      invalidDate: '@docs-update marker has invalid date "{{ date }}". Use format: YYYY-MM-DD',
+      futureDate: '@docs-update marker has future date "{{ date }}". Use today\'s date or earlier.',
     },
     schema: [
       {

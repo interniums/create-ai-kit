@@ -58,3 +58,4 @@ test/fixtures/package.json
 
 ## Cursor (repo uses templates/_cursor; keep hydrate local)
 .cursor/HYDRATE.md
+docs/hydration-prompt.md

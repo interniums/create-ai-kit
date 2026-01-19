@@ -31,6 +31,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.5.0] - 2026-01-19
+
+### Added
+
+- Generated fallback prompt at `docs/hydration-prompt.md` with source-of-truth note.
+- Always-on `app-context.mdc` rule template for minimal app context.
+- Optional domain rule examples in `HYDRATE.md`.
+
+### Changed
+
+- CLI messaging now points to the fallback prompt when clipboard is empty.
+- Hydration guidance highlights plan-mode sequencing for better context coverage.
+- README updated to reflect the fallback prompt and new rule.
+- `.gitignore` includes the generated fallback prompt.
+
+### Fixed
+
+- `--dry-run` no longer writes the fallback prompt file.
+
+---
+
 ## [1.4.0] - 2026-01-19
 
 ### Added
@@ -132,6 +153,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date       | Highlights                          |
 | ------- | ---------- | ----------------------------------- |
+| 1.5.0   | 2026-01-19 | Hydration fallback + app context    |
+| 1.4.0   | 2026-01-19 | Marker rules + CI check             |
 | 1.3.1   | 2026-01-18 | Cleaned npm bin config              |
 | 1.3.0   | 2026-01-18 | Hydration check + docs improvements |
 | 1.2.0   | 2026-01-18 | Safe upgrade without manifest       |
@@ -140,7 +163,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/interniums/create-ai-kit/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/interniums/create-ai-kit/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/interniums/create-ai-kit/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/interniums/create-ai-kit/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/interniums/create-ai-kit/compare/v1.1.0...v1.2.0

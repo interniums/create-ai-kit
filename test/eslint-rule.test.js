@@ -77,10 +77,7 @@ describe('ESLint Rule: docs-marker-expiring', () => {
 
 describe('Check Markers Script', () => {
   const fs = require('fs');
-  const scriptPath = path.join(
-    __dirname,
-    '../templates/scripts/docs-update/check-markers.js',
-  );
+  const scriptPath = path.join(__dirname, '../templates/scripts/docs-update/check-markers.js');
 
   it('should support CLI flags and status buckets', () => {
     const content = fs.readFileSync(scriptPath, 'utf-8');

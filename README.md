@@ -17,7 +17,7 @@ npx create-ai-kit
 2. **Creates** `AGENTS.md` skeleton with AI_FILL tokens for project-specific content
 3. **Installs** docs-update scripts for weekly documentation maintenance
 4. **Adds** a hydration placeholder check script
-5. **Copies** a hydration prompt to your clipboard
+5. **Copies** a hydration prompt to your clipboard and saves it to `docs/hydration-prompt.md`
 
 ## Usage
 
@@ -49,7 +49,7 @@ If a `.cursor` folder already exists without a manifest, running without `--forc
 2. The CLI copies templates, renames `_cursor` → `.cursor`, and writes files.
 3. A manifest (`.ai-kit-manifest.json`) tracks checksums for safe upgrades.
 4. If a file was modified, the CLI writes a `.new` version instead of overwriting.
-5. Your hydration prompt is copied to the clipboard when possible.
+5. Your hydration prompt is copied to the clipboard when possible and saved to `docs/hydration-prompt.md`.
 
 ## What You Get (Output)
 
@@ -61,7 +61,7 @@ If a `.cursor` folder already exists without a manifest, running without `--forc
 ## After Installation
 
 1. Open Cursor (Cmd+Shift+I for Composer)
-2. Paste the hydration prompt (already in clipboard)
+2. Paste the hydration prompt (clipboard or `docs/hydration-prompt.md`)
 3. Let the AI configure your project by filling in `<!-- AI_FILL: ... -->` blocks
 4. Run `node scripts/placeholder-check.js` (or `npm run hydrate:check`) to confirm hydration is complete
 
@@ -83,6 +83,7 @@ If a `.cursor` folder already exists without a manifest, running without `--forc
 │   └── verify.md
 ├── rules/
 │   ├── main.mdc       # Main rule file
+│   ├── app-context.mdc # Minimal app context (always on)
 │   └── _template.mdc  # Template for new rules
 └── HYDRATE.md         # Hydration prompt (delete after use)
 
@@ -100,6 +101,7 @@ scripts/
 AGENTS.md              # Agent onboarding guide
 docs/
 ├── README.md          # Documentation index
+├── hydration-prompt.md # Generated hydration prompt fallback
 └── templates/
     ├── DOCS-TEMPLATE.md         # Documentation template
     └── WEEKLY-UPDATE-INPUT.md   # Weekly update input template
@@ -148,6 +150,7 @@ decide which docs to change, and then you remove the markers once docs are updat
 6. Remove the markers.
 
 Enforcement:
+
 - Days 1–7: OK
 - Days 8–14: warning
 - Day 15+: error

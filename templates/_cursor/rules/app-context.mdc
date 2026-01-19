@@ -1,0 +1,15 @@
+---
+description: Minimal app context that applies to all tasks
+globs:
+alwaysApply: true
+---
+
+# App Context
+
+Keep this minimal and stable. Use short lines.
+
+- App name: <!-- AI_FILL: ... -->
+- One-line purpose: <!-- AI_FILL: ... -->
+- Primary users: <!-- AI_FILL: ... -->
+- Tech stack: <!-- AI_FILL: ... -->
+- Core domains (2–4): <!-- AI_FILL: ... -->

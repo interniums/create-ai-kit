@@ -72,16 +72,16 @@ module.exports = {
 
 ### `docs-marker-expiry`
 
-| Option   | Type   | Default | Description                                 |
-| -------- | ------ | ------- | ------------------------------------------- |
+| Option    | Type   | Default | Description                                 |
+| --------- | ------ | ------- | ------------------------------------------- |
 | `maxDays` | number | 14      | Days before a dated marker becomes an error |
 
 ### `docs-marker-expiring`
 
-| Option    | Type   | Default | Description                              |
-| --------- | ------ | ------- | ---------------------------------------- |
-| `maxDays` | number | 14      | Max age in days before marker expires    |
-| `warnDays` | number | 7       | Days before expiration to start warning  |
+| Option     | Type   | Default | Description                             |
+| ---------- | ------ | ------- | --------------------------------------- |
+| `maxDays`  | number | 14      | Max age in days before marker expires   |
+| `warnDays` | number | 7       | Days before expiration to start warning |
 
 ### Examples
 
