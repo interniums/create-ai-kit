@@ -113,7 +113,7 @@ Guidelines:
 4. Test with `create-ai-kit --dry-run` (via `npm link`)
 5. Commit with a clear message:
    ```bash
-   git commit -m "Add: brief description of change"
+   git commit -m "feat: brief description of change"
    ```
 6. Push and open a PR against `main`
 

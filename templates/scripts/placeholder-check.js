@@ -16,6 +16,12 @@
 
 const fs = require('fs');
 const path = require('path');
+let picomatch = null;
+try {
+  picomatch = require('picomatch');
+} catch {
+  picomatch = null;
+}
 
 const DEFAULT_CONFIG = {
   excludePatterns: [
@@ -25,12 +31,17 @@ const DEFAULT_CONFIG = {
     '**/.next/**',
     '**/.git/**',
     '**/coverage/**',
+    '**/.cursor/**',
+    '**/docs/templates/**',
+    '.ai-kit-manifest.json',
+    'docs/hydration-prompt.md',
   ],
 };
 
 const INTERNAL_IGNORE_PREFIXES = [
   'scripts/docs-update/',
   'scripts/placeholder-check.js',
+  'scripts/hydrate-verify.js',
   '.cursor/commands/',
 ];
 
@@ -84,7 +95,16 @@ function loadConfig() {
         config.sourceRoots = config.sourceRoots.filter((root) => !root.includes('AI_FILL'));
       }
 
-      return { ...DEFAULT_CONFIG, ...config };
+      if (config.excludePatterns) {
+        config.excludePatterns = config.excludePatterns.map((pattern) =>
+          pattern.replace(/\\/g, '/')
+        );
+      }
+      return {
+        ...DEFAULT_CONFIG,
+        ...config,
+        excludePatterns: [...DEFAULT_CONFIG.excludePatterns, ...(config.excludePatterns || [])],
+      };
     } catch {
       return DEFAULT_CONFIG;
     }
@@ -96,24 +116,8 @@ function loadConfig() {
 /**
  * Check if path should be excluded
  */
-function isExcluded(filePath, excludePatterns) {
-  const normalizedPath = filePath.replace(/\\/g, '/');
-
-  return excludePatterns.some((pattern) => {
-    const normalizedPattern = pattern.replace(/\\/g, '/');
-    const hasTrailingGlob = normalizedPattern.endsWith('/**');
-
-    if (hasTrailingGlob) {
-      const basePattern = normalizedPattern.slice(0, -3);
-      const baseRegex = new RegExp(globToRegex(basePattern));
-      if (baseRegex.test(normalizedPath)) {
-        return true;
-      }
-    }
-
-    const regex = new RegExp(globToRegex(normalizedPattern));
-    return regex.test(normalizedPath);
-  });
+function normalizePath(filePath) {
+  return filePath.replace(/\\/g, '/');
 }
 
 function globToRegex(globPattern) {
@@ -121,6 +125,32 @@ function globToRegex(globPattern) {
     .replace(/\*\*\/?/g, '__GLOBSTAR__')
     .replace(/\*/g, '[^/]*')
     .replace(/__GLOBSTAR__/g, '.*');
+}
+
+function fallbackMatch(filePath, patterns) {
+  return patterns.some((pattern) => {
+    const normalizedPattern = normalizePath(pattern);
+    const hasTrailingGlob = normalizedPattern.endsWith('/**');
+
+    if (hasTrailingGlob) {
+      const basePattern = normalizedPattern.slice(0, -3);
+      const baseRegex = new RegExp(globToRegex(basePattern));
+      if (baseRegex.test(filePath)) {
+        return true;
+      }
+    }
+
+    const regex = new RegExp(globToRegex(normalizedPattern));
+    return regex.test(filePath);
+  });
+}
+
+function isExcluded(filePath, excludePatterns) {
+  const normalizedPath = normalizePath(filePath);
+  if (picomatch) {
+    return picomatch(excludePatterns, { dot: true })(normalizedPath);
+  }
+  return fallbackMatch(normalizedPath, excludePatterns);
 }
 
 /**
@@ -143,7 +173,7 @@ function findTextFiles(dir, config, files = []) {
 
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
-    const relativePath = path.relative(process.cwd(), fullPath);
+    const relativePath = normalizePath(path.relative(process.cwd(), fullPath));
 
     if (INTERNAL_IGNORE_PREFIXES.some((prefix) => relativePath.startsWith(prefix))) {
       continue;

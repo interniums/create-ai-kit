@@ -17,6 +17,12 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+let picomatch = null;
+try {
+  picomatch = require('picomatch');
+} catch {
+  picomatch = null;
+}
 
 /**
  * @typedef {Object} TaskDescription
@@ -85,7 +91,19 @@ function loadConfig() {
         }
       }
 
-      return { ...DEFAULT_CONFIG, ...config };
+      if (config.sourceRoots) {
+        config.sourceRoots = config.sourceRoots.map((root) => root.replace(/\\/g, '/'));
+      }
+      if (config.excludePatterns) {
+        config.excludePatterns = config.excludePatterns.map((pattern) =>
+          pattern.replace(/\\/g, '/')
+        );
+      }
+      return {
+        ...DEFAULT_CONFIG,
+        ...config,
+        excludePatterns: [...DEFAULT_CONFIG.excludePatterns, ...(config.excludePatterns || [])],
+      };
     } catch (e) {
       console.warn('⚠️  Could not parse ai-kit.config.json. Using defaults.');
       return DEFAULT_CONFIG;
@@ -121,11 +139,10 @@ function isValidDate(dateStr) {
  * @returns {boolean}
  */
 function isExcluded(filePath, excludePatterns) {
-  return excludePatterns.some((pattern) => {
-    // Convert glob pattern to regex
-    const regex = new RegExp(pattern.replace(/\*\*\/?/g, '.*').replace(/\*/g, '[^/]*'));
-    return regex.test(filePath);
-  });
+  if (picomatch) {
+    return picomatch(excludePatterns, { dot: true })(filePath);
+  }
+  return fallbackMatch(filePath, excludePatterns);
 }
 
 /**
@@ -136,6 +153,34 @@ function isExcluded(filePath, excludePatterns) {
  */
 function isInSourceRoot(filePath, sourceRoots) {
   return sourceRoots.some((root) => filePath.startsWith(root));
+}
+
+function normalizePath(filePath) {
+  return filePath.replace(/\\/g, '/');
+}
+
+function globToRegex(globPattern) {
+  return globPattern
+    .replace(/\*\*\/?/g, '__GLOBSTAR__')
+    .replace(/\*/g, '[^/]*')
+    .replace(/__GLOBSTAR__/g, '.*');
+}
+
+function fallbackMatch(filePath, patterns) {
+  return patterns.some((pattern) => {
+    const normalizedPattern = normalizePath(pattern);
+    const regex = new RegExp(globToRegex(normalizedPattern));
+    return regex.test(filePath);
+  });
+}
+
+function ensureGitAvailable() {
+  try {
+    execSync('git --version', { stdio: 'ignore' });
+  } catch {
+    console.error('❌ Git is not available on PATH. Install git and re-run.');
+    process.exit(1);
+  }
 }
 
 // Get git diff for period
@@ -164,7 +209,7 @@ function getGitDiff(fromDate, toDate, config) {
       .filter(Boolean)
       .forEach((line) => {
         const [status, filePath, newPath] = line.split('\t');
-        const actualPath = newPath || filePath;
+        const actualPath = normalizePath(newPath || filePath);
 
         // Use config-based filtering instead of hardcoded paths
         if (
@@ -230,14 +275,13 @@ function matchFileToDocs(filePath, mappings) {
   const matchedDocs = new Set();
 
   mappings.forEach((mapping) => {
-    // Convert glob pattern to regex:
-    // - ** matches any path depth
-    // - * matches any characters except /
-    const pattern = mapping.pattern
-      .replace(/\*\*\/?/g, '.*') // Handle ** with optional trailing /
-      .replace(/\*/g, '[^/]*');
-    const regex = new RegExp(`^${pattern}`); // No $ to allow partial matches
-
+    if (picomatch) {
+      if (picomatch(mapping.pattern, { dot: true })(filePath)) {
+        mapping.docs.forEach((doc) => matchedDocs.add(doc));
+      }
+      return;
+    }
+    const regex = new RegExp(`^${globToRegex(mapping.pattern)}`);
     if (regex.test(filePath)) {
       mapping.docs.forEach((doc) => matchedDocs.add(doc));
     }
@@ -299,6 +343,7 @@ function parseTasks(input) {
 
 // Main function
 async function main() {
+  ensureGitAvailable();
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,

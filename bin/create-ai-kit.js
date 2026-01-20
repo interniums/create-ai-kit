@@ -19,7 +19,6 @@ try {
   // Clipboard not available (e.g., CI environment, missing native deps)
 }
 
-const PROJECT_ROOT = process.cwd();
 const MANIFEST_FILE = '.ai-kit-manifest.json';
 const TEMPLATES_DIR = path.join(__dirname, '../templates');
 
@@ -30,8 +29,8 @@ const PROJECT_SIGNATURES = {
     deps: ['next'],
     label: 'Next.js',
     hints: [
-      'App Router detected - consider creating .cursor/rules/app-router.mdc',
-      'Pages Router detected - consider creating .cursor/rules/pages-router.mdc',
+      'Consider creating .cursor/rules/app-router.mdc for App Router conventions',
+      'Consider creating .cursor/rules/pages-router.mdc for Pages Router conventions',
     ],
   },
   react: {
@@ -69,12 +68,12 @@ const PROJECT_SIGNATURES = {
 };
 
 // Detect project type
-function detectProject() {
+function detectProject(projectRoot) {
   const detected = [];
   let pkgDeps = [];
 
   // Read package.json dependencies
-  const pkgPath = path.join(PROJECT_ROOT, 'package.json');
+  const pkgPath = path.join(projectRoot, 'package.json');
   if (fs.existsSync(pkgPath)) {
     try {
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
@@ -91,7 +90,7 @@ function detectProject() {
     // Check for signature files
     if (sig.files) {
       for (const file of sig.files) {
-        if (fs.existsSync(path.join(PROJECT_ROOT, file))) {
+        if (fs.existsSync(path.join(projectRoot, file))) {
           matched = true;
           break;
         }
@@ -114,6 +113,27 @@ function detectProject() {
   }
 
   return detected;
+}
+
+function detectNextRouter(projectRoot) {
+  const appDir = path.join(projectRoot, 'app');
+  const appSrcDir = path.join(projectRoot, 'src', 'app');
+  const pagesDir = path.join(projectRoot, 'pages');
+  const pagesSrcDir = path.join(projectRoot, 'src', 'pages');
+
+  if (fs.existsSync(appDir)) {
+    return 'app';
+  }
+  if (fs.existsSync(appSrcDir)) {
+    return 'app';
+  }
+  if (fs.existsSync(pagesDir)) {
+    return 'pages';
+  }
+  if (fs.existsSync(pagesSrcDir)) {
+    return 'pages';
+  }
+  return null;
 }
 
 // Files to always preserve during upgrade (never overwrite with template)
@@ -149,14 +169,23 @@ async function main() {
     .option('--force', 'Overwrite existing files or upgrade')
     .option('--dry-run', 'Preview changes without writing')
     .option('--yes', 'Skip confirmation prompts')
+    .option('--no-gitignore', 'Skip .gitignore updates')
+    .argument('[targetDir]', 'Target directory (defaults to current)')
     .parse(process.argv);
 
   const options = program.opts();
+  const [targetDir] = program.args;
+  const projectRoot = targetDir ? path.resolve(process.cwd(), targetDir) : process.cwd();
 
   console.log(chalk.blue('🚀 Initializing AI Kit...'));
 
+  if (!fs.existsSync(projectRoot)) {
+    fse.ensureDirSync(projectRoot);
+    console.log(chalk.gray(`  Created target directory: ${projectRoot}`));
+  }
+
   // 0. Check if this is a valid project directory
-  const pkgJsonPath = path.join(PROJECT_ROOT, 'package.json');
+  const pkgJsonPath = path.join(projectRoot, 'package.json');
   if (!fs.existsSync(pkgJsonPath)) {
     console.warn(chalk.yellow('\n⚠️  No package.json found in current directory.'));
     console.log(chalk.gray('   AI Kit works best in a project root directory.'));
@@ -165,8 +194,8 @@ async function main() {
   }
 
   // 1. Check for collision
-  const cursorDir = path.join(PROJECT_ROOT, '.cursor');
-  const manifestPath = path.join(PROJECT_ROOT, MANIFEST_FILE);
+  const cursorDir = path.join(projectRoot, '.cursor');
+  const manifestPath = path.join(projectRoot, MANIFEST_FILE);
   const hasCursor = fs.existsSync(cursorDir);
   const hasManifest = fs.existsSync(manifestPath);
   const safeUpgradeWithoutManifest = hasCursor && !hasManifest && !options.force;
@@ -240,7 +269,7 @@ async function main() {
     }
 
     const templatePath = path.join(TEMPLATES_DIR, relPath);
-    const targetPath = path.join(PROJECT_ROOT, targetRelPath);
+    const targetPath = path.join(projectRoot, targetRelPath);
 
     const templateContent = fs.readFileSync(templatePath);
     const templateChecksum = calculateChecksum(templateContent);
@@ -287,6 +316,10 @@ async function main() {
           });
         }
       } else {
+        if (hasBaseline) {
+          // Record current checksum to avoid repeated diffs on future runs
+          manifest.files[targetRelPath] = currentChecksum;
+        }
         console.log(
           chalk.yellow(`  Skipping existing file: ${targetRelPath} (use --force to overwrite)`)
         );
@@ -306,19 +339,19 @@ async function main() {
   } else {
     // Write creations
     for (const f of creations) {
-      fse.outputFileSync(path.join(PROJECT_ROOT, f.path), f.content);
+      fse.outputFileSync(path.join(projectRoot, f.path), f.content);
       manifest.files[f.path] = f.checksum;
       console.log(chalk.green(`  Created: ${f.path}`));
     }
     // Write updates
     for (const f of updates) {
-      fse.outputFileSync(path.join(PROJECT_ROOT, f.path), f.content);
+      fse.outputFileSync(path.join(projectRoot, f.path), f.content);
       manifest.files[f.path] = f.checksum;
       console.log(chalk.blue(`  Updated: ${f.path}`));
     }
     // Write .new files
     for (const f of newFiles) {
-      fse.outputFileSync(path.join(PROJECT_ROOT, f.path), f.content);
+      fse.outputFileSync(path.join(projectRoot, f.path), f.content);
       console.log(chalk.yellow(`  Created: ${f.path}`));
     }
 
@@ -326,21 +359,24 @@ async function main() {
     fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 
     // Update .gitignore
-    const gitignorePath = path.join(PROJECT_ROOT, '.gitignore');
-    const ignoreEntry = '.cursor/HYDRATE.md';
-    if (fs.existsSync(gitignorePath)) {
-      const content = fs.readFileSync(gitignorePath, 'utf-8');
-      if (!content.includes(ignoreEntry)) {
-        fs.appendFileSync(gitignorePath, `\n${ignoreEntry}\n`);
-        console.log(chalk.gray('  Updated .gitignore'));
+    if (options.gitignore) {
+      const gitignorePath = path.join(projectRoot, '.gitignore');
+      const ignoreEntries = ['.cursor/HYDRATE.md', 'docs/hydration-prompt.md'];
+      if (fs.existsSync(gitignorePath)) {
+        const content = fs.readFileSync(gitignorePath, 'utf-8');
+        const missingEntries = ignoreEntries.filter((entry) => !content.includes(entry));
+        if (missingEntries.length > 0) {
+          fs.appendFileSync(gitignorePath, `\n${missingEntries.join('\n')}\n`);
+          console.log(chalk.gray('  Updated .gitignore'));
+        }
+      } else {
+        fs.writeFileSync(gitignorePath, `${ignoreEntries.join('\n')}\n`);
+        console.log(chalk.green('  Created .gitignore'));
       }
-    } else {
-      fs.writeFileSync(gitignorePath, `${ignoreEntry}\n`);
-      console.log(chalk.green('  Created .gitignore'));
     }
 
     // Add scripts to package.json
-    const pkgPath = path.join(PROJECT_ROOT, 'package.json');
+    const pkgPath = path.join(projectRoot, 'package.json');
     if (fs.existsSync(pkgPath)) {
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
       pkg.scripts = pkg.scripts || {};
@@ -374,13 +410,25 @@ async function main() {
     console.log(chalk.green('\n✅ AI Kit scaffolded successfully!'));
 
     // Project detection
-    const detectedProjects = detectProject();
+    const detectedProjects = detectProject(projectRoot);
     if (detectedProjects.length > 0) {
       const labels = detectedProjects.map((p) => p.label).join(', ');
       console.log(chalk.blue(`\n📦 Detected: ${labels}`));
 
       // Show relevant hints
-      const hints = detectedProjects.flatMap((p) => p.hints || []);
+      const hints = detectedProjects.flatMap((p) => {
+        if (p.key === 'nextjs') {
+          const router = detectNextRouter(projectRoot);
+          if (router === 'app') {
+            return [p.hints[0]];
+          }
+          if (router === 'pages') {
+            return [p.hints[1]];
+          }
+          return [];
+        }
+        return p.hints || [];
+      });
       if (hints.length > 0) {
         console.log(chalk.gray('\nSuggestions based on your stack:'));
         hints.slice(0, 3).forEach((hint) => {
@@ -390,10 +438,10 @@ async function main() {
     }
 
     // Read Hydration prompt, save fallback, and copy to clipboard
-    const hydratePath = path.join(PROJECT_ROOT, '.cursor/HYDRATE.md');
+    const hydratePath = path.join(projectRoot, '.cursor/HYDRATE.md');
     if (fs.existsSync(hydratePath)) {
       const hydrateContent = fs.readFileSync(hydratePath, 'utf-8');
-      const docsHydratePath = path.join(PROJECT_ROOT, 'docs', 'hydration-prompt.md');
+      const docsHydratePath = path.join(projectRoot, 'docs', 'hydration-prompt.md');
       const docsHydrateContent = [
         '# Hydration Prompt (Generated)',
         '',

@@ -11,6 +11,11 @@ Scaffold **AI Kit** — an AI-friendly documentation and workflow system for [Cu
 npx create-ai-kit
 ```
 
+```bash
+# scaffold into a subdirectory
+npx create-ai-kit ./apps/my-project
+```
+
 ## What It Does
 
 1. **Scaffolds** `.cursor/commands/` with 11 workflow commands (plan, build, verify, etc.)
@@ -33,6 +38,17 @@ npx create-ai-kit
 ```bash
 npx create-ai-kit --dry-run
 ```
+
+### Show Help
+
+```bash
+npx create-ai-kit --help
+```
+
+Expected output (example):
+
+- Usage with optional target directory
+- Flags for `--dry-run`, `--force`, `--yes`, and `--no-gitignore`
 
 ### Upgrade Existing Installation
 
@@ -67,6 +83,7 @@ If a `.cursor` folder already exists without a manifest, running without `--forc
 4. Note: hydration on large projects can take a while — let it finish
 5. If the agent cannot write to `.cursor/`, run the steps locally or grant permission
 6. Run `npm run hydrate:verify` (or `node scripts/hydrate-verify.js`) to confirm required files, config, and placeholders
+7. `.gitignore` is updated by default to ignore `.cursor/HYDRATE.md` and `docs/hydration-prompt.md` (use `--no-gitignore` to skip)
 
 ## Files Created
 
@@ -114,11 +131,13 @@ docs/
 
 ## CLI Options
 
-| Option      | Description                             |
-| ----------- | --------------------------------------- |
-| `--dry-run` | Preview changes without writing files   |
-| `--force`   | Overwrite/upgrade existing installation |
-| `--yes`     | Skip confirmation prompts               |
+| Option           | Description                             |
+| ---------------- | --------------------------------------- |
+| `--dry-run`      | Preview changes without writing files   |
+| `--force`        | Overwrite/upgrade existing installation |
+| `--yes`          | Skip confirmation prompts               |
+| `--no-gitignore` | Skip `.gitignore` updates               |
+| `[targetDir]`    | Optional target directory               |
 
 ## How It Works
 
@@ -188,19 +207,19 @@ Common scripts added to `package.json`:
 
 ## What's Included
 
-| Component              | Purpose                              |
-| ---------------------- | ------------------------------------ |
-| `/plan`                | Create implementation blueprints     |
-| `/build`               | Production-ready code generation     |
-| `/verify`              | Code review and safety checks        |
-| `/hydrate-check`       | Deprecated alias of `/hydrate-verify` |
-| `/hydrate-verify`      | Hydration verification (files + config) |
-| `/debug`               | Root cause analysis                  |
-| `/commit`              | Git commit with best practices       |
-| `AGENTS.md`            | AI onboarding guide for your project |
-| `docs-update/`         | Weekly documentation sync scripts    |
+| Component              | Purpose                                            |
+| ---------------------- | -------------------------------------------------- |
+| `/plan`                | Create implementation blueprints                   |
+| `/build`               | Production-ready code generation                   |
+| `/verify`              | Code review and safety checks                      |
+| `/hydrate-check`       | Deprecated alias of `/hydrate-verify`              |
+| `/hydrate-verify`      | Hydration verification (files + config)            |
+| `/debug`               | Root cause analysis                                |
+| `/commit`              | Git commit with best practices                     |
+| `AGENTS.md`            | AI onboarding guide for your project               |
+| `docs-update/`         | Weekly documentation sync scripts                  |
 | `placeholder-check.js` | Internal placeholder scan (used by hydrate-verify) |
-| `hydrate-verify.js`    | Required files + config + placeholders |
+| `hydrate-verify.js`    | Required files + config + placeholders             |
 
 ## Real-World Learnings (Universe Repo)
 
@@ -214,8 +233,26 @@ Observed issues that this kit now documents, but does not enforce:
 
 ## Requirements
 
-- Node.js 14+
+- Node.js 14+ (Node 16+ recommended)
 - [Cursor IDE](https://cursor.sh) (for AI hydration)
+
+## Revert / Cleanup
+
+If you want to undo an install:
+
+1. Remove `.cursor/`
+2. Delete `.ai-kit-manifest.json`
+3. Delete `docs/hydration-prompt.md`
+4. Remove any `.new` files created during upgrades
+
+Tip: if you want to keep docs, only remove the generated prompt file.
+
+## Performance Notes (Large Repos)
+
+If hydration checks are slow, adjust these in `.cursor/ai-kit.config.json`:
+
+- `sourceRoots`: limit to the directories you want scanned
+- `excludePatterns`: add large folders that shouldn’t be scanned
 
 ## Contributing
 

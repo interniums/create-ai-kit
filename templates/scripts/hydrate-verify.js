@@ -70,7 +70,7 @@ function filterSourceRoots(sourceRoots) {
     if (typeof root !== 'string') {
       return false;
     }
-    const trimmed = root.trim();
+    const trimmed = root.trim().replace(/\\/g, '/');
     return trimmed.length > 0 && !trimmed.includes('AI_FILL');
   });
 }
@@ -81,6 +81,10 @@ function getMissingFiles(files) {
 
 function getForbiddenFiles(files) {
   return files.filter((filePath) => fs.existsSync(path.join(process.cwd(), filePath)));
+}
+
+function getMissingSourceRoots(sourceRoots) {
+  return sourceRoots.filter((root) => !fs.existsSync(path.join(process.cwd(), root)));
 }
 
 function runPlaceholderCheck() {
@@ -117,6 +121,7 @@ function main() {
 
   const filteredSourceRoots = filterSourceRoots(config?.sourceRoots);
   const hasValidSourceRoots = filteredSourceRoots.length > 0;
+  const missingSourceRoots = getMissingSourceRoots(filteredSourceRoots);
 
   if (parseError) {
     console.log(`⚠️  Failed to parse ${normalizePath(configPath)}.`);
@@ -133,6 +138,10 @@ function main() {
     console.log('');
   }
 
+  if (missingSourceRoots.length > 0) {
+    printList('sourceRoots directories not found:', missingSourceRoots);
+  }
+
   const placeholderStatus = runPlaceholderCheck();
   const hasPlaceholderIssues = placeholderStatus !== 0;
 
@@ -141,6 +150,7 @@ function main() {
     missingDocs.length > 0 ||
     forbiddenFiles.length > 0 ||
     !hasValidSourceRoots ||
+    missingSourceRoots.length > 0 ||
     hasPlaceholderIssues;
 
   console.log('---');
@@ -148,6 +158,7 @@ function main() {
   console.log(`- Required files: ${missingDocs.length > 0 ? 'FAIL' : 'PASS'}`);
   console.log(`- Template files: ${forbiddenFiles.length > 0 ? 'FAIL' : 'PASS'}`);
   console.log(`- sourceRoots: ${hasValidSourceRoots ? 'PASS' : 'FAIL'}`);
+  console.log(`- sourceRoots exist: ${missingSourceRoots.length > 0 ? 'FAIL' : 'PASS'}`);
   console.log(`- Placeholders: ${hasPlaceholderIssues ? 'FAIL' : 'PASS'}`);
   console.log('');
 

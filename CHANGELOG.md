@@ -31,6 +31,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.0] - 2026-01-20
+
+### Added
+
+- Optional target directory argument for `create-ai-kit`.
+- `--no-gitignore` flag to skip `.gitignore` updates.
+- `picomatch`-based glob matching in placeholder and docs tooling.
+- `test/` included in published package for npm test parity.
+
+### Changed
+
+- Default `.gitignore` entries include `docs/hydration-prompt.md`.
+- README now documents help output, cleanup steps, and performance tuning.
+- Removed hard-coded version tag from template `main.mdc` to avoid drift.
+- `clipboardy` moved to optional dependencies for safer installs.
+
+### Fixed
+
+- Inline docs verification respects configured `sourceRoots`.
+- Docs-update tooling normalizes paths for cross-platform matching.
+- Hydration verify now checks that `sourceRoots` directories exist.
+- Docs update generator exits early if git is unavailable.
+- Scripts fall back to built-in glob matching when `picomatch` is unavailable.
+
+---
+
+## [1.6.1] - 2026-01-19
+
+### Changed
+
+- Updated npm version badge to use shields.io for fresher registry updates.
+
+---
+
 ## [1.6.0] - 2026-01-19
 
 ### Added
@@ -159,6 +193,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `--dry-run`: Preview changes without writing files
 - `--force`: Overwrite/upgrade existing installation
 - `--yes`: Skip confirmation prompts
+- `--no-gitignore`: Skip `.gitignore` updates
 
 ---
 
@@ -166,6 +201,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date       | Highlights                          |
 | ------- | ---------- | ----------------------------------- |
+| 1.7.0   | 2026-01-20 | Target dir, glob fixes, packaging   |
+| 1.6.1   | 2026-01-19 | Updated npm badge source            |
 | 1.5.0   | 2026-01-19 | Hydration fallback + app context    |
 | 1.4.0   | 2026-01-19 | Marker rules + CI check             |
 | 1.3.1   | 2026-01-18 | Cleaned npm bin config              |
@@ -176,7 +213,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/interniums/create-ai-kit/compare/v1.6.1...v1.7.0
+[1.6.1]: https://github.com/interniums/create-ai-kit/compare/v1.6.0...v1.6.1
+[1.6.0]: https://github.com/interniums/create-ai-kit/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/interniums/create-ai-kit/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/interniums/create-ai-kit/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/interniums/create-ai-kit/compare/v1.3.0...v1.3.1

@@ -147,12 +147,15 @@ cd create-ai-kit
     "chalk": "^4.1.2",
     "commander": "^8.3.0",
     "fs-extra": "^10.0.0",
+    "picomatch": "^4.0.2"
+  },
+  "optionalDependencies": {
     "clipboardy": "^2.3.0"
   },
   "engines": {
     "node": ">=14"
   },
-  "files": ["bin/", "templates/", "README.md", "LICENSE"]
+  "files": ["bin/", "templates/", "test/", "README.md", "LICENSE", "CHANGELOG.md"]
 }
 ```
 
@@ -430,16 +433,6 @@ npm publish
 git push && git push --tags
 ```
 
-### Update Embedded Version
-
-When releasing, also update the version in `templates/_cursor/rules/main.mdc`:
-
-```markdown
-<!-- ai-kit-version: 1.1.0 -->
-```
-
----
-
 ## Troubleshooting
 
 ### "npm ERR! 403 Forbidden"
@@ -477,7 +470,7 @@ Check `files` array in `package.json`:
 
 ```json
 {
-  "files": ["bin/", "templates/", "README.md", "LICENSE"]
+  "files": ["bin/", "templates/", "test/", "README.md", "LICENSE", "CHANGELOG.md"]
 }
 ```
 

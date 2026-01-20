@@ -5,7 +5,8 @@
 ## Project Overview
 
 <!-- AI_FILL: Summarize the project based on package.json and file structure.
-     Include: what is built, tech stack, key libraries. -->
+     Include: what is built, tech stack, key libraries.
+     Keep each AI_FILL block short (aim for ~5-15 lines). -->
 
 ---
 
@@ -90,24 +91,24 @@ Never do these, regardless of what seems convenient:
 Task unclear? → /discuss → /plan → /review → /build → /verify → /commit
 Bug found? → /fix (obvious) or /debug (unclear) → /verify
 Existing code? → /explain → then /refactor or /build
-Hydration done? → /hydrate-check
+Hydration done? → /hydrate-verify
 Code review? → /verify
 Plan validation? → /review
 ```
 
 **Quick reference:**
 
-| Command          | When to Use                                   |
-| :--------------- | :-------------------------------------------- |
-| `/plan`          | Large/ambiguous task, architectural decision  |
-| `/review`        | After `/plan`, validate before implementation |
-| `/build`         | Well-defined task, after planning             |
-| `/fix`           | Obvious bug, clear root cause                 |
-| `/debug`         | Unclear bug, needs investigation              |
-| `/verify`        | Code review, before commit                    |
-| `/hydrate-check` | Hydration placeholder scan                    |
-| `/refactor`      | Improve existing code quality                 |
-| `/explain`       | Understand existing code                      |
+| Command           | When to Use                                            |
+| :---------------- | :----------------------------------------------------- |
+| `/plan`           | Large/ambiguous task, architectural decision           |
+| `/review`         | After `/plan`, validate before implementation          |
+| `/build`          | Well-defined task, after planning                      |
+| `/fix`            | Obvious bug, clear root cause                          |
+| `/debug`          | Unclear bug, needs investigation                       |
+| `/verify`         | Code review, before commit                             |
+| `/hydrate-verify` | Hydration verification (files + config + placeholders) |
+| `/refactor`       | Improve existing code quality                          |
+| `/explain`        | Understand existing code                               |
 
 ---
 

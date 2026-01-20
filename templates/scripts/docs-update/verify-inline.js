@@ -20,8 +20,8 @@ const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 
 // Patterns to extract DOCS.md references from markdown files
 // Only match specific paths, not glob patterns (skip paths with *)
-const DOCS_REF_PATTERN = /`(src\/[^`*]+\/DOCS\.md)`/g;
-const LINK_PATTERN = /\]\((src\/[^)*]+\/DOCS\.md)\)/g;
+let DOCS_REF_PATTERN = /`(src\/[^`*]+\/DOCS\.md)`/g;
+let LINK_PATTERN = /\]\((src\/[^)*]+\/DOCS\.md)\)/g;
 
 /**
  * @typedef {Object} VerificationResult
@@ -46,6 +46,47 @@ function extractReferences(content) {
   }
 
   return [...new Set(refs)]; // Deduplicate
+}
+
+function loadConfig() {
+  const configPath = path.join(ROOT_DIR, '.cursor', 'ai-kit.config.json');
+  if (!fs.existsSync(configPath)) {
+    return { sourceRoots: ['src/'] };
+  }
+
+  try {
+    const content = fs.readFileSync(configPath, 'utf-8');
+    const config = JSON.parse(content);
+    if (Array.isArray(config.sourceRoots) && config.sourceRoots.length > 0) {
+      return {
+        sourceRoots: config.sourceRoots.filter(
+          (root) => typeof root === 'string' && !root.includes('AI_FILL')
+        ),
+      };
+    }
+  } catch {
+    // fall through
+  }
+
+  return { sourceRoots: ['src/'] };
+}
+
+function escapeRegex(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function buildReferencePatterns(sourceRoots) {
+  const roots = sourceRoots
+    .map((root) => root.replace(/\\/g, '/').replace(/^\.\//, ''))
+    .filter((root) => root.length > 0 && !root.includes('*'));
+
+  if (roots.length === 0) {
+    return;
+  }
+
+  const rootsPattern = roots.map((root) => escapeRegex(root)).join('|');
+  DOCS_REF_PATTERN = new RegExp('`((?:' + rootsPattern + ')[^`*]+/DOCS\\.md)`', 'g');
+  LINK_PATTERN = new RegExp('\\]\\(((?:' + rootsPattern + ')[^)*]+/DOCS\\.md)\\)', 'g');
 }
 
 function findMarkdownFiles(dir) {
@@ -75,6 +116,8 @@ function findMarkdownFiles(dir) {
 
 function verifyReferences() {
   const results = [];
+  const config = loadConfig();
+  buildReferencePatterns(config.sourceRoots);
 
   // Check docs/ folder
   const docsFiles = findMarkdownFiles(DOCS_DIR);

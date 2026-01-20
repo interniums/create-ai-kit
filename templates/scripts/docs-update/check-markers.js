@@ -19,6 +19,12 @@
 
 const fs = require('fs');
 const path = require('path');
+let picomatch = null;
+try {
+  picomatch = require('picomatch');
+} catch {
+  picomatch = null;
+}
 
 // CLI config
 const CONFIG = {
@@ -111,7 +117,9 @@ function loadConfig() {
       return {
         ...DEFAULT_CONFIG,
         ...config,
-        excludePatterns: [...DEFAULT_CONFIG.excludePatterns, ...(config.excludePatterns || [])],
+        excludePatterns: [...DEFAULT_CONFIG.excludePatterns, ...(config.excludePatterns || [])].map(
+          (pattern) => pattern.replace(/\\/g, '/')
+        ),
       };
     } catch {
       return DEFAULT_CONFIG;
@@ -124,11 +132,31 @@ function loadConfig() {
 /**
  * Check if path should be excluded
  */
-function isExcluded(filePath, excludePatterns) {
-  return excludePatterns.some((pattern) => {
-    const regex = new RegExp(pattern.replace(/\*\*\/?/g, '.*').replace(/\*/g, '[^/]*'));
+function normalizePath(filePath) {
+  return filePath.replace(/\\/g, '/');
+}
+
+function globToRegex(globPattern) {
+  return globPattern
+    .replace(/\*\*\/?/g, '__GLOBSTAR__')
+    .replace(/\*/g, '[^/]*')
+    .replace(/__GLOBSTAR__/g, '.*');
+}
+
+function fallbackMatch(filePath, patterns) {
+  return patterns.some((pattern) => {
+    const normalizedPattern = normalizePath(pattern);
+    const regex = new RegExp(globToRegex(normalizedPattern));
     return regex.test(filePath);
   });
+}
+
+function isExcluded(filePath, excludePatterns) {
+  const normalizedPath = normalizePath(filePath);
+  if (picomatch) {
+    return picomatch(excludePatterns, { dot: true })(normalizedPath);
+  }
+  return fallbackMatch(normalizedPath, excludePatterns);
 }
 
 /**
@@ -170,7 +198,7 @@ function findSourceFiles(dir, config, files = []) {
 
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
-    const relativePath = path.relative(process.cwd(), fullPath);
+    const relativePath = normalizePath(path.relative(process.cwd(), fullPath));
 
     if (isExcluded(relativePath, config.excludePatterns)) {
       continue;
@@ -420,7 +448,7 @@ function main() {
     const files = findSourceFiles(rootPath, config);
 
     for (const file of files) {
-      const relativePath = path.relative(process.cwd(), file);
+      const relativePath = normalizePath(path.relative(process.cwd(), file));
       if (
         IGNORE_FILES.some((ignored) => relativePath === ignored || relativePath.startsWith(ignored))
       ) {

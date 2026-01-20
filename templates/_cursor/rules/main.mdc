@@ -6,8 +6,6 @@ alwaysApply: true
 
 # AI Kit
 
-<!-- ai-kit-version: 1.6.0 -->
-
 On first interaction with a new task, read `AGENTS.md` in the project root.
 If present, read `.cursor/rules/app-context.mdc` for a minimal app snapshot.
 After hydration, run `/hydrate-verify` to confirm files, config, and placeholders.

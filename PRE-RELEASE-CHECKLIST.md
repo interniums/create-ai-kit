@@ -165,7 +165,7 @@ node -e "console.log(JSON.stringify(require('./package.json'), null, 2))"
 - [ ] `templates/` included
 - [ ] `README.md` included
 - [ ] `LICENSE` included
-- [ ] `test/` NOT included
+- [ ] `test/` included (for published test runs)
 - [ ] `.prettierrc` NOT included
 - [ ] Development configs NOT included
 
@@ -233,6 +233,8 @@ Run all tests below. Record results in the table.
 | 14  | Prompt fallback file          | `docs/hydration-prompt.md` created on install  | ⬜     |       |
 | 15  | Hydration verify              | `node scripts/hydrate-verify.js`               | ⬜     |       |
 | 16  | Global link test              | `npm link` then `create-ai-kit --dry-run`      | ⬜     |       |
+| 17  | Target dir argument           | `node ... ./path` creates target dir           | ⬜     |       |
+| 18  | --no-gitignore flag           | No `.gitignore` updates or creation            | ⬜     |       |
 
 ### Detailed Test Scripts
 
@@ -264,6 +266,16 @@ cd /tmp/test-fresh
 echo "# Modified" >> .cursor/commands/build.md
 node /path/to/ai-kit/bin/create-ai-kit.js --force --yes
 # Verify: build.md.new created if build.md was in manifest
+
+# Test 17: Target directory argument
+node /path/to/ai-kit/bin/create-ai-kit.js /tmp/test-target-dir --yes
+# Verify: directory created and scaffolded
+
+# Test 18: --no-gitignore flag
+mkdir -p /tmp/test-no-gitignore && cd /tmp/test-no-gitignore
+npm init -y
+node /path/to/ai-kit/bin/create-ai-kit.js --yes --no-gitignore
+# Verify: .gitignore not created or modified
 
 # Test 15: Global link
 cd /path/to/ai-kit

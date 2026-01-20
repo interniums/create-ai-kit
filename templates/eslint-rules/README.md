@@ -22,6 +22,9 @@ Use dated markers by default:
 // @docs-update(2024-01-15): docs/security.md - Added new auth flow
 ```
 
+Note: the rules scan line-by-line. Multi-line markers (splitting the marker across lines)
+are not supported and will be ignored.
+
 ## Setup
 
 ### Option 1: ESLint Flat Config (eslint.config.js)

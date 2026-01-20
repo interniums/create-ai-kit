@@ -4,7 +4,8 @@
 
 ## Purpose
 
-<!-- AI_FILL: Describe the documentation system for this project. Include who owns it, what it covers, and how often it should be updated. -->
+<!-- AI_FILL: Describe the documentation system for this project. Include who owns it, what it covers, and how often it should be updated.
+     Keep each AI_FILL block short (aim for ~5-15 lines). -->
 
 ---
 
