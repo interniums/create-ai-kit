@@ -11,23 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- (Add new features here before release)
+- `ai-kit:verify` script and `create-ai-kit lint` command.
 
 ### Changed
 
-- (Add changes here)
-
-### Fixed
-
-- (Add bug fixes here)
+- CLI output modes for TTY/CI and new zero-config install option.
+- Placeholder scan now skips symlinks, nested repos, and shows progress.
 
 ### Removed
 
-- (Add removed features here)
-
-### Security
-
-- (Add security fixes here)
+- Removed legacy `hydrate:*` scripts from scaffolded installs.
 
 ---
 
@@ -62,20 +55,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated npm version badge to use shields.io for fresher registry updates.
-
----
-
-## [Unreleased]
-
-### Added
-
-- `ai-kit:verify` script and `create-ai-kit lint` command.
-
-### Changed
-
-- CLI output modes for TTY/CI and new zero-config install option.
-- Placeholder scan now skips symlinks, nested repos, and shows progress.
-- Removed legacy `hydrate:*` scripts from scaffolded installs.
 
 ---
 
