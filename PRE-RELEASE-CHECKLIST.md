@@ -333,6 +333,11 @@ npm pack --dry-run
 - [ ] No .env or secret files included
 - [ ] Package size is reasonable (< 500KB)
 
+### Release Publish Readiness
+
+- [ ] Release notes drafted from CHANGELOG
+- [ ] Commit + tag ready to push
+
 ### Actual Pack Test
 
 ```bash
@@ -365,6 +370,11 @@ npm whoami
 
 - [ ] Logged in as correct npm account
 - [ ] Has publish permissions for the package
+
+### GitHub Release
+
+- [ ] GitHub release prepared (tag + title + notes)
+- [ ] Ready to push tag after publish
 
 ---
 
@@ -433,7 +443,7 @@ git push origin vX.X.X
 ```
 
 - [ ] Version tag pushed
-- [ ] GitHub release created
+- [ ] GitHub release created from tag
 - [ ] Release notes published
 
 ### Final Smoke Test

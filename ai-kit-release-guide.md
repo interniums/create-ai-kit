@@ -331,6 +331,15 @@ npm view create-ai-kit
 npx create-ai-kit --dry-run
 ```
 
+### Step 5: Push Tags and Create GitHub Release
+
+```bash
+git push
+git push origin vX.X.X
+```
+
+Create the GitHub release from the tag (use the CHANGELOG section as notes).
+
 ---
 
 ## GitHub Repository Setup
@@ -375,9 +384,9 @@ npm publish
 ### GitHub Release
 
 1. Go to your repo → Releases → "Create a new release"
-2. Tag: `v1.0.0`
-3. Title: `v1.0.0 - Initial Release`
-4. Description:
+2. Tag: `vX.X.X`
+3. Title: `vX.X.X`
+4. Description (paste from CHANGELOG):
 
 ```markdown
 ## 🎉 Initial Release
