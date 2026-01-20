@@ -23,8 +23,27 @@ npx create-ai-kit ./apps/my-project
 3. **Installs** docs-update scripts for weekly documentation maintenance
 4. **Adds** a hydration placeholder check script
 5. **Adds** a hydration verification script (files + config + placeholders)
-6. **Prints** a copyable hydration prompt in TTY, copies to clipboard, and saves `docs/hydration-prompt.md`
+6. **Saves** a copyable hydration prompt to `docs/hydration-prompt.md` and copies to clipboard when possible
 7. **Lints** hydration prompts for size, repetition, and bloat (`npx create-ai-kit lint`)
+
+## Docs System (3-Layer)
+
+AI Kit sets up a 3-layer documentation system designed for fast, targeted context:
+
+- **Entry:** `AGENTS.md` with a keyword-driven Documentation Index
+- **Rules:** `.cursor/rules/*.mdc` for auto-loaded conventions
+- **Baseline:** `docs/*.md` and `docs/domains/*.md` for architecture and flows
+
+The index is keyword-first: match what the user asked to the right doc quickly.
+
+## Using Commands
+
+Commands live in `.cursor/commands/` and are invoked in Cursor by typing `/`.
+
+- Use `/plan` for ambiguous or multi-file work
+- Use `/build` for implementation
+- Use `/verify` before committing
+- Each command file includes a clear protocol and output format
 
 ## Usage (Simple Path)
 
@@ -34,7 +53,7 @@ npx create-ai-kit ./apps/my-project
 npx create-ai-kit
 ```
 
-2. Open Cursor and paste the hydration prompt (clipboard or `docs/hydration-prompt.md`).
+2. Open Cursor and paste the hydration prompt (`docs/hydration-prompt.md` or clipboard).
 3. Let the AI fill `<!-- AI_FILL: ... -->` blocks.
 4. Verify hydration:
 
@@ -94,7 +113,8 @@ npx create-ai-kit --help
 2. The CLI copies templates, renames `_cursor` → `.cursor`, and writes files.
 3. A manifest (`.ai-kit-manifest.json`) tracks checksums for safe upgrades.
 4. If a file was modified, the CLI writes a `.new` version instead of overwriting.
-5. Your hydration prompt is printed in TTY, copied to the clipboard when possible, and saved to `docs/hydration-prompt.md`.
+5. Your hydration prompt is saved to `docs/hydration-prompt.md` and copied to the clipboard when possible.
+6. To print the full prompt to stdout, use `--print-prompt`.
 
 ## What You Get (Output)
 
@@ -106,13 +126,15 @@ npx create-ai-kit --help
 ## After Installation
 
 1. Open Cursor (Cmd+Shift+I for Composer)
-2. Paste the hydration prompt (clipboard or `docs/hydration-prompt.md`)
-3. Let the AI configure your project by filling in `<!-- AI_FILL: ... -->` blocks
-4. Note: hydration on large projects can take a while — let it finish
-5. If the agent cannot write to `.cursor/`, run the steps locally or grant permission
-6. Run `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`) to confirm required files, config, and placeholders
-7. If you installed with `--zero-config`, skip step 6 (scripts are not installed)
-8. `.gitignore` is updated by default to ignore `.cursor/HYDRATE.md` and `docs/hydration-prompt.md` (use `--no-gitignore` to skip)
+2. Paste the hydration prompt (`docs/hydration-prompt.md` or clipboard)
+3. Run it in Plan mode for better hydration
+4. Let the AI configure your project by filling in `<!-- AI_FILL: ... -->` blocks
+5. Review hydrated docs for accuracy (AI can make mistakes)
+6. Note: hydration on large projects can take a while — let it finish
+7. If the agent cannot write to `.cursor/`, run the steps locally or grant permission
+8. Run `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`) to confirm required files, config, and placeholders
+9. If you installed with `--zero-config`, skip step 8 (scripts are not installed)
+10. `.gitignore` is updated by default to ignore `.cursor/HYDRATE.md` and `docs/hydration-prompt.md` (use `--no-gitignore` to skip)
 
 ## Files Created
 
@@ -152,6 +174,8 @@ AGENTS.md              # Agent onboarding guide
 docs/
 ├── README.md          # Documentation index
 ├── hydration-prompt.md # Generated hydration prompt fallback
+├── domains/
+│   └── README.md       # Domain docs entry point
 └── templates/
     ├── DOCS-TEMPLATE.md         # Documentation template
     └── WEEKLY-UPDATE-INPUT.md   # Weekly update input template
@@ -162,16 +186,17 @@ It still writes `docs/hydration-prompt.md` as a fallback prompt source.
 
 ## CLI Options
 
-| Option           | Description                             |
-| ---------------- | --------------------------------------- |
-| `--dry-run`      | Preview changes without writing files   |
-| `--force`        | Overwrite/upgrade existing installation |
-| `--yes`          | Skip confirmation prompts               |
-| `--no-gitignore` | Skip `.gitignore` updates               |
+| Option           | Description                                 |
+| ---------------- | ------------------------------------------- |
+| `--dry-run`      | Preview changes without writing files       |
+| `--force`        | Overwrite/upgrade existing installation     |
+| `--yes`          | Skip confirmation prompts                   |
+| `--no-gitignore` | Skip `.gitignore` updates                   |
 | `--zero-config`  | Install only `.cursor/rules` + minimal docs |
-| `--quiet`        | Limit output (CI-friendly)              |
-| `--ci`           | Non-interactive, compact output         |
-| `[targetDir]`    | Optional target directory               |
+| `--quiet`        | Limit output (CI-friendly)                  |
+| `--ci`           | Non-interactive, compact output             |
+| `--print-prompt` | Print full hydration prompt to stdout       |
+| `[targetDir]`    | Optional target directory                   |
 
 ## Monorepo Guidance
 

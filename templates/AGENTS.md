@@ -13,20 +13,23 @@
 ## Machine-Readable Schema
 
 <!-- AI_KIT_SCHEMA_START -->
+
 ```yaml
 aiKitSchemaVersion: 1
 project:
-  name: "AI_FILL: project name"
-  type: "AI_FILL: app/service/library"
+  name: 'AI_FILL: project name'
+  type: 'AI_FILL: app/service/library'
 stack:
-  primary: "AI_FILL: primary framework"
-  languages: ["AI_FILL: language list"]
+  primary: 'AI_FILL: primary framework'
+  languages: ['AI_FILL: language list']
 entrypoints:
-  - "AI_FILL: entry file or command"
+  - 'AI_FILL: entry file or command'
 docs:
-  index: "docs/README.md"
-  updateWorkflow: "scripts/docs-update/README.md"
+  index: 'docs/README.md'
+  domainsRoot: 'docs/domains'
+  updateWorkflow: 'scripts/docs-update/README.md'
 ```
+
 <!-- AI_KIT_SCHEMA_END -->
 
 ---
@@ -35,10 +38,13 @@ docs:
 
 Use this table to find relevant documentation. **Read the docs before modifying core systems.**
 
-| Keywords | Documentation | When to Read |
-| :------- | :------------ | :----------- |
+| Keywords                       | Documentation                                       | When to Read                            |
+| :----------------------------- | :-------------------------------------------------- | :-------------------------------------- |
+| `example`, `domain`, `service` | `docs/domains/<domain>.md` → `src/<domain>/DOCS.md` | Example format — replace with real docs |
 
 <!-- AI_FILL: detailed table of documentation files based on project structure -->
+
+Use keywords that show up in requests (feature names, services, flows). Start with `docs/README.md` for the docs system overview.
 
 ---
 
@@ -139,4 +145,5 @@ When you need to find files:
 
 - **Inline docs**: Look for `DOCS.md` in the folder you're working in
 - **Baseline docs**: Check `docs/` for architecture overviews
+- **Domain docs**: Start at `docs/domains/README.md`, then `docs/domains/<domain>.md`
 - **File headers**: Some files have `@docs` comments pointing to docs

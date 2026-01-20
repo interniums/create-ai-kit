@@ -357,7 +357,10 @@ function acquireLock() {
     fs.unlinkSync(lockPath);
   }
 
-  fs.writeFileSync(lockPath, JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() }));
+  fs.writeFileSync(
+    lockPath,
+    JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() })
+  );
 
   const cleanup = () => {
     if (fs.existsSync(lockPath)) {

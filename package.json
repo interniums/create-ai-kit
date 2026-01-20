@@ -1,6 +1,6 @@
 {
   "name": "create-ai-kit",
-  "version": "1.8.0",
+  "version": "2.0.0",
   "description": "Scaffold AI Kit - AI-friendly documentation and workflow system for Cursor IDE",
   "bin": {
     "create-ai-kit": "bin/create-ai-kit.js"
@@ -37,8 +37,8 @@
   "homepage": "https://github.com/interniums/create-ai-kit#readme",
   "dependencies": {
     "chalk": "^4.1.2",
-    "commander": "^8.3.0",
-    "fs-extra": "^10.0.0",
+    "commander": "^10.0.1",
+    "fs-extra": "^11.3.3",
     "picomatch": "^4.0.2"
   },
   "optionalDependencies": {

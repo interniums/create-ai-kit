@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.0.0] - 2026-01-20
+
+### Added
+
+- `--print-prompt` CLI flag to print the full hydration prompt.
+- Domain docs entry point at `docs/domains/README.md`.
+
+### Changed
+
+- Hydration prompt output is suppressed by default; prompt file remains the fallback source.
+- README now documents the 3-layer docs system and keyword-based index usage.
+- Hydration guidance recommends Plan mode and reviewing hydrated docs for accuracy.
+- Updated dependencies to latest CJS-compatible versions (commander 10, fs-extra 11, chalk 4, clipboardy 2).
+
+### Breaking Changes
+
+- Hydration prompt is no longer printed by default in TTY output; use `--print-prompt`.
+
+---
+
 ## [1.8.0] - 2026-01-20
 
 ### Added

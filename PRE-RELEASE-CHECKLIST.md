@@ -118,7 +118,7 @@ This checklist must be completed before every release. No exceptions.
 - [ ] All CLI options are documented
 - [ ] All created files/folders are listed
 - [ ] Requirements (Node.js version) are accurate
-- [ ] Prompt output modes (TTY/CI) documented
+- [ ] Prompt output modes (TTY/CI + --print-prompt) documented
 - [ ] Zero-config mode documented (if supported)
 - [ ] Monorepo placement guidance documented
 - [ ] Links work (no broken URLs)
@@ -234,13 +234,14 @@ Run all tests below. Record results in the table.
 | 11  | Project detection (React)     | Create with react dep, verify detection        | ⬜     |       |
 | 12  | Project detection (Python)    | Create requirements.txt, verify detection      | ⬜     |       |
 | 13  | Clipboard copy                | Verify HYDRATE.md copied to clipboard          | ⬜     |       |
-| 14  | Prompt output modes           | TTY shows COPY block, non-TTY is compact       | ⬜     |       |
+| 14  | Prompt output modes           | TTY suppressed by default; use --print-prompt  | ⬜     |       |
 | 15  | Prompt fallback file          | `docs/hydration-prompt.md` created as fallback | ⬜     |       |
 | 16  | Hydration verify              | `npm run ai-kit:verify` or `node scripts/...`  | ⬜     |       |
 | 17  | Global link test              | `npm link` then `create-ai-kit --dry-run`      | ⬜     |       |
 | 18  | Target dir argument           | `node ... ./path` creates target dir           | ⬜     |       |
 | 19  | --no-gitignore flag           | No `.gitignore` updates or creation            | ⬜     |       |
 | 20  | Zero-config install (if used) | `node ... --zero-config` behaves as expected   | ⬜     |       |
+| 21  | Hydrated docs review          | Review hydrated docs for accuracy              | ⬜     |       |
 
 ### Detailed Test Scripts
 
@@ -256,6 +257,10 @@ mkdir -p /tmp/test-fresh && cd /tmp/test-fresh
 npm init -y
 node /path/to/ai-kit/bin/create-ai-kit.js --yes
 # Verify: .cursor/, AGENTS.md, scripts/, manifest exist, prompt output shown
+
+# Test 2e: TTY prompt output (print-prompt)
+node /path/to/ai-kit/bin/create-ai-kit.js --print-prompt --yes
+# Verify: full prompt block printed to stdout
 
 # Test 2b: Non-TTY prompt output (CI-safe)
 mkdir -p /tmp/test-non-tty && cd /tmp/test-non-tty
@@ -321,6 +326,7 @@ test -d .cursor/rules && echo "✓ .cursor/rules/"
 test -f .cursor/HYDRATE.md && echo "✓ .cursor/HYDRATE.md"
 test -f .cursor/ai-kit.config.json && echo "✓ .cursor/ai-kit.config.json"
 test -f AGENTS.md && echo "✓ AGENTS.md"
+test -f docs/domains/README.md && echo "✓ docs/domains/README.md"
 test -d scripts/docs-update && echo "✓ scripts/docs-update/"
 test -f scripts/placeholder-check.js && echo "✓ scripts/placeholder-check.js"
 test -f scripts/hydrate-verify.js && echo "✓ scripts/hydrate-verify.js"

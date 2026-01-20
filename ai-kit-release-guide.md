@@ -445,6 +445,7 @@ npm publish
 ```
 
 Default placement guidance:
+
 - Install `.cursor/rules` at the repo root by default.
 - Allow per-package installs only via an explicit flag (documented in README).
 

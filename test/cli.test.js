@@ -102,6 +102,7 @@ describe('AI Kit CLI', () => {
         '.cursor/HYDRATE.md',
         '.cursor/rules/main.mdc',
         'AGENTS.md',
+        'docs/domains/README.md',
         'scripts/docs-update/generate-context.js',
       ];
 

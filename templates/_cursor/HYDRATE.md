@@ -10,8 +10,11 @@ modes keep output compact, so rely on the file fallback.
 ## Important Notes
 
 - Hydration on large projects can take a long time. Let the agent finish its scan.
+- Run this prompt in Plan mode for better hydration quality.
+- Some `.cursor/` folders can be write-protected. If the agent cannot write there, run hydration locally or grant write access.
 - Some environments block writing to `.cursor/`. If that happens, run the hydration steps locally or grant the agent permission to write to `.cursor/`.
 - If AI Kit was installed with `--zero-config`, docs-update and verification scripts are not included.
+- During hydration, the agent may ask for confirmation before making changes. Approve when ready.
 
 ## Your Tasks
 
@@ -56,11 +59,20 @@ alwaysApply: false # Usually false for feature rules
 - One-off edge cases
 - Patterns already in AGENTS.md
 
-### 4. Generate inline docs
+### 4. Optional: Inline docs (only if useful)
 
-- For each major directory in `src/` (or equivalent), consider if a `DOCS.md` would help
-- Only create DOCS.md files for complex modules (not trivial ones)
-- Use `docs/templates/DOCS-TEMPLATE.md` as a guide but delete the template file if not needed
+- Skip unless the module is complex or easy to get wrong
+- Use `docs/templates/DOCS-TEMPLATE.md` as a guide
+- Keep `DOCS.md` short and link back to the baseline doc
+
+<details>
+<summary>Optional: inline docs prompt</summary>
+
+```
+Create inline `DOCS.md` only for complex modules. Keep each doc short, link to the baseline doc, and skip trivial folders. Use docs/templates/DOCS-TEMPLATE.md as a guide.
+```
+
+</details>
 
 ### 5. Configure source roots
 

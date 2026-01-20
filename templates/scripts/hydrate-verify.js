@@ -22,6 +22,7 @@ const { spawnSync } = require('child_process');
 
 const DEFAULT_REQUIRED_DOCS = [
   'AGENTS.md',
+  'docs/domains/README.md',
   '.cursor/ai-kit.config.json',
   '.cursor/rules/app-context.mdc',
   '.cursor/rules/main.mdc',

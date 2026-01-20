@@ -21,11 +21,7 @@ try {
 
 const MANIFEST_FILE = '.ai-kit-manifest.json';
 const TEMPLATES_DIR = path.join(__dirname, '../templates');
-const ZERO_CONFIG_ALLOWLIST = [
-  '_cursor/rules/',
-  '_cursor/HYDRATE.md',
-  'AGENTS.md',
-];
+const ZERO_CONFIG_ALLOWLIST = ['_cursor/rules/', '_cursor/HYDRATE.md', 'AGENTS.md'];
 
 const OUTPUT_MODES = {
   FULL: 'full',
@@ -599,11 +595,14 @@ async function runInit(targetDir, options) {
         logger.log(chalk.gray('   Use docs/hydration-prompt.md instead.'));
       }
 
-      if (outputMode === OUTPUT_MODES.FULL) {
+      if (outputMode === OUTPUT_MODES.FULL && options.printPrompt) {
         logger.log('\n📎 Copyable hydration prompt:');
         logger.log(chalk.gray('--- HYDRATION PROMPT START ---'));
         logger.log(hydrateContent.trimEnd());
         logger.log(chalk.gray('--- HYDRATION PROMPT END ---\n'));
+      } else if (outputMode === OUTPUT_MODES.FULL) {
+        logger.log(chalk.gray('\n📎 Prompt output suppressed (use --print-prompt to show it).'));
+        logger.log(chalk.gray('   Note: AI hydration can make mistakes. Review docs after.'));
       }
     }
 
@@ -611,9 +610,11 @@ async function runInit(targetDir, options) {
       logger.log('\nNext steps:');
       logger.log('  1. Open Cursor (Cmd+Shift+I for Composer)');
       logger.log('  2. Paste the prompt (Cmd+V or docs/hydration-prompt.md)');
-      logger.log('  3. Let the AI configure your project');
+      logger.log('  3. Run it in Plan mode for better hydration');
+      logger.log('  4. Let the AI configure your project');
+      logger.log('  5. Review hydrated docs for accuracy (AI can make mistakes)');
       if (!options.zeroConfig) {
-        logger.log('  4. Run npm run ai-kit:verify after hydration');
+        logger.log('  6. Run npm run ai-kit:verify after hydration');
       }
     }
   }
@@ -665,6 +666,7 @@ async function main() {
     .option('--quiet', 'Limit output (CI-friendly)')
     .option('--ci', 'Disable prompts and clipboard output')
     .option('--zero-config', 'Install only .cursor/rules + minimal docs')
+    .option('--print-prompt', 'Print full hydration prompt to stdout')
     .argument('[targetDir]', 'Target directory (defaults to current)')
     .action(async (targetDir, options) => {
       await runInit(targetDir, options);
@@ -678,10 +680,8 @@ async function main() {
     .option('--file <path>', 'Prompt file to lint')
     .option('--max-lines <number>', 'Maximum line count', (val) => Number.parseInt(val, 10))
     .option('--max-chars <number>', 'Maximum character count', (val) => Number.parseInt(val, 10))
-    .option(
-      '--max-repeated-lines <number>',
-      'Minimum repeats to flag a line',
-      (val) => Number.parseInt(val, 10)
+    .option('--max-repeated-lines <number>', 'Minimum repeats to flag a line', (val) =>
+      Number.parseInt(val, 10)
     )
     .action(async (options) => {
       await runLint(options);
