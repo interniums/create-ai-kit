@@ -23,32 +23,34 @@ npx create-ai-kit ./apps/my-project
 3. **Installs** docs-update scripts for weekly documentation maintenance
 4. **Adds** a hydration placeholder check script
 5. **Adds** a hydration verification script (files + config + placeholders)
-6. **Copies** a hydration prompt to your clipboard and saves it to `docs/hydration-prompt.md`
+6. **Prints** a copyable hydration prompt in TTY, copies to clipboard, and saves `docs/hydration-prompt.md`
+7. **Lints** hydration prompts for size, repetition, and bloat (`npx create-ai-kit lint`)
 
-## Usage
+## Usage (Simple Path)
 
-### Fresh Install
+1. Install:
 
 ```bash
 npx create-ai-kit
 ```
+
+2. Open Cursor and paste the hydration prompt (clipboard or `docs/hydration-prompt.md`).
+3. Let the AI fill `<!-- AI_FILL: ... -->` blocks.
+4. Verify hydration:
+
+```bash
+npm run ai-kit:verify
+```
+
+That’s the default path for most users.
+
+## Usage (Advanced)
 
 ### Preview Changes
 
 ```bash
 npx create-ai-kit --dry-run
 ```
-
-### Show Help
-
-```bash
-npx create-ai-kit --help
-```
-
-Expected output (example):
-
-- Usage with optional target directory
-- Flags for `--dry-run`, `--force`, `--yes`, and `--no-gitignore`
 
 ### Upgrade Existing Installation
 
@@ -57,8 +59,34 @@ npx create-ai-kit --force
 ```
 
 User-modified files will create `.new` versions instead of overwriting.
+If a `.cursor` folder already exists without a manifest, running without `--force` will do a safe upgrade.
 
-If a `.cursor` folder already exists without a manifest, running without `--force` will do a safe upgrade and create `.new` files for any conflicts.
+### Minimal Install (Zero-Config)
+
+```bash
+npx create-ai-kit --zero-config
+```
+
+Installs `.cursor/rules/`, `.cursor/HYDRATE.md`, and minimal docs (AGENTS.md + generated `docs/hydration-prompt.md`).
+Docs-update scripts and hydration verification are skipped in this mode.
+
+### Lint the Hydration Prompt
+
+```bash
+npx create-ai-kit lint
+```
+
+Optional file override:
+
+```bash
+npx create-ai-kit lint --file .cursor/HYDRATE.md
+```
+
+### Show Help
+
+```bash
+npx create-ai-kit --help
+```
 
 ## How It Works (Simple)
 
@@ -66,7 +94,7 @@ If a `.cursor` folder already exists without a manifest, running without `--forc
 2. The CLI copies templates, renames `_cursor` → `.cursor`, and writes files.
 3. A manifest (`.ai-kit-manifest.json`) tracks checksums for safe upgrades.
 4. If a file was modified, the CLI writes a `.new` version instead of overwriting.
-5. Your hydration prompt is copied to the clipboard when possible and saved to `docs/hydration-prompt.md`.
+5. Your hydration prompt is printed in TTY, copied to the clipboard when possible, and saved to `docs/hydration-prompt.md`.
 
 ## What You Get (Output)
 
@@ -82,8 +110,9 @@ If a `.cursor` folder already exists without a manifest, running without `--forc
 3. Let the AI configure your project by filling in `<!-- AI_FILL: ... -->` blocks
 4. Note: hydration on large projects can take a while — let it finish
 5. If the agent cannot write to `.cursor/`, run the steps locally or grant permission
-6. Run `npm run hydrate:verify` (or `node scripts/hydrate-verify.js`) to confirm required files, config, and placeholders
-7. `.gitignore` is updated by default to ignore `.cursor/HYDRATE.md` and `docs/hydration-prompt.md` (use `--no-gitignore` to skip)
+6. Run `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`) to confirm required files, config, and placeholders
+7. If you installed with `--zero-config`, skip step 6 (scripts are not installed)
+8. `.gitignore` is updated by default to ignore `.cursor/HYDRATE.md` and `docs/hydration-prompt.md` (use `--no-gitignore` to skip)
 
 ## Files Created
 
@@ -96,7 +125,6 @@ If a `.cursor` folder already exists without a manifest, running without `--forc
 │   ├── discuss.md
 │   ├── explain.md
 │   ├── fix.md
-│   ├── hydrate-check.md
 │   ├── hydrate-verify.md
 │   ├── plan.md
 │   ├── refactor.md
@@ -129,6 +157,9 @@ docs/
     └── WEEKLY-UPDATE-INPUT.md   # Weekly update input template
 ```
 
+Zero-config installs `.cursor/rules/`, `.cursor/HYDRATE.md`, and `AGENTS.md`.
+It still writes `docs/hydration-prompt.md` as a fallback prompt source.
+
 ## CLI Options
 
 | Option           | Description                             |
@@ -137,7 +168,16 @@ docs/
 | `--force`        | Overwrite/upgrade existing installation |
 | `--yes`          | Skip confirmation prompts               |
 | `--no-gitignore` | Skip `.gitignore` updates               |
+| `--zero-config`  | Install only `.cursor/rules` + minimal docs |
+| `--quiet`        | Limit output (CI-friendly)              |
+| `--ci`           | Non-interactive, compact output         |
 | `[targetDir]`    | Optional target directory               |
+
+## Monorepo Guidance
+
+- Default install at the repo root. This keeps rules and docs consistent across packages.
+- For per-package installs, run `npx create-ai-kit ./packages/<name>` explicitly.
+- Mixed mode is OK: keep root rules + add package-specific rules only when needed.
 
 ## How It Works
 
@@ -198,12 +238,14 @@ This keeps the update workflow accurate without making it heavier.
 
 Common scripts added to `package.json`:
 
-- `hydrate:verify` → unified hydration check (files + config + placeholders)
-- `hydrate:check` → alias of `hydrate:verify` (kept for compatibility)
+- `ai-kit:verify` → unified hydration check (files + config + placeholders)
 - `docs:update` → build the context for doc updates
 - `docs:check` → check marker age/format
 - `docs:check:ci` → fail CI if expired markers exist
 - `docs:verify-inline` → verify inline doc references
+
+Note: the placeholder scan uses a `.ai-kit-placeholder-check.lock` file. If a scan is killed,
+remove the lock and re-run.
 
 ## What's Included
 
@@ -212,7 +254,6 @@ Common scripts added to `package.json`:
 | `/plan`                | Create implementation blueprints                   |
 | `/build`               | Production-ready code generation                   |
 | `/verify`              | Code review and safety checks                      |
-| `/hydrate-check`       | Deprecated alias of `/hydrate-verify`              |
 | `/hydrate-verify`      | Hydration verification (files + config)            |
 | `/debug`               | Root cause analysis                                |
 | `/commit`              | Git commit with best practices                     |

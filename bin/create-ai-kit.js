@@ -21,6 +21,17 @@ try {
 
 const MANIFEST_FILE = '.ai-kit-manifest.json';
 const TEMPLATES_DIR = path.join(__dirname, '../templates');
+const ZERO_CONFIG_ALLOWLIST = [
+  '_cursor/rules/',
+  '_cursor/HYDRATE.md',
+  'AGENTS.md',
+];
+
+const OUTPUT_MODES = {
+  FULL: 'full',
+  COMPACT: 'compact',
+  QUIET: 'quiet',
+};
 
 // Project detection patterns
 const PROJECT_SIGNATURES = {
@@ -143,6 +154,91 @@ const PRESERVE_LIST = [
   '.cursor/HYDRATE.md', // Should not exist usually, but if it does
 ];
 
+function getOutputMode(options) {
+  if (options.quiet) {
+    return OUTPUT_MODES.QUIET;
+  }
+  if (options.ci || !process.stdout.isTTY) {
+    return OUTPUT_MODES.COMPACT;
+  }
+  return OUTPUT_MODES.FULL;
+}
+
+function createLogger(outputMode) {
+  const isQuiet = outputMode === OUTPUT_MODES.QUIET;
+  return {
+    log: (...args) => {
+      if (!isQuiet) {
+        console.log(...args);
+      }
+    },
+    warn: (...args) => {
+      if (!isQuiet) {
+        console.warn(...args);
+      }
+    },
+    info: (...args) => {
+      if (!isQuiet) {
+        console.log(...args);
+      }
+    },
+    error: (...args) => {
+      console.error(...args);
+    },
+  };
+}
+
+function shouldIncludeTemplate(relPath, options) {
+  if (!options.zeroConfig) {
+    return true;
+  }
+  return ZERO_CONFIG_ALLOWLIST.some((allowed) => relPath.startsWith(allowed));
+}
+
+function resolveHydrationPromptPath(projectRoot) {
+  const preferred = path.join(projectRoot, 'docs', 'hydration-prompt.md');
+  const fallback = path.join(projectRoot, '.cursor', 'HYDRATE.md');
+  if (fs.existsSync(preferred)) {
+    return preferred;
+  }
+  return fallback;
+}
+
+function lintPromptContent(content, { maxLines, maxChars, maxRepeatedLines }) {
+  const lines = content.split('\n');
+  const trimmedLines = lines.map((line) => line.trim()).filter(Boolean);
+  const lineCounts = new Map();
+
+  for (const line of trimmedLines) {
+    lineCounts.set(line, (lineCounts.get(line) || 0) + 1);
+  }
+
+  const repeatedLines = [...lineCounts.entries()]
+    .filter(([, count]) => count >= maxRepeatedLines)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+
+  const warnings = [];
+  if (lines.length > maxLines) {
+    warnings.push(
+      `Too many lines: ${lines.length} (max ${maxLines}). Trim the prompt to keep it focused.`
+    );
+  }
+  if (content.length > maxChars) {
+    warnings.push(
+      `Too many characters: ${content.length} (max ${maxChars}). Trim repeated sections.`
+    );
+  }
+  if (repeatedLines.length > 0) {
+    const repeatedSummary = repeatedLines
+      .map(([line, count]) => `"${line.slice(0, 72)}"${count > 1 ? ` ×${count}` : ''}`)
+      .join('; ');
+    warnings.push(`Repeated lines detected: ${repeatedSummary}`);
+  }
+
+  return warnings;
+}
+
 // Helper to calculate checksum
 function calculateChecksum(content) {
   return crypto.createHash('md5').update(content).digest('hex');
@@ -163,34 +259,29 @@ function confirm(msg) {
   });
 }
 
-async function main() {
-  program
-    .version(pkg.version)
-    .option('--force', 'Overwrite existing files or upgrade')
-    .option('--dry-run', 'Preview changes without writing')
-    .option('--yes', 'Skip confirmation prompts')
-    .option('--no-gitignore', 'Skip .gitignore updates')
-    .argument('[targetDir]', 'Target directory (defaults to current)')
-    .parse(process.argv);
-
-  const options = program.opts();
-  const [targetDir] = program.args;
+async function runInit(targetDir, options) {
+  if (options.ci) {
+    options.yes = true;
+  }
   const projectRoot = targetDir ? path.resolve(process.cwd(), targetDir) : process.cwd();
+  const outputMode = getOutputMode(options);
+  const logger = createLogger(outputMode);
+  const isCompact = outputMode === OUTPUT_MODES.COMPACT;
 
-  console.log(chalk.blue('🚀 Initializing AI Kit...'));
+  logger.log(chalk.blue('🚀 Initializing AI Kit...'));
 
   if (!fs.existsSync(projectRoot)) {
     fse.ensureDirSync(projectRoot);
-    console.log(chalk.gray(`  Created target directory: ${projectRoot}`));
+    logger.log(chalk.gray(`  Created target directory: ${projectRoot}`));
   }
 
   // 0. Check if this is a valid project directory
   const pkgJsonPath = path.join(projectRoot, 'package.json');
   if (!fs.existsSync(pkgJsonPath)) {
-    console.warn(chalk.yellow('\n⚠️  No package.json found in current directory.'));
-    console.log(chalk.gray('   AI Kit works best in a project root directory.'));
-    console.log(chalk.gray('   If this is intentional, the scaffolding will continue.\n'));
-    console.log(chalk.gray('   💡 Run `npm init -y` to create a package.json first.\n'));
+    logger.warn(chalk.yellow('\n⚠️  No package.json found in current directory.'));
+    logger.log(chalk.gray('   AI Kit works best in a project root directory.'));
+    logger.log(chalk.gray('   If this is intentional, the scaffolding will continue.\n'));
+    logger.log(chalk.gray('   💡 Run `npm init -y` to create a package.json first.\n'));
   }
 
   // 1. Check for collision
@@ -201,21 +292,46 @@ async function main() {
   const safeUpgradeWithoutManifest = hasCursor && !hasManifest && !options.force;
 
   if (safeUpgradeWithoutManifest) {
-    console.log(chalk.yellow('⚠️  A .cursor folder already exists without a manifest.'));
-    console.log(chalk.gray('   Proceeding with a safe upgrade (no overwrites).'));
-    console.log(chalk.gray('   Conflicts will be written as .new files.'));
+    logger.warn(chalk.yellow('⚠️  A .cursor folder already exists without a manifest.'));
+    logger.log(chalk.gray('   Proceeding with a safe upgrade (no overwrites).'));
+    logger.log(chalk.gray('   Conflicts will be written as .new files.'));
   }
 
   // 2. Load Manifest if exists
+  const manifestBaseline = hasManifest
+    ? (() => {
+        try {
+          return JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+        } catch (e) {
+          logger.warn(chalk.yellow('⚠️  Could not read existing manifest.'));
+          logger.warn(chalk.gray('   Try deleting .ai-kit-manifest.json and re-running.'));
+          return null;
+        }
+      })()
+    : null;
   let manifest = { version: pkg.version, files: {} };
-  if (hasManifest) {
+  if (manifestBaseline) {
     try {
-      manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-      // Update manifest version to current package version
-      manifest.version = pkg.version;
-    } catch (e) {
-      console.warn(chalk.yellow('⚠️  Could not read existing manifest.'));
-      console.warn(chalk.gray('   Try deleting .ai-kit-manifest.json and re-running.'));
+      const hasExistingFiles =
+        manifestBaseline.files && Object.keys(manifestBaseline.files).length > 0;
+      if (options.zeroConfig && hasExistingFiles) {
+        logger.warn(
+          chalk.yellow(
+            '⚠️  Zero-config requested on an existing install. Keeping manifest entries to avoid data loss.'
+          )
+        );
+        manifest = {
+          version: pkg.version,
+          files: { ...manifestBaseline.files },
+        };
+      } else {
+        manifest = {
+          version: pkg.version,
+          files: options.zeroConfig ? {} : { ...manifestBaseline.files },
+        };
+      }
+    } catch {
+      manifest = { version: pkg.version, files: {} };
     }
   }
 
@@ -244,7 +360,9 @@ async function main() {
       if (stat.isDirectory()) {
         walk(fullPath, relPath);
       } else {
-        filesToProcess.push(relPath);
+        if (shouldIncludeTemplate(relPath, options)) {
+          filesToProcess.push(relPath);
+        }
       }
     }
   }
@@ -294,7 +412,7 @@ async function main() {
       }
 
       // Check if file was modified by user compared to LAST manifest
-      const lastChecksum = manifest.files[targetRelPath];
+      const lastChecksum = manifestBaseline?.files?.[targetRelPath];
       const hasBaseline = Boolean(lastChecksum);
       const userModified =
         (hasBaseline && lastChecksum !== currentChecksum) ||
@@ -304,7 +422,7 @@ async function main() {
         if (userModified) {
           // User modified file: create .new
           newFiles.push({ path: targetRelPath + '.new', content: templateContent });
-          console.log(
+          logger.warn(
             chalk.yellow(`  Conflict: ${targetRelPath} modified by user. Creating .new file.`)
           );
         } else {
@@ -320,7 +438,7 @@ async function main() {
           // Record current checksum to avoid repeated diffs on future runs
           manifest.files[targetRelPath] = currentChecksum;
         }
-        console.log(
+        logger.warn(
           chalk.yellow(`  Skipping existing file: ${targetRelPath} (use --force to overwrite)`)
         );
       }
@@ -331,28 +449,28 @@ async function main() {
 
   // 5. Apply changes
   if (options.dryRun) {
-    console.log('\nDry Run Results:');
-    creations.forEach((f) => console.log(chalk.green(`  + Create: ${f.path}`)));
-    updates.forEach((f) => console.log(chalk.blue(`  ~ Update: ${f.path}`)));
-    newFiles.forEach((f) => console.log(chalk.yellow(`  ? Create: ${f.path}`)));
-    skips.forEach((f) => console.log(chalk.gray(`  - Skip: ${f.path} (${f.reason})`)));
+    logger.log('\nDry Run Results:');
+    creations.forEach((f) => logger.log(chalk.green(`  + Create: ${f.path}`)));
+    updates.forEach((f) => logger.log(chalk.blue(`  ~ Update: ${f.path}`)));
+    newFiles.forEach((f) => logger.log(chalk.yellow(`  ? Create: ${f.path}`)));
+    skips.forEach((f) => logger.log(chalk.gray(`  - Skip: ${f.path} (${f.reason})`)));
   } else {
     // Write creations
     for (const f of creations) {
       fse.outputFileSync(path.join(projectRoot, f.path), f.content);
       manifest.files[f.path] = f.checksum;
-      console.log(chalk.green(`  Created: ${f.path}`));
+      logger.log(chalk.green(`  Created: ${f.path}`));
     }
     // Write updates
     for (const f of updates) {
       fse.outputFileSync(path.join(projectRoot, f.path), f.content);
       manifest.files[f.path] = f.checksum;
-      console.log(chalk.blue(`  Updated: ${f.path}`));
+      logger.log(chalk.blue(`  Updated: ${f.path}`));
     }
     // Write .new files
     for (const f of newFiles) {
       fse.outputFileSync(path.join(projectRoot, f.path), f.content);
-      console.log(chalk.yellow(`  Created: ${f.path}`));
+      logger.log(chalk.yellow(`  Created: ${f.path}`));
     }
 
     // Write Manifest
@@ -367,53 +485,54 @@ async function main() {
         const missingEntries = ignoreEntries.filter((entry) => !content.includes(entry));
         if (missingEntries.length > 0) {
           fs.appendFileSync(gitignorePath, `\n${missingEntries.join('\n')}\n`);
-          console.log(chalk.gray('  Updated .gitignore'));
+          logger.log(chalk.gray('  Updated .gitignore'));
         }
       } else {
         fs.writeFileSync(gitignorePath, `${ignoreEntries.join('\n')}\n`);
-        console.log(chalk.green('  Created .gitignore'));
+        logger.log(chalk.green('  Created .gitignore'));
       }
     }
 
     // Add scripts to package.json
-    const pkgPath = path.join(projectRoot, 'package.json');
-    if (fs.existsSync(pkgPath)) {
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-      pkg.scripts = pkg.scripts || {};
+    if (!options.zeroConfig) {
+      const pkgPath = path.join(projectRoot, 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+        pkg.scripts = pkg.scripts || {};
 
-      const newScripts = {
-        'hydrate:verify': 'node scripts/hydrate-verify.js',
-        'hydrate:check': 'node scripts/hydrate-verify.js',
-        'docs:update': 'node scripts/docs-update/generate-context.js',
-        'docs:check': 'node scripts/docs-update/check-markers.js',
-        'docs:check:ci': 'node scripts/docs-update/check-markers.js --ci',
-        'docs:verify-inline': 'node scripts/docs-update/verify-inline.js',
-      };
+        const newScripts = {
+          'ai-kit:verify': 'node scripts/hydrate-verify.js',
+          'docs:update': 'node scripts/docs-update/generate-context.js',
+          'docs:check': 'node scripts/docs-update/check-markers.js',
+          'docs:check:ci': 'node scripts/docs-update/check-markers.js --ci',
+          'docs:verify-inline': 'node scripts/docs-update/verify-inline.js',
+        };
 
-      let scriptsAdded = false;
-      for (const [key, val] of Object.entries(newScripts)) {
-        if (!pkg.scripts[key]) {
-          pkg.scripts[key] = val;
-          scriptsAdded = true;
-        } else if (pkg.scripts[key] !== val) {
-          console.log(chalk.yellow(`  Skipping script "${key}": already exists`));
+        let scriptsAdded = false;
+        for (const [key, val] of Object.entries(newScripts)) {
+          if (!pkg.scripts[key]) {
+            pkg.scripts[key] = val;
+            scriptsAdded = true;
+          } else if (pkg.scripts[key] !== val) {
+            logger.warn(chalk.yellow(`  Skipping script "${key}": already exists`));
+          }
         }
-      }
 
-      if (scriptsAdded) {
-        fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
-        console.log(chalk.gray('  Updated package.json scripts'));
+        if (scriptsAdded) {
+          fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+          logger.log(chalk.gray('  Updated package.json scripts'));
+        }
       }
     }
 
     // Success Message & Clipboard
-    console.log(chalk.green('\n✅ AI Kit scaffolded successfully!'));
+    logger.log(chalk.green('\n✅ AI Kit scaffolded successfully!'));
 
     // Project detection
     const detectedProjects = detectProject(projectRoot);
     if (detectedProjects.length > 0) {
       const labels = detectedProjects.map((p) => p.label).join(', ');
-      console.log(chalk.blue(`\n📦 Detected: ${labels}`));
+      logger.log(chalk.blue(`\n📦 Detected: ${labels}`));
 
       // Show relevant hints
       const hints = detectedProjects.flatMap((p) => {
@@ -429,10 +548,10 @@ async function main() {
         }
         return p.hints || [];
       });
-      if (hints.length > 0) {
-        console.log(chalk.gray('\nSuggestions based on your stack:'));
+      if (hints.length > 0 && !isCompact) {
+        logger.log(chalk.gray('\nSuggestions based on your stack:'));
         hints.slice(0, 3).forEach((hint) => {
-          console.log(chalk.gray(`  • ${hint}`));
+          logger.log(chalk.gray(`  • ${hint}`));
         });
       }
     }
@@ -459,34 +578,116 @@ async function main() {
       if (!options.dryRun) {
         try {
           fse.outputFileSync(docsHydratePath, docsHydrateContent);
-          console.log(chalk.gray('\n📄 Hydration prompt saved to docs/hydration-prompt.md'));
+          logger.log(chalk.gray('\n📄 Hydration prompt saved to docs/hydration-prompt.md'));
         } catch (e) {
-          console.log(chalk.gray('\n📄 Could not save docs/hydration-prompt.md.'));
-          console.log(chalk.gray(`   ${e.message || 'Check file permissions.'}`));
+          logger.log(chalk.gray('\n📄 Could not save docs/hydration-prompt.md.'));
+          logger.log(chalk.gray(`   ${e.message || 'Check file permissions.'}`));
         }
       }
 
-      if (clipboardy) {
+      if (clipboardy && !options.ci) {
         try {
           clipboardy.writeSync(hydrateContent);
-          console.log(chalk.cyan('\n📋 Hydration prompt copied to clipboard!'));
-          console.log(chalk.gray('   If your clipboard is empty, use docs/hydration-prompt.md.'));
+          logger.log(chalk.cyan('\n📋 Hydration prompt copied to clipboard!'));
+          logger.log(chalk.gray('   If your clipboard is empty, use docs/hydration-prompt.md.'));
         } catch {
-          console.log(chalk.gray('\n📋 Could not copy to clipboard.'));
-          console.log(chalk.gray('   Use docs/hydration-prompt.md instead.'));
+          logger.log(chalk.gray('\n📋 Could not copy to clipboard.'));
+          logger.log(chalk.gray('   Use docs/hydration-prompt.md instead.'));
         }
-      } else {
-        console.log(chalk.gray('\n📋 Clipboard not available in this environment.'));
-        console.log(chalk.gray('   Use docs/hydration-prompt.md instead.'));
+      } else if (!options.ci) {
+        logger.log(chalk.gray('\n📋 Clipboard not available in this environment.'));
+        logger.log(chalk.gray('   Use docs/hydration-prompt.md instead.'));
+      }
+
+      if (outputMode === OUTPUT_MODES.FULL) {
+        logger.log('\n📎 Copyable hydration prompt:');
+        logger.log(chalk.gray('--- HYDRATION PROMPT START ---'));
+        logger.log(hydrateContent.trimEnd());
+        logger.log(chalk.gray('--- HYDRATION PROMPT END ---\n'));
       }
     }
 
-    console.log('\nNext steps:');
-    console.log('  1. Open Cursor (Cmd+Shift+I for Composer)');
-    console.log('  2. Paste the prompt (Cmd+V or docs/hydration-prompt.md)');
-    console.log('  3. Let the AI configure your project');
-    console.log('  4. Run node scripts/hydrate-verify.js after hydration');
+    if (!options.quiet && !options.ci) {
+      logger.log('\nNext steps:');
+      logger.log('  1. Open Cursor (Cmd+Shift+I for Composer)');
+      logger.log('  2. Paste the prompt (Cmd+V or docs/hydration-prompt.md)');
+      logger.log('  3. Let the AI configure your project');
+      if (!options.zeroConfig) {
+        logger.log('  4. Run npm run ai-kit:verify after hydration');
+      }
+    }
   }
+}
+
+async function runLint(options) {
+  const outputMode = getOutputMode(options);
+  const logger = createLogger(outputMode);
+  const targetPath = options.file
+    ? path.resolve(process.cwd(), options.file)
+    : resolveHydrationPromptPath(process.cwd());
+
+  if (!fs.existsSync(targetPath)) {
+    logger.error(chalk.red('❌ Hydration prompt not found.'));
+    logger.error(chalk.gray('   Provide --file or generate docs/hydration-prompt.md.'));
+    process.exit(1);
+  }
+
+  const content = fs.readFileSync(targetPath, 'utf-8');
+  const warnings = lintPromptContent(content, {
+    maxLines: Number.isFinite(options.maxLines) ? options.maxLines : 220,
+    maxChars: Number.isFinite(options.maxChars) ? options.maxChars : 20000,
+    maxRepeatedLines: Number.isFinite(options.maxRepeatedLines) ? options.maxRepeatedLines : 4,
+  });
+
+  logger.log(chalk.blue('🔍 Linting hydration prompt...'));
+  logger.log(chalk.gray(`   File: ${path.relative(process.cwd(), targetPath)}`));
+
+  if (warnings.length === 0) {
+    logger.log(chalk.green('\n✅ Prompt lint: PASS'));
+    process.exit(0);
+  }
+
+  logger.warn(chalk.yellow('\n⚠️  Prompt lint: WARN'));
+  warnings.forEach((warning) => {
+    logger.warn(chalk.yellow(`- ${warning}`));
+  });
+  process.exit(1);
+}
+
+async function main() {
+  program
+    .name('create-ai-kit')
+    .version(pkg.version)
+    .option('--force', 'Overwrite existing files or upgrade')
+    .option('--dry-run', 'Preview changes without writing')
+    .option('--yes', 'Skip confirmation prompts')
+    .option('--no-gitignore', 'Skip .gitignore updates')
+    .option('--quiet', 'Limit output (CI-friendly)')
+    .option('--ci', 'Disable prompts and clipboard output')
+    .option('--zero-config', 'Install only .cursor/rules + minimal docs')
+    .argument('[targetDir]', 'Target directory (defaults to current)')
+    .action(async (targetDir, options) => {
+      await runInit(targetDir, options);
+    });
+
+  program
+    .command('lint')
+    .description('Lint hydration prompt for size and repetition')
+    .option('--quiet', 'Limit output (CI-friendly)')
+    .option('--ci', 'Disable prompts and clipboard output')
+    .option('--file <path>', 'Prompt file to lint')
+    .option('--max-lines <number>', 'Maximum line count', (val) => Number.parseInt(val, 10))
+    .option('--max-chars <number>', 'Maximum character count', (val) => Number.parseInt(val, 10))
+    .option(
+      '--max-repeated-lines <number>',
+      'Minimum repeats to flag a line',
+      (val) => Number.parseInt(val, 10)
+    )
+    .action(async (options) => {
+      await runLint(options);
+    });
+
+  program.parse(process.argv);
 }
 
 main().catch((e) => {

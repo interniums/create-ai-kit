@@ -336,6 +336,29 @@ describe('Generate Context Script', () => {
   });
 });
 
+describe('Lint Command', () => {
+  let tempDir;
+
+  beforeEach(() => {
+    tempDir = createTempDir();
+    fs.mkdirSync(path.join(tempDir, 'docs'), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, 'docs/hydration-prompt.md'),
+      '# Hydration Prompt\n\nShort prompt content.\n'
+    );
+  });
+
+  afterEach(() => {
+    cleanupDir(tempDir);
+  });
+
+  it('should pass for a small prompt', () => {
+    const result = runCLI(tempDir, ['lint']);
+    assert.strictEqual(result.exitCode, 0, 'Lint should exit with code 0');
+    assert.ok(result.stdout.includes('Prompt lint: PASS'), 'Should report lint pass');
+  });
+});
+
 describe('Marker Check Script', () => {
   it('should exist and be valid JavaScript', () => {
     const scriptPath = path.join(TEMPLATES_DIR, 'scripts/docs-update/check-markers.js');

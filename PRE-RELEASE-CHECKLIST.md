@@ -43,6 +43,7 @@ This checklist must be completed before every release. No exceptions.
   - [x] List of changes categorized: Added, Changed, Fixed, Removed, Security
   - [ ] Breaking changes highlighted with ⚠️
   - [ ] Migration notes if applicable
+  - [ ] Compatibility policy for legacy scripts (if changed)
 
 ---
 
@@ -81,7 +82,7 @@ This checklist must be completed before every release. No exceptions.
 - [ ] No broken relative paths within templates
 - [ ] Template markdown renders correctly
 - [ ] No orphaned or unused template files
-- [ ] Hydration verify passes in a hydrated test project (`node scripts/hydrate-verify.js`)
+- [ ] Hydration verify passes in a hydrated test project (`npm run ai-kit:verify` or `node scripts/hydrate-verify.js`)
 
 ---
 
@@ -117,6 +118,9 @@ This checklist must be completed before every release. No exceptions.
 - [ ] All CLI options are documented
 - [ ] All created files/folders are listed
 - [ ] Requirements (Node.js version) are accurate
+- [ ] Prompt output modes (TTY/CI) documented
+- [ ] Zero-config mode documented (if supported)
+- [ ] Monorepo placement guidance documented
 - [ ] Links work (no broken URLs)
 - [ ] Badges display correct information
 
@@ -225,16 +229,18 @@ Run all tests below. Record results in the table.
 | 6   | User modification preserved   | Modify file, --force, check .new               | ⬜     |       |
 | 7   | Manifest integrity            | Check .ai-kit-manifest.json is valid           | ⬜     |       |
 | 8   | .gitignore update             | Verify HYDRATE.md entry added                  | ⬜     |       |
-| 9   | package.json scripts          | Verify docs:\* scripts added                   | ⬜     |       |
+| 9   | package.json scripts          | Verify scripts are minimal/optional            | ⬜     |       |
 | 10  | Project detection (Next.js)   | Create with next dep, verify detection         | ⬜     |       |
 | 11  | Project detection (React)     | Create with react dep, verify detection        | ⬜     |       |
 | 12  | Project detection (Python)    | Create requirements.txt, verify detection      | ⬜     |       |
 | 13  | Clipboard copy                | Verify HYDRATE.md copied to clipboard          | ⬜     |       |
-| 14  | Prompt fallback file          | `docs/hydration-prompt.md` created on install  | ⬜     |       |
-| 15  | Hydration verify              | `node scripts/hydrate-verify.js`               | ⬜     |       |
-| 16  | Global link test              | `npm link` then `create-ai-kit --dry-run`      | ⬜     |       |
-| 17  | Target dir argument           | `node ... ./path` creates target dir           | ⬜     |       |
-| 18  | --no-gitignore flag           | No `.gitignore` updates or creation            | ⬜     |       |
+| 14  | Prompt output modes           | TTY shows COPY block, non-TTY is compact       | ⬜     |       |
+| 15  | Prompt fallback file          | `docs/hydration-prompt.md` created as fallback | ⬜     |       |
+| 16  | Hydration verify              | `npm run ai-kit:verify` or `node scripts/...`  | ⬜     |       |
+| 17  | Global link test              | `npm link` then `create-ai-kit --dry-run`      | ⬜     |       |
+| 18  | Target dir argument           | `node ... ./path` creates target dir           | ⬜     |       |
+| 19  | --no-gitignore flag           | No `.gitignore` updates or creation            | ⬜     |       |
+| 20  | Zero-config install (if used) | `node ... --zero-config` behaves as expected   | ⬜     |       |
 
 ### Detailed Test Scripts
 
@@ -243,13 +249,32 @@ Run all tests below. Record results in the table.
 mkdir -p /tmp/test-dry-run && cd /tmp/test-dry-run
 npm init -y
 node /path/to/ai-kit/bin/create-ai-kit.js --dry-run
-# Verify: No files created (including docs/hydration-prompt.md), output lists files
+# Verify: No files created, output lists files
 
 # Test 2: Fresh install
 mkdir -p /tmp/test-fresh && cd /tmp/test-fresh
 npm init -y
 node /path/to/ai-kit/bin/create-ai-kit.js --yes
-# Verify: .cursor/, AGENTS.md, scripts/, manifest exist, docs/hydration-prompt.md created
+# Verify: .cursor/, AGENTS.md, scripts/, manifest exist, prompt output shown
+
+# Test 2b: Non-TTY prompt output (CI-safe)
+mkdir -p /tmp/test-non-tty && cd /tmp/test-non-tty
+npm init -y
+node /path/to/ai-kit/bin/create-ai-kit.js --yes > /tmp/ai-kit-install.log
+# Verify: log is compact and points to prompt source/fallback
+
+# Test 2c: CI/quiet output
+mkdir -p /tmp/test-ci && cd /tmp/test-ci
+npm init -y
+node /path/to/ai-kit/bin/create-ai-kit.js --ci
+# Verify: no interactive prompts, compact output, prompt file saved
+
+# Test 2d: Zero-config install (if supported)
+mkdir -p /tmp/test-zero-config && cd /tmp/test-zero-config
+node /path/to/ai-kit/bin/create-ai-kit.js --zero-config --yes
+# Verify: only .cursor/rules, .cursor/HYDRATE.md, and minimal docs are installed
+# Verify: docs/hydration-prompt.md is generated as fallback
+# Verify: manifest includes only installed files
 
 # Test 4: Re-run without --force (should be a no-op)
 node /path/to/ai-kit/bin/create-ai-kit.js --yes
@@ -302,6 +327,13 @@ test -f scripts/hydrate-verify.js && echo "✓ scripts/hydrate-verify.js"
 test -f .ai-kit-manifest.json && echo "✓ .ai-kit-manifest.json"
 ```
 
+For zero-config installs, verify only the minimal set:
+
+```bash
+test -d .cursor/rules && echo "✓ .cursor/rules/"
+test -f .ai-kit-manifest.json && echo "✓ .ai-kit-manifest.json"
+```
+
 Expected command files:
 
 - [ ] `.cursor/commands/build.md`
@@ -310,7 +342,6 @@ Expected command files:
 - [ ] `.cursor/commands/discuss.md`
 - [ ] `.cursor/commands/explain.md`
 - [ ] `.cursor/commands/fix.md`
-- [ ] `.cursor/commands/hydrate-check.md`
 - [ ] `.cursor/commands/hydrate-verify.md`
 - [ ] `.cursor/commands/plan.md`
 - [ ] `.cursor/commands/refactor.md`

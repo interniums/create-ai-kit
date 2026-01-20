@@ -10,6 +10,27 @@
 
 ---
 
+## Machine-Readable Schema
+
+<!-- AI_KIT_SCHEMA_START -->
+```yaml
+aiKitSchemaVersion: 1
+project:
+  name: "AI_FILL: project name"
+  type: "AI_FILL: app/service/library"
+stack:
+  primary: "AI_FILL: primary framework"
+  languages: ["AI_FILL: language list"]
+entrypoints:
+  - "AI_FILL: entry file or command"
+docs:
+  index: "docs/README.md"
+  updateWorkflow: "scripts/docs-update/README.md"
+```
+<!-- AI_KIT_SCHEMA_END -->
+
+---
+
 ## Documentation Index
 
 Use this table to find relevant documentation. **Read the docs before modifying core systems.**

@@ -42,7 +42,7 @@ Files touched in current task, or files explicitly mentioned.
 7. **Local Checks:**
    - Run lint check — must pass
    - Run type check — must pass
-   - Run hydrate verify — `node scripts/hydrate-verify.js` (or `npm run hydrate:verify`)
+   - Run hydrate verify — `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`)
    - Manually verify behavior changes (check UI, API responses, database state, etc.)
 
 8. **Auto-Fix Before Reporting:**

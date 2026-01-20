@@ -61,7 +61,6 @@ create-ai-kit/
 │   │   │   ├── discuss.md
 │   │   │   ├── explain.md
 │   │   │   ├── fix.md
-│   │   │   ├── hydrate-check.md       # Deprecated alias
 │   │   │   ├── hydrate-verify.md
 │   │   │   ├── plan.md
 │   │   │   ├── refactor.md
@@ -209,6 +208,37 @@ ls -la scripts/docs-update/
 ls -la scripts/hydrate-verify.js
 ```
 
+### Test 2b: Prompt Output Modes
+
+```bash
+# Non-TTY output should be compact and CI-safe
+mkdir /tmp/test-non-tty && cd /tmp/test-non-tty
+npm init -y
+node /path/to/create-ai-kit/bin/create-ai-kit.js --yes > /tmp/ai-kit-install.log
+```
+
+Expected: log is compact and points to the hydration prompt source/fallback.
+
+### Test 2b.1: CI/Quiet Output
+
+```bash
+mkdir /tmp/test-ci && cd /tmp/test-ci
+npm init -y
+node /path/to/create-ai-kit/bin/create-ai-kit.js --ci
+```
+
+Expected: no interactive prompts, compact output, prompt file saved.
+
+### Test 2c: Zero-Config Install (if supported)
+
+```bash
+mkdir /tmp/test-zero-config && cd /tmp/test-zero-config
+node /path/to/create-ai-kit/bin/create-ai-kit.js --zero-config --yes
+```
+
+Expected: only `.cursor/rules`, `.cursor/HYDRATE.md`, and minimal docs are installed; manifest records
+only those files. `docs/hydration-prompt.md` is still generated as fallback.
+
 ### Test 3: Re-run Behavior (No-op)
 
 ```bash
@@ -238,10 +268,18 @@ node /path/to/create-ai-kit/bin/create-ai-kit.js
 
 ```bash
 # Run after hydration is complete
-node scripts/hydrate-verify.js
+npm run ai-kit:verify
 ```
 
 Expected output: “No placeholders found”.
+
+### Test 3d: Prompt Lint
+
+```bash
+create-ai-kit lint
+```
+
+Expected output: “Prompt lint: PASS” (or warnings with a non-zero exit).
 
 ### Test 4: Force Upgrade
 
@@ -271,6 +309,31 @@ npm unlink -g create-ai-kit
 ```
 
 ---
+
+## Standalone Installer Feasibility (Decision Doc)
+
+Status: Draft (scope + ownership cost snapshot).
+
+### Scope Options
+
+- **Install-only**: a binary that copies templates + writes the manifest, no upgrades or lint.
+- **Full CLI**: parity with `create-ai-kit` (upgrade, lint, zero-config, scripts).
+
+### Ownership Costs
+
+- **Build pipeline**: cross-platform builds, CI artifacts, versioned releases.
+- **Signing + notarization**: macOS and Windows signing requirements.
+- **Update strategy**: auto-update vs manual downloads, version discovery.
+- **Support surface**: runtime issues, OS-specific edge cases, dependency bundling.
+- **Security**: supply-chain scanning, reproducible builds, checksum distribution.
+
+### Recommendation
+
+Start with **install-only** if a binary is required. Defer full CLI parity until:
+
+- We validate demand (install friction is a blocker).
+- We have a maintenance plan for updates + signing.
+- We define a clear owner for release operations.
 
 ## Publishing to npm
 
@@ -381,6 +444,10 @@ npm publish
 # Add entry in root package.json workspaces (if using)
 ```
 
+Default placement guidance:
+- Install `.cursor/rules` at the repo root by default.
+- Allow per-package installs only via an explicit flag (documented in README).
+
 ### GitHub Release
 
 1. Go to your repo → Releases → "Create a new release"
@@ -415,6 +482,10 @@ npx create-ai-kit
 ---
 
 ## Versioning & Updates
+
+### Compatibility Policy
+
+When removing or renaming scripts, document the migration path in the release notes.
 
 ### Semantic Versioning
 

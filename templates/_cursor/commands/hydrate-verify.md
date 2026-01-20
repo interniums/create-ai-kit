@@ -12,11 +12,16 @@ Unified hydration check (files + config + placeholders).
 
 - Large projects can take a while to scan. Let the check finish.
 - If the agent cannot write to `.cursor/`, run the steps locally or grant the required permission.
-- `/hydrate-check` is a deprecated alias of this command.
 
 ## Protocol
 
 1. **Run hydrate verification:**
+
+   ```bash
+   npm run ai-kit:verify
+   ```
+
+   Fallback:
 
    ```bash
    node scripts/hydrate-verify.js

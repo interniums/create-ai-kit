@@ -4,11 +4,14 @@ You are configuring the AI Kit for this project. I have just installed
 template files that contain `<!-- AI_FILL: ... -->` blocks.
 
 If you need to reference this prompt later, it is saved to `docs/hydration-prompt.md`.
+In TTY terminals, the installer also prints a copyable prompt block. Non-TTY and CI
+modes keep output compact, so rely on the file fallback.
 
 ## Important Notes
 
 - Hydration on large projects can take a long time. Let the agent finish its scan.
 - Some environments block writing to `.cursor/`. If that happens, run the hydration steps locally or grant the agent permission to write to `.cursor/`.
+- If AI Kit was installed with `--zero-config`, docs-update and verification scripts are not included.
 
 ## Your Tasks
 
@@ -116,7 +119,7 @@ See `eslint-rules/README.md` for more options.
 
 ### 10. Verify hydration completeness
 
-- Run `node scripts/hydrate-verify.js` to verify required files, config, and placeholders
+- Run `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`) to verify required files, config, and placeholders
 - If any placeholders remain, ask the AI to fill in the missing sections listed by the script
 - Re-run until the check reports no placeholders
 

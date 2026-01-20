@@ -27,7 +27,6 @@ Use native Cursor commands (type `/` in chat) for common workflows:
 - `/build` - Production-ready implementation
 - `/verify` - Code review and safety check
 - `/hydrate-verify` - Hydration verification (files + config + placeholders)
-- `/hydrate-check` - Deprecated alias of `/hydrate-verify`
 - `/fix` - Quick targeted correction
 - `/debug` - Root cause analysis
 - `/refactor` - Improve code quality
@@ -35,7 +34,7 @@ Use native Cursor commands (type `/` in chat) for common workflows:
 - `/discuss` - Technical debate
 - `/explain` - Code walkthrough
 
-Commands are defined in `.cursor/commands/` - each loads only when invoked.
+Commands are defined in `.cursor/commands/` (not included in `--zero-config`) and load only when invoked.
 
 ## Documentation Policy
 

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
+## [1.8.0] - 2026-01-20
 
 ### Added
 
@@ -65,12 +65,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- `ai-kit:verify` script and `create-ai-kit lint` command.
+
+### Changed
+
+- CLI output modes for TTY/CI and new zero-config install option.
+- Placeholder scan now skips symlinks, nested repos, and shows progress.
+- Removed legacy `hydrate:*` scripts from scaffolded installs.
+
+---
+
 ## [1.6.0] - 2026-01-19
 
 ### Added
 
 - Hydration verification script (`scripts/hydrate-verify.js`) and `/hydrate-verify` command.
-- `hydrate:verify` npm script during scaffolding (with `hydrate:check` as an alias).
+- `hydrate:verify` npm script during scaffolding.
 
 ### Changed
 
@@ -131,8 +145,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Hydration placeholder check script (`scripts/placeholder-check.js`) and `/hydrate-check` command (11 total commands now).
-- `hydrate:check` npm script added during scaffolding.
+- Hydration placeholder check script (`scripts/placeholder-check.js`).
 
 ### Changed
 

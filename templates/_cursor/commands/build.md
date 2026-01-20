@@ -62,6 +62,6 @@ Production-ready implementation.
 
 ## Project Scripts
 
-- `node scripts/hydrate-verify.js` (or `npm run hydrate:verify`) — verify hydration completeness
+- `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`) — verify hydration completeness
 
 <!-- AI_FILL: Add project specific scripts here (e.g. npm run lint, npm run type-check) -->

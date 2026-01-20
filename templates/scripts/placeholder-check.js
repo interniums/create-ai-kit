@@ -23,19 +23,22 @@ try {
   picomatch = null;
 }
 
+const DEFAULT_EXCLUDE_PATTERNS = [
+  '**/node_modules/**',
+  '**/dist/**',
+  '**/build/**',
+  '**/.next/**',
+  '**/.git/**',
+  '.git',
+  '**/coverage/**',
+  '**/.cursor/**',
+  '**/docs/templates/**',
+  '.ai-kit-manifest.json',
+  'docs/hydration-prompt.md',
+];
+
 const DEFAULT_CONFIG = {
-  excludePatterns: [
-    '**/node_modules/**',
-    '**/dist/**',
-    '**/build/**',
-    '**/.next/**',
-    '**/.git/**',
-    '**/coverage/**',
-    '**/.cursor/**',
-    '**/docs/templates/**',
-    '.ai-kit-manifest.json',
-    'docs/hydration-prompt.md',
-  ],
+  excludePatterns: DEFAULT_EXCLUDE_PATTERNS,
 };
 
 const INTERNAL_IGNORE_PREFIXES = [
@@ -79,6 +82,10 @@ const PLACEHOLDER_PATTERNS = [
   { id: 'DOCS-TEMPLATE', regex: /DOCS-TEMPLATE/ },
 ];
 
+const LOCK_FILE = '.ai-kit-placeholder-check.lock';
+const LOCK_TIMEOUT_MS = 30 * 60 * 1000;
+const PROGRESS_INTERVAL_MS = 750;
+
 /**
  * Load config from .cursor/ai-kit.config.json
  */
@@ -100,10 +107,11 @@ function loadConfig() {
           pattern.replace(/\\/g, '/')
         );
       }
+      const mergedExcludes = [...DEFAULT_EXCLUDE_PATTERNS, ...(config.excludePatterns || [])];
       return {
         ...DEFAULT_CONFIG,
         ...config,
-        excludePatterns: [...DEFAULT_CONFIG.excludePatterns, ...(config.excludePatterns || [])],
+        excludePatterns: [...new Set(mergedExcludes)],
       };
     } catch {
       return DEFAULT_CONFIG;
@@ -164,7 +172,51 @@ function isTextFile(filePath) {
 /**
  * Recursively find all text files
  */
-function findTextFiles(dir, config, files = []) {
+function hasGitMarker(dir) {
+  const gitPath = path.join(dir, '.git');
+  return fs.existsSync(gitPath);
+}
+
+function createProgressReporter() {
+  const isTTY = process.stdout.isTTY;
+  const interval = isTTY ? PROGRESS_INTERVAL_MS : PROGRESS_INTERVAL_MS * 2;
+  let lastUpdate = Date.now();
+  let fileCount = 0;
+  let dirCount = 0;
+
+  const render = () => {
+    const message = `🔎 Scanning... ${fileCount} files, ${dirCount} dirs`;
+    if (isTTY) {
+      process.stdout.write(`\r${message} (Ctrl+C to stop)`);
+    } else {
+      console.log(message);
+    }
+  };
+
+  return {
+    tick: (type) => {
+      if (type === 'file') {
+        fileCount += 1;
+      } else if (type === 'dir') {
+        dirCount += 1;
+      }
+      const now = Date.now();
+      if (now - lastUpdate >= interval) {
+        render();
+        lastUpdate = now;
+      }
+    },
+    done: () => {
+      if (isTTY) {
+        process.stdout.write('\r');
+        process.stdout.write(' '.repeat(80));
+        process.stdout.write('\r');
+      }
+    },
+  };
+}
+
+function findTextFiles(dir, config, files = [], rootDir = dir, progress = null) {
   if (!fs.existsSync(dir)) {
     return files;
   }
@@ -183,9 +235,21 @@ function findTextFiles(dir, config, files = []) {
       continue;
     }
 
+    if (entry.isSymbolicLink()) {
+      continue;
+    }
+
     if (entry.isDirectory()) {
-      findTextFiles(fullPath, config, files);
+      if (entry.name === '.git') {
+        continue;
+      }
+      if (fullPath !== rootDir && hasGitMarker(fullPath)) {
+        continue;
+      }
+      progress?.tick('dir');
+      findTextFiles(fullPath, config, files, rootDir, progress);
     } else if (entry.isFile() && isTextFile(fullPath)) {
+      progress?.tick('file');
       files.push(fullPath);
     }
   }
@@ -279,17 +343,53 @@ function buildRemediationPrompt(results) {
   return lines.join('\n');
 }
 
+function acquireLock() {
+  const lockPath = path.join(process.cwd(), LOCK_FILE);
+
+  if (fs.existsSync(lockPath)) {
+    const stats = fs.statSync(lockPath);
+    const ageMs = Date.now() - stats.mtimeMs;
+    if (ageMs < LOCK_TIMEOUT_MS) {
+      console.log('⏳ Placeholder check already running.');
+      console.log(`   Remove ${LOCK_FILE} if this is a stale lock.`);
+      process.exit(1);
+    }
+    fs.unlinkSync(lockPath);
+  }
+
+  fs.writeFileSync(lockPath, JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() }));
+
+  const cleanup = () => {
+    if (fs.existsSync(lockPath)) {
+      fs.unlinkSync(lockPath);
+    }
+  };
+
+  process.on('exit', cleanup);
+  process.on('SIGINT', () => {
+    cleanup();
+    process.exit(1);
+  });
+  process.on('SIGTERM', () => {
+    cleanup();
+    process.exit(1);
+  });
+}
+
 /**
  * Main function
  */
 function main() {
+  acquireLock();
   const config = loadConfig();
   const root = process.cwd();
   const results = [];
+  const progress = createProgressReporter();
 
   console.log('🔍 Checking for hydration placeholders...\n');
 
-  const files = findTextFiles(root, config);
+  const files = findTextFiles(root, config, [], root, progress);
+  progress.done();
 
   for (const file of files) {
     const markers = [...scanFileName(file), ...scanFileContent(file)];
