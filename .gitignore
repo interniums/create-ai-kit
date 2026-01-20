@@ -56,6 +56,9 @@ RELEASE-PLAN.md
 test/fixtures/test-*/
 test/fixtures/package.json
 
+PRE-RELEASE-CHECKLIST.md
+ai-kit-release-guide.md
+
 ## Cursor (repo uses templates/_cursor; keep hydrate local)
 .cursor/HYDRATE.md
 docs/hydration-prompt.md
