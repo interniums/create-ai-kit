@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0] - 2026-01-21
+
+### Added
+
+- Docs-update context now includes collected `@docs-update` markers (with grouped output).
+- Smoke tests for docs-update marker collection, placeholder scanning, and inline docs verification.
+- Inline docs verification now detects plain-text `DOCS.md` references.
+
+### Changed
+
+- Command templates now include fast-path guidance and conditional lint/type-check steps.
+- Frontend-only guardrails in `/build` are now gated for non-frontend projects.
+- `main.mdc` trimmed to a concise navigation + command reference.
+- Docs clarify release checklist privacy, ESLint setup behavior, and docs-update limitations.
+
+### Fixed
+
+- `--dry-run` no longer creates missing target directories.
+- Placeholder scans include Cursor command files and report on missing cursor dir in verify.
+
+---
+
 ## [2.2.0] - 2026-01-21
 
 ### Added
@@ -251,6 +273,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date       | Highlights                              |
 | ------- | ---------- | --------------------------------------- |
+| 2.3.0   | 2026-01-21 | Docs/CLI alignment, markers, tests      |
 | 2.2.0   | 2026-01-21 | eslint-setup command, auto sourceRoots  |
 | 2.1.0   | 2026-01-20 | Custom cursor-dir, fallback support     |
 | 2.0.0   | 2026-01-20 | 3-layer docs, domain docs, print-prompt |
@@ -267,7 +290,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/interniums/create-ai-kit/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/interniums/create-ai-kit/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/interniums/create-ai-kit/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/interniums/create-ai-kit/compare/v1.8.0...v2.0.0

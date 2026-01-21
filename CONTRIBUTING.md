@@ -138,7 +138,8 @@ When opening an issue, please include:
 
 Before publishing a new release:
 
-1. Complete **all items** in `PRE-RELEASE-CHECKLIST.md`
+1. Complete the **internal** pre-release checklist (maintainers only).
+   - The checklist is private and not in this repo. Contact maintainers for access.
 2. Run the pre-release reminder:
    ```bash
    npm run release:check
@@ -150,7 +151,7 @@ Before publishing a new release:
 7. Tag the release: `git tag -a vX.X.X -m "vX.X.X"`
 8. Push tags: `git push origin vX.X.X`
 
-The pre-release checklist covers code quality, security, documentation, testing, and post-release verification. No release should skip this checklist.
+The internal checklist covers code quality, security, documentation, testing, and post-release verification. No release should skip this checklist.
 
 ## License
 

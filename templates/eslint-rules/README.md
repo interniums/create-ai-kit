@@ -38,16 +38,16 @@ are not supported and will be ignored.
 ### Option 1: ESLint Flat Config (eslint.config.js)
 
 ```javascript
-const localRules = require('./eslint-rules');
+const aiKitRules = require('./eslint-rules');
 
 module.exports = [
   {
     plugins: {
-      'local-rules': localRules,
+      'ai-kit': aiKitRules,
     },
     rules: {
-      'local-rules/docs-marker-expiry': ['error', { maxDays: 14 }],
-      'local-rules/docs-marker-expiring': ['warn', { maxDays: 14, warnDays: 7 }],
+      'ai-kit/docs-marker-expiry': ['error', { maxDays: 14 }],
+      'ai-kit/docs-marker-expiring': ['warn', { maxDays: 14, warnDays: 7 }],
     },
   },
 ];
@@ -98,8 +98,8 @@ module.exports = {
 
 ```javascript
 // Strict mode - 14-day expiry with 7-day warnings
-'local-rules/docs-marker-expiry': ['error', { maxDays: 14 }]
-'local-rules/docs-marker-expiring': ['warn', { maxDays: 14, warnDays: 7 }]
+'ai-kit/docs-marker-expiry': ['error', { maxDays: 14 }]
+'ai-kit/docs-marker-expiring': ['warn', { maxDays: 14, warnDays: 7 }]
 ```
 
 ## Workflow

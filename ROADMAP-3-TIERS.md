@@ -49,7 +49,7 @@ Additional context from the review:
 - CLI: `bin/create-ai-kit.js`
 - Scripts: `templates/scripts/hydrate-verify.js`
 - Docs: `README.md`, `templates/_cursor/HYDRATE.md`,
-  `PRE-RELEASE-CHECKLIST.md`, `ai-kit-release-guide.md`
+  internal release checklist (private), `ai-kit-release-guide.md`
 
 ### Deliverables
 

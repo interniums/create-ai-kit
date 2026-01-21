@@ -1,24 +1,15 @@
 ---
 description: Core AI Kit configuration - read AGENTS.md on first interaction
-globs: 
+globs:
 alwaysApply: true
 ---
 
 # AI Kit
 
 On first interaction with a new task, read `AGENTS.md` in the project root.
-If present, read `rules/app-context.mdc` in the cursor rules folder for a minimal app snapshot.
-If you use a custom cursor dir or the `cursor-copy/` fallback, treat paths here as relative to that folder.
-After hydration, run `/hydrate-verify` to confirm files, config, and placeholders.
-
-It contains:
-
-- Documentation Index (keyword → doc file mapping)
-- Architecture quick reference
-- Intelligent Dissent Protocol (when to suggest modern improvements)
-- Critical anti-patterns to avoid
-
-For file-specific patterns, see the other `.mdc` files in this folder—they auto-load based on file type.
+If present, read `rules/app-context.mdc` for a minimal app snapshot.
+After hydration, run `/hydrate-verify`.
+For doc markers, dissent protocol, and anti-patterns, follow `AGENTS.md`.
 
 ## Commands
 
@@ -27,28 +18,10 @@ Use native Cursor commands (type `/` in chat) for common workflows:
 - `/plan` - Architectural blueprint before coding
 - `/build` - Production-ready implementation
 - `/verify` - Code review and safety check
-- `/hydrate-verify` - Hydration verification (files + config + placeholders)
+- `/hydrate-verify` - Hydration verification
 - `/fix` - Quick targeted correction
 - `/debug` - Root cause analysis
 - `/refactor` - Improve code quality
 - `/commit` - Create git commit
 - `/discuss` - Technical debate
 - `/explain` - Code walkthrough
-
-Commands are defined in the cursor commands folder (default `.cursor/commands/`, not included in `--zero-config`) and load only when invoked.
-
-## Documentation Policy
-
-**DO NOT** update documentation in real-time during feature development. This creates noise, merge conflicts, and token waste.
-
-**Instead:** Use the batch update workflow.
-
-**When making significant changes** (new exports, breaking changes, new patterns), add a marker comment:
-
-```typescript
-// @docs-update(2024-01-15): path/to/DOCS.md - Description of change
-```
-
-Markers are the default for doc-worthy changes; keep 1–3 per commit. Manual shortcut: `docs-upd`.
-
-Remember: You may challenge documented patterns when you find more secure, performant, or modern solutions. Present alternatives, explain tradeoffs, and ask permission before diverging.

@@ -54,6 +54,8 @@ try {
  * @property {{changedFiles: ChangedFile[], stats: {additions: number, deletions: number, filesChanged: number}}} gitDiff
  * @property {string[]} affectedDocs
  * @property {Record<string, {path: string, exists: boolean, lastUpdated?: string}>} existingDocState
+ * @property {{file: string, line: number, date: string, docPath: string, description: string}[]} markers
+ * @property {Record<string, {file: string, line: number, date: string, docPath: string, description: string}[]>} markersByDoc
  */
 
 // Default config values
@@ -69,6 +71,34 @@ const DEFAULT_CONFIG = {
   ],
   docsRoot: 'docs/',
 };
+
+const TEXT_EXTENSIONS = new Set([
+  '.md',
+  '.mdc',
+  '.txt',
+  '.json',
+  '.yml',
+  '.yaml',
+  '.js',
+  '.jsx',
+  '.ts',
+  '.tsx',
+  '.mjs',
+  '.cjs',
+  '.css',
+  '.scss',
+  '.html',
+  '.py',
+  '.rb',
+  '.go',
+  '.rs',
+  '.java',
+  '.kt',
+  '.swift',
+  '.cs',
+  '.php',
+  '.toml',
+]);
 
 /**
  * Load AI Kit config from the cursor config directory
@@ -161,6 +191,11 @@ function isInSourceRoot(filePath, sourceRoots) {
 
 function normalizePath(filePath) {
   return filePath.replace(/\\/g, '/');
+}
+
+function isTextFile(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  return TEXT_EXTENSIONS.has(ext);
 }
 
 function globToRegex(globPattern) {
@@ -324,6 +359,54 @@ function getDocState(docPath) {
   };
 }
 
+function collectDocMarkers(changedFiles) {
+  const markers = [];
+  const dedupe = new Set();
+  const markerRegex = /@docs-update\((\d{4}-\d{2}-\d{2})\):\s*([^\s]+)\s*-\s*(.+)/;
+
+  for (const file of changedFiles) {
+    if (file.status === 'deleted') {
+      continue;
+    }
+    const fullPath = path.join(process.cwd(), file.path);
+    if (!fs.existsSync(fullPath) || !isTextFile(fullPath)) {
+      continue;
+    }
+
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    const lines = content.split('\n');
+    lines.forEach((line, index) => {
+      const match = line.match(markerRegex);
+      if (!match) {
+        return;
+      }
+      const [, date, docPath, description] = match;
+      const key = `${file.path}:${index + 1}:${docPath}:${description}`;
+      if (dedupe.has(key)) {
+        return;
+      }
+      dedupe.add(key);
+      markers.push({
+        file: file.path,
+        line: index + 1,
+        date,
+        docPath,
+        description: description.trim(),
+      });
+    });
+  }
+
+  const markersByDoc = markers.reduce((acc, marker) => {
+    if (!acc[marker.docPath]) {
+      acc[marker.docPath] = [];
+    }
+    acc[marker.docPath].push(marker);
+    return acc;
+  }, {});
+
+  return { markers, markersByDoc };
+}
+
 // Parse tasks from input (simple parser)
 function parseTasks(input) {
   const tasks = [];
@@ -431,6 +514,8 @@ async function main() {
     return acc;
   }, {});
 
+  const { markers, markersByDoc } = collectDocMarkers(changedFiles);
+
   // Build context
   const context = {
     period: { from: fromDate, to: toDate },
@@ -441,6 +526,8 @@ async function main() {
     },
     affectedDocs,
     existingDocState,
+    markers,
+    markersByDoc,
   };
 
   // Output context
@@ -453,6 +540,7 @@ async function main() {
   console.log(`   Tasks: ${tasks.length}`);
   console.log(`   Changed Files: ${changedFiles.length}`);
   console.log(`   Affected Docs: ${affectedDocs.length}`);
+  console.log(`   Markers: ${markers.length}`);
 
   if (affectedDocs.length > 0) {
     console.log('\n📄 Docs to review:');
@@ -469,4 +557,13 @@ async function main() {
   console.log('   3. Review and commit the changes');
 }
 
-main().catch(console.error);
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  collectDocMarkers,
+};

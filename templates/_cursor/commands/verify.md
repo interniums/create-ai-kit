@@ -11,6 +11,10 @@ Files touched in current task, or files explicitly mentioned.
 - After `/build`, before committing
 - For PR review
 
+## Fast Path
+
+If the change touches 1–2 files, keep output brief and skip redundant checklist items.
+
 ## Protocol
 
 1. **Plan Compliance (if plan exists):** Cross-check implementation against the original plan:
@@ -40,8 +44,8 @@ Files touched in current task, or files explicitly mentioned.
 <!-- AI_FILL: Add project specific risk checks (e.g. payments, analytics, etc.) -->
 
 7. **Local Checks:**
-   - Run lint check — must pass
-   - Run type check — must pass
+   - Run lint check if it exists — must pass
+   - Run type check if it exists — must pass
    - Run hydrate verify — `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`)
    - Manually verify behavior changes (check UI, API responses, database state, etc.)
 

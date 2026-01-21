@@ -10,11 +10,15 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
-const { execSync, spawnSync } = require('child_process');
+const { spawnSync } = require('child_process');
 
 const CLI_PATH = path.join(__dirname, '../bin/create-ai-kit.js');
 const FIXTURES_DIR = path.join(__dirname, 'fixtures');
 const TEMPLATES_DIR = path.join(__dirname, '../templates');
+const PLACEHOLDER_SCRIPT = path.join(TEMPLATES_DIR, 'scripts/placeholder-check.js');
+const HYDRATE_VERIFY_SCRIPT = path.join(TEMPLATES_DIR, 'scripts/hydrate-verify.js');
+const GENERATE_CONTEXT_SCRIPT = path.join(TEMPLATES_DIR, 'scripts/docs-update/generate-context.js');
+const VERIFY_INLINE_SCRIPT = path.join(TEMPLATES_DIR, 'scripts/docs-update/verify-inline.js');
 
 /**
  * Helper to create a temporary test directory
@@ -109,6 +113,15 @@ describe('AI Kit CLI', () => {
       for (const file of expectedFiles) {
         assert.ok(result.stdout.includes(file), `Output should list ${file}`);
       }
+    });
+
+    it('should not create a missing target directory in dry-run', () => {
+      const targetDir = path.join(tempDir, 'new-project');
+      assert.ok(!fs.existsSync(targetDir), 'Target directory should not exist before dry-run');
+
+      const result = runCLI(tempDir, ['--dry-run', 'new-project']);
+      assert.strictEqual(result.exitCode, 0, 'CLI should exit with code 0');
+      assert.ok(!fs.existsSync(targetDir), 'Target directory should not be created in dry-run');
     });
   });
 
@@ -420,5 +433,108 @@ describe('Marker Check Script', () => {
     // Note: We can't actually run it as it calls process.exit
     const content = fs.readFileSync(scriptPath, 'utf-8');
     assert.ok(content.includes('@docs-update'), 'Should search for @docs-update markers');
+  });
+});
+
+describe('Script Smoke Tests', () => {
+  it('placeholder-check scans cursor directory files', () => {
+    const tempDir = createTempDir();
+    try {
+      const cursorDir = path.join(tempDir, '.cursor');
+      fs.mkdirSync(cursorDir, { recursive: true });
+      fs.writeFileSync(path.join(cursorDir, 'notes.md'), 'AI_FILL: placeholder');
+
+      const result = spawnSync('node', [PLACEHOLDER_SCRIPT], {
+        cwd: tempDir,
+        encoding: 'utf-8',
+      });
+
+      assert.strictEqual(result.status, 1, 'placeholder-check should exit with code 1');
+      assert.ok(result.stdout.includes('AI_FILL'), 'Output should include placeholder marker');
+    } finally {
+      cleanupDir(tempDir);
+    }
+  });
+
+  it('hydrate-verify fails when cursor directory is missing', () => {
+    const tempDir = createTempDir();
+    try {
+      const result = spawnSync('node', [HYDRATE_VERIFY_SCRIPT], {
+        cwd: tempDir,
+        encoding: 'utf-8',
+      });
+
+      assert.strictEqual(result.status, 1, 'hydrate-verify should exit with code 1');
+    } finally {
+      cleanupDir(tempDir);
+    }
+  });
+
+  it('generate-context includes docs-update markers', () => {
+    const tempDir = createTempDir();
+    try {
+      fs.mkdirSync(path.join(tempDir, 'src'), { recursive: true });
+      fs.writeFileSync(
+        path.join(tempDir, 'src/feature.js'),
+        '// @docs-update(2024-01-15): docs/test.md - Added feature\n'
+      );
+
+      const originalCwd = process.cwd();
+      let markers = [];
+      try {
+        process.chdir(tempDir);
+        const { collectDocMarkers } = require(GENERATE_CONTEXT_SCRIPT);
+        ({ markers } = collectDocMarkers([
+          { path: 'src/feature.js', status: 'modified', additions: 1, deletions: 0 },
+        ]));
+      } finally {
+        process.chdir(originalCwd);
+      }
+
+      assert.ok(Array.isArray(markers), 'Markers should be collected');
+      assert.strictEqual(markers.length, 1, 'Should collect one marker');
+      assert.strictEqual(markers[0].docPath, 'docs/test.md');
+    } finally {
+      cleanupDir(tempDir);
+    }
+  });
+});
+
+describe('Verify Inline Script', () => {
+  it('detects backtick, link, and plain-text DOCS.md references', () => {
+    const tempDir = createTempDir();
+    try {
+      fs.mkdirSync(path.join(tempDir, 'docs'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, 'src/alpha'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, 'src/beta'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, 'src/gamma'), { recursive: true });
+      fs.writeFileSync(path.join(tempDir, 'src/alpha/DOCS.md'), '# Alpha docs\n');
+      fs.writeFileSync(path.join(tempDir, 'src/beta/DOCS.md'), '# Beta docs\n');
+      fs.writeFileSync(path.join(tempDir, 'src/gamma/DOCS.md'), '# Gamma docs\n');
+      fs.writeFileSync(
+        path.join(tempDir, 'docs/refs.md'),
+        [
+          'References:',
+          '`src/alpha/DOCS.md`',
+          '[Beta docs](src/beta/DOCS.md)',
+          'Plain: src/gamma/DOCS.md',
+          '',
+        ].join('\n')
+      );
+
+      const result = spawnSync('node', [VERIFY_INLINE_SCRIPT], {
+        cwd: tempDir,
+        encoding: 'utf-8',
+        env: { ...process.env, AI_KIT_ROOT_DIR: tempDir },
+      });
+
+      assert.strictEqual(result.status, 0, 'verify-inline should exit with code 0');
+      assert.ok(
+        result.stdout.includes('All DOCS.md references are valid'),
+        'Output should confirm valid references'
+      );
+    } finally {
+      cleanupDir(tempDir);
+    }
   });
 });

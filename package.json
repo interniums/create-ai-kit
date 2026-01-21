@@ -1,6 +1,6 @@
 {
   "name": "create-ai-kit",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Scaffold AI Kit - AI-friendly documentation and workflow system for Cursor IDE",
   "bin": {
     "create-ai-kit": "bin/create-ai-kit.js"
@@ -9,7 +9,7 @@
     "test": "node --test test/*.test.js",
     "preview": "node bin/create-ai-kit.js --dry-run",
     "format": "prettier --write .",
-    "release:check": "echo '\\n📋 Before releasing, complete PRE-RELEASE-CHECKLIST.md\\n' && echo 'Steps:\\n  1. Review PRE-RELEASE-CHECKLIST.md\\n  2. Run: npm test\\n  3. Run: npm audit\\n  4. Run: npm pack --dry-run\\n  5. Publish: npm publish\\n'",
+    "release:check": "echo '\\n📋 Release checklist is maintainer-only (private). Contact maintainers for access.\\n' && echo 'Steps:\\n  1. Review the internal release checklist (maintainers only)\\n  2. Run: npm test\\n  3. Run: npm audit\\n  4. Run: npm pack --dry-run\\n  5. Publish: npm publish\\n'",
     "docs:update": "node scripts/docs-update/generate-context.js",
     "docs:check": "node scripts/docs-update/check-markers.js",
     "docs:check:ci": "node scripts/docs-update/check-markers.js --ci",

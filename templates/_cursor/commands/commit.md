@@ -6,6 +6,10 @@ Create a git commit from current working tree changes.
 
 - User explicitly requests a commit
 
+## Fast Path
+
+If the change touches 1–2 files, keep output brief and skip redundant checklist items.
+
 ## Commit Quality Framework
 
 ### Atomic Commits
@@ -109,7 +113,7 @@ Keep as single commit if:
 6. **Stage files:** Use explicit file paths, not blanket commands.
    - Prefer `git add <file1> <file2>` over `git add .`
    - This avoids accidental inclusion of logs, `.DS_Store`, temp files, or untracked files
-   - If many files, list them explicitly or use `git add -p` for interactive staging
+   - If many files, list them explicitly; use `git add -p` only if interactive staging is supported
 
 7. **Write commit message:**
    - Focus on "why", not "what" (the diff shows what)

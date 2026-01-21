@@ -34,7 +34,6 @@ const DEFAULT_EXCLUDE_PATTERNS = [
   '**/.git/**',
   '.git',
   '**/coverage/**',
-  `**/${CURSOR_DIR}/**`,
   '**/docs/templates/**',
   '.ai-kit-manifest.json',
   'docs/hydration-prompt.md',
@@ -48,7 +47,6 @@ const INTERNAL_IGNORE_PREFIXES = [
   'scripts/docs-update/',
   'scripts/placeholder-check.js',
   'scripts/hydrate-verify.js',
-  `${CURSOR_DIR}/commands/`,
 ];
 
 const TEXT_EXTENSIONS = new Set([

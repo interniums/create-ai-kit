@@ -8,7 +8,7 @@ This system helps keep documentation in sync with code changes:
 
 1. **Markers added**: Agent adds dated markers for doc-worthy changes
 2. **Human provides**: Period dates + completed tasks
-3. **Script analyzes**: Git diff + maps to affected docs
+3. **Script analyzes**: Git history diff + maps to affected docs
 4. **AI generates**: Draft documentation updates with confidence scores
 5. **Human reviews**: Approves, modifies, or rejects updates
 
@@ -27,7 +27,7 @@ This system helps keep documentation in sync with code changes:
 ### 1. Add Markers (default)
 
 Markers are the default for doc-worthy changes (new exports, breaking changes, new patterns).
-The agent adds them during `/plan` and `/commit`.
+The agent adds them during `/build` and `/commit`.
 Keep 1–3 markers per commit to avoid spam.
 
 Manual shortcut (devs): use the VS Code snippet `docs-upd` to insert:
@@ -51,13 +51,13 @@ node scripts/docs-update/generate-context.js
 npm run docs:update
 ```
 
-The script will:
+The script will (git history only — uncommitted changes are not included):
 
 - Prompt for period dates
 - Ask to use the WEEKLY-UPDATE-INPUT.md file
-- Analyze git changes for that period
+- Analyze git changes for that period (committed changes only)
 - Map changed files to affected docs
-- Collect `@docs-update(YYYY-MM-DD): path/to/doc.md - description` markers from code comments
+- Collect `@docs-update(YYYY-MM-DD): path/to/doc.md - description` markers from changed files
 - Output `update-context.json`
 
 ### 4. Generate Doc Updates

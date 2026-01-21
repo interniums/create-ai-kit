@@ -346,8 +346,12 @@ async function runInit(targetDir, options) {
   }
 
   if (!fs.existsSync(projectRoot)) {
-    fse.ensureDirSync(projectRoot);
-    logger.log(chalk.gray(`  Created target directory: ${projectRoot}`));
+    if (options.dryRun) {
+      logger.log(chalk.gray(`  Would create target directory: ${projectRoot}`));
+    } else {
+      fse.ensureDirSync(projectRoot);
+      logger.log(chalk.gray(`  Created target directory: ${projectRoot}`));
+    }
   }
 
   // 0. Check if this is a valid project directory
@@ -768,6 +772,9 @@ async function runInit(targetDir, options) {
       if (!options.zeroConfig) {
         logger.log(chalk.gray('\n   Verify: npm run ai-kit:verify'));
       }
+      logger.log(
+        chalk.gray('   ESLint: if configured, run npx create-ai-kit eslint-setup (run yourself)')
+      );
     }
   }
 }

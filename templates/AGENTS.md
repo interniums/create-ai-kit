@@ -94,7 +94,7 @@ When you find a better approach:
 // @docs-update(2024-01-15): docs/auth.md - New provider added
 ```
 
-Markers are the default for doc-worthy changes and are auto-added during `/plan` and `/commit`.
+Markers are the default for doc-worthy changes and are auto-added during `/build` and `/commit`.
 Keep 1–3 markers per commit to avoid spam.
 Manual shortcut: use the VS Code snippet `docs-upd`.
 

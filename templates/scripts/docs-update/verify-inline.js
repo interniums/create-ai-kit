@@ -18,13 +18,14 @@ const { resolveCursorDir } = require('../ai-kit-paths');
 
 const CURSOR_DIR = resolveCursorDir();
 
-const ROOT_DIR = path.resolve(__dirname, '../..');
+const ROOT_DIR = path.resolve(process.env.AI_KIT_ROOT_DIR || path.join(__dirname, '../..'));
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
 
 // Patterns to extract DOCS.md references from markdown files
 // Only match specific paths, not glob patterns (skip paths with *)
 let DOCS_REF_PATTERN = /`(src\/[^`*]+\/DOCS\.md)`/g;
 let LINK_PATTERN = /\]\((src\/[^)*]+\/DOCS\.md)\)/g;
+let PLAIN_PATTERN = /(src\/[^`\s)*]+\/DOCS\.md)/g;
 
 /**
  * @typedef {Object} VerificationResult
@@ -45,6 +46,15 @@ function extractReferences(content) {
   // Extract markdown link references
   const linkMatches = content.matchAll(LINK_PATTERN);
   for (const match of linkMatches) {
+    refs.push(match[1]);
+  }
+
+  // Extract plain-text references (exclude inline code + markdown links)
+  const strippedContent = content
+    .replace(/`[^`]*`/g, ' ')
+    .replace(/\[[^\]]*\]\([^)]+\)/g, ' ');
+  const plainMatches = strippedContent.matchAll(PLAIN_PATTERN);
+  for (const match of plainMatches) {
     refs.push(match[1]);
   }
 
@@ -90,6 +100,7 @@ function buildReferencePatterns(sourceRoots) {
   const rootsPattern = roots.map((root) => escapeRegex(root)).join('|');
   DOCS_REF_PATTERN = new RegExp('`((?:' + rootsPattern + ')[^`*]+/DOCS\\.md)`', 'g');
   LINK_PATTERN = new RegExp('\\]\\(((?:' + rootsPattern + ')[^)*]+/DOCS\\.md)\\)', 'g');
+  PLAIN_PATTERN = new RegExp('((?:' + rootsPattern + ')[^`\\s)*]+/DOCS\\.md)', 'g');
 }
 
 function findMarkdownFiles(dir) {

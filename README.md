@@ -26,6 +26,12 @@ npx create-ai-kit ./apps/my-project
 6. **Saves** a copyable hydration prompt to `docs/hydration-prompt.md` and copies to clipboard when possible
 7. **Lints** hydration prompts for size, repetition, and bloat (`npx create-ai-kit lint`)
 
+## What It Does NOT Do
+
+- It does **not** modify your application source code.
+- It does **not** run AI hydration for you (you paste the prompt in Cursor).
+- `docs:update` uses **git history only** (no uncommitted changes).
+
 ## Docs System (3-Layer)
 
 AI Kit sets up a 3-layer documentation system designed for fast, targeted context:
@@ -109,7 +115,8 @@ If you use `--cursor-dir` or the CLI fell back to `cursor-copy/`, point to that 
 npx create-ai-kit eslint-setup
 ```
 
-Automatically detects your ESLint config format and adds the AI Kit docs-marker rules. Supports `.eslintrc.json`, `.eslintrc.js`, `eslint.config.js`, and `package.json` eslintConfig.
+Run this yourself (do not delegate to the agent). It detects your ESLint config format and adds the AI Kit docs-marker rules. Supports `.eslintrc.json`, `.eslintrc.js`, `eslint.config.js`, and `package.json` eslintConfig.
+For `.eslintrc.js`, the CLI prints instructions — apply the changes manually.
 
 ### Show Help
 
@@ -137,9 +144,9 @@ npx create-ai-kit --help
 
 Tip: Open Cursor Composer (Cmd+Shift+I) in Plan mode and paste the hydration prompt (`docs/hydration-prompt.md` or clipboard). The agent may ask for confirmation on some changes. Review hydrated docs after.
 
-Verify: `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`).
+Verify: `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`). This now checks `.cursor` placeholders and manifest drift.
 
-If ESLint is configured, run: `npx create-ai-kit eslint-setup`.
+If ESLint is configured, run yourself: `npx create-ai-kit eslint-setup`.
 
 Notes:
 
@@ -239,7 +246,7 @@ This approach means:
 ## Docs Update Markers
 
 Markers are the default for doc-worthy changes (new exports, breaking changes, new patterns).
-The agent auto-adds markers during `/plan` and `/commit`.
+The agent auto-adds markers during `/build` and `/commit`.
 
 `// @docs-update(YYYY-MM-DD): path/to/doc.md - description`
 

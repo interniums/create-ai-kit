@@ -93,28 +93,35 @@ The CLI auto-detects source directories and pre-fills `.cursor/ai-kit.config.jso
 
 **SKIP this step** if the project does not have ESLint configured (no `eslint.config.js`, `.eslintrc.*`, or eslint in package.json).
 
-If ESLint IS configured, run: `npx create-ai-kit eslint-setup`
+If ESLint IS configured, run this yourself (do not delegate to the agent): `npx create-ai-kit eslint-setup`
 
 This will automatically detect your ESLint config format and add the AI Kit rules.
 
-### 8. Populate anti-patterns
+### 8. Populate command templates
+
+- Fill in project-specific sections in `.cursor/commands/*` (scripts, risk checks, etc.)
+- Remove any `<!-- AI_FILL: ... -->` comments after filling them
+
+### 9. Populate anti-patterns
 
 - Open `docs/anti-patterns.md` and fill in the `<!-- AI_FILL: ... -->` blocks
 - Remove sections that don't apply to this tech stack (e.g., remove React section for a Python project)
 - Add any project-specific anti-patterns discovered in the codebase
 
-### 9. Cleanup
+### 10. Cleanup
 
 - Remove all `<!-- AI_FILL: ... -->` comments after filling them
 - Delete `.cursor/HYDRATE.md` when done
 - Delete `docs/templates/DOCS-TEMPLATE.md` if not needed
 - Delete `.cursor/rules/_template.mdc` after using it as reference
 
-### 10. Verify hydration completeness
+### 11. Verify hydration completeness
 
-- Run `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`) to verify required files, config, and placeholders
+- Run `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`) to verify required files, config, placeholders, and manifest drift
 - If any placeholders remain, ask the AI to fill in the missing sections listed by the script
 - Re-run until the check reports no placeholders
+
+Note: Verification now checks that `.cursor/commands/*` exists and warns on `.ai-kit-manifest.json` drift. If you intentionally keep a manifest, regenerate it after cleanup.
 
 ## Cursor-Specific Notes
 

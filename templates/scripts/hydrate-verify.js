@@ -29,6 +29,17 @@ const DEFAULT_REQUIRED_DOCS = [
   `${CURSOR_DIR}/ai-kit.config.json`,
   `${CURSOR_DIR}/rules/app-context.mdc`,
   `${CURSOR_DIR}/rules/main.mdc`,
+  `${CURSOR_DIR}/commands/build.md`,
+  `${CURSOR_DIR}/commands/commit.md`,
+  `${CURSOR_DIR}/commands/debug.md`,
+  `${CURSOR_DIR}/commands/discuss.md`,
+  `${CURSOR_DIR}/commands/explain.md`,
+  `${CURSOR_DIR}/commands/fix.md`,
+  `${CURSOR_DIR}/commands/hydrate-verify.md`,
+  `${CURSOR_DIR}/commands/plan.md`,
+  `${CURSOR_DIR}/commands/refactor.md`,
+  `${CURSOR_DIR}/commands/review.md`,
+  `${CURSOR_DIR}/commands/verify.md`,
   'scripts/docs-update/file-doc-map.json',
 ];
 
@@ -94,6 +105,25 @@ function getMissingSourceRoots(sourceRoots) {
   return sourceRoots.filter((root) => !fs.existsSync(path.join(process.cwd(), root)));
 }
 
+function checkManifestDrift() {
+  const manifestPath = path.join(process.cwd(), '.ai-kit-manifest.json');
+  if (!fs.existsSync(manifestPath)) {
+    return { missing: [], parseError: null };
+  }
+
+  try {
+    const content = fs.readFileSync(manifestPath, 'utf-8');
+    const manifest = JSON.parse(content);
+    const files = manifest?.files ? Object.keys(manifest.files) : [];
+    const missing = files.filter((filePath) =>
+      !fs.existsSync(path.join(process.cwd(), filePath))
+    );
+    return { missing, parseError: null };
+  } catch (error) {
+    return { missing: [], parseError: error };
+  }
+}
+
 function runPlaceholderCheck() {
   const result = spawnSync('node', ['scripts/placeholder-check.js'], {
     stdio: 'inherit',
@@ -121,6 +151,9 @@ function printList(title, items) {
 function main() {
   console.log('🔍 Running hydration verification...\n');
 
+  const cursorDirPath = path.join(process.cwd(), CURSOR_DIR);
+  const hasCursorDir = fs.existsSync(cursorDirPath);
+
   const { config, configPath, parseError } = readConfig();
   const requiredDocs = resolveRequiredDocs(config);
   const missingDocs = getMissingFiles(requiredDocs);
@@ -129,6 +162,12 @@ function main() {
   const filteredSourceRoots = filterSourceRoots(config?.sourceRoots);
   const hasValidSourceRoots = filteredSourceRoots.length > 0;
   const missingSourceRoots = getMissingSourceRoots(filteredSourceRoots);
+
+  if (!hasCursorDir) {
+    console.log(`Missing cursor directory: ${normalizePath(cursorDirPath)}`);
+    console.log('Re-run hydration to generate cursor rules and commands.');
+    console.log('');
+  }
 
   if (parseError) {
     console.log(`⚠️  Failed to parse ${normalizePath(configPath)}.`);
@@ -149,21 +188,39 @@ function main() {
     printList('sourceRoots directories not found:', missingSourceRoots);
   }
 
+  const { missing: missingManifestFiles, parseError: manifestParseError } = checkManifestDrift();
+  if (manifestParseError) {
+    console.log('⚠️  Failed to parse .ai-kit-manifest.json.');
+    console.log(`   ${manifestParseError.message}`);
+    console.log('');
+  }
+
+  if (missingManifestFiles.length > 0) {
+    printList('Manifest drift (files missing from .ai-kit-manifest.json):', missingManifestFiles);
+    console.log('Regenerate the manifest via CLI upgrade or delete it.');
+    console.log('');
+  }
+
   const placeholderStatus = runPlaceholderCheck();
   const hasPlaceholderIssues = placeholderStatus !== 0;
 
   const hasFailures =
+    !hasCursorDir ||
     parseError ||
+    manifestParseError ||
     missingDocs.length > 0 ||
     forbiddenFiles.length > 0 ||
+    missingManifestFiles.length > 0 ||
     !hasValidSourceRoots ||
     missingSourceRoots.length > 0 ||
     hasPlaceholderIssues;
 
   console.log('---');
   console.log(`Hydration verify: ${hasFailures ? 'FAIL' : 'PASS'}`);
+  console.log(`- Cursor dir: ${hasCursorDir ? 'PASS' : 'FAIL'}`);
   console.log(`- Required files: ${missingDocs.length > 0 ? 'FAIL' : 'PASS'}`);
   console.log(`- Template files: ${forbiddenFiles.length > 0 ? 'FAIL' : 'PASS'}`);
+  console.log(`- Manifest drift: ${missingManifestFiles.length > 0 ? 'FAIL' : 'PASS'}`);
   console.log(`- sourceRoots: ${hasValidSourceRoots ? 'PASS' : 'FAIL'}`);
   console.log(`- sourceRoots exist: ${missingSourceRoots.length > 0 ? 'FAIL' : 'PASS'}`);
   console.log(`- Placeholders: ${hasPlaceholderIssues ? 'FAIL' : 'PASS'}`);

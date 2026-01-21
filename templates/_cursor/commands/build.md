@@ -7,6 +7,10 @@ Production-ready implementation.
 - After `/plan`, or for well-defined tasks
 - Skip if: task needs clarification → use `/plan` first
 
+## Fast Path
+
+If the change touches 1–2 files, keep output brief and skip redundant checklist items.
+
 ## Protocol
 
 1. **No Placeholders:** Write full, functional code. No `// ... rest of code`.
@@ -15,26 +19,19 @@ Production-ready implementation.
 
 3. **Route Safety:** Use route builders (if available), never hardcode URLs.
 
-4. **Handler Safety:** Extract all logic from UI handlers into named functions.
-
-5. **State Management:**
+4. **State Management:**
    - Simple local state: `useState` (or equivalent)
    - Complex logic: Extract to custom hooks/composables
    - Shared state: Use existing Context/Store
    - Never put complex business logic inside effects in components
 
-6. **UI & Styling:**
-   - Use project's UI library components
-   - Use theme tokens (colors, spacing)
-   - No inline styles, no raw CSS (unless project standard)
-   - Reuse components; don't invent new primitives unless explicitly asked
+5. **Frontend-only guardrails (if this is a frontend project):**
+   - **Handler Safety:** Extract all logic from UI handlers into named functions
+   - **UI & Styling:** Use UI library components + theme tokens; no inline styles unless standard
+   - **Data Fetching:** Use service layer functions, no raw fetch/axios in components
+   - **State UX:** Handle loading and error states explicitly
 
-7. **Data Fetching:**
-   - Use service layer functions
-   - Never use raw fetch/axios in components
-   - Handle loading and error states explicitly
-
-8. **Anti-Patterns:**
+6. **Anti-Patterns:**
    See full table in `AGENTS.md` → Critical Anti-Patterns section. Key ones:
    - No `any` types
    - No hardcoded routes
@@ -44,13 +41,13 @@ Production-ready implementation.
    - No `fetch()` in components
    - No raw strings in URLs
 
-9. **UI Guardrails:**
+7. **Frontend-only UX guardrails (if this is a frontend project):**
    - Prevent double-submits for async actions
    - Confirm destructive actions
    - Accessibility: keyboard support, visible focus
    - Provide clear states: loading, empty, error, success
 
-10. **Docs Marker:** If changing exports or patterns, add marker comment:
+8. **Docs Marker:** If changing exports or patterns, add marker comment:
 
     ```typescript
     // @docs-update(2024-01-15): path/to/DOCS.md - Description of change
@@ -58,7 +55,7 @@ Production-ready implementation.
 
     These markers are temporary - they're collected by the docs update script.
 
-11. **Verification:** Run lint and type checks, fix introduced issues before finishing.
+9. **Verification:** Run lint and type checks if scripts exist; otherwise report missing.
 
 ## Project Scripts
 
