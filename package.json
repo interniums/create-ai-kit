@@ -1,6 +1,6 @@
 {
   "name": "create-ai-kit",
-  "version": "2.4.1",
+  "version": "2.4.2",
   "description": "Scaffold AI Kit - small docs + workflow system for Cursor that keeps AI context clear",
   "bin": {
     "create-ai-kit": "bin/create-ai-kit.js"

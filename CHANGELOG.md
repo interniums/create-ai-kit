@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.2] - 2026-01-21
+
+### Changed
+
+- README rewritten to highlight the system flow, command lifecycle, and maintenance workflow.
+- Added ESLint setup step to the hydration flow.
+
+---
+
 ## [2.4.1] - 2026-01-21
 
 ### Changed
