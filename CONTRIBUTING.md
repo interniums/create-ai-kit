@@ -83,7 +83,7 @@ npm unlink -g create-ai-kit
 ### CLI Changes
 
 - Main logic is in `bin/create-ai-kit.js`
-- Keep the CLI simple and zero-config where possible
+- Keep the CLI simple and minimal where possible
 - Maintain backward compatibility with existing installations
 
 ## Code Style

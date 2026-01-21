@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.3] - 2026-01-21
+
+### Changed
+
+- Renamed `--zero-config` to `--minimal` with a deprecation alias.
+- README reorganized with clearer setup flow and CLI options.
+- HYDRATE guidance updated for minimal installs.
+
+### Removed
+
+- ROADMAP-3-TIERS.md (superseded by newer docs).
+
+---
+
 ## [2.4.2] - 2026-01-21
 
 ### Changed
@@ -126,7 +140,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- CLI output modes for TTY/CI and new zero-config install option.
+- CLI output modes for TTY/CI and new minimal install option.
 - Placeholder scan now skips symlinks, nested repos, and shows progress.
 
 ### Removed
@@ -309,7 +323,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | 2.2.0   | 2026-01-21 | eslint-setup command, auto sourceRoots  |
 | 2.1.0   | 2026-01-20 | Custom cursor-dir, fallback support     |
 | 2.0.0   | 2026-01-20 | 3-layer docs, domain docs, print-prompt |
-| 1.8.0   | 2026-01-20 | ai-kit:verify, zero-config mode         |
+| 1.8.0   | 2026-01-20 | ai-kit:verify, minimal mode             |
 | 1.7.0   | 2026-01-20 | Target dir, glob fixes, packaging       |
 | 1.6.1   | 2026-01-19 | Updated npm badge source                |
 | 1.5.0   | 2026-01-19 | Hydration fallback + app context        |

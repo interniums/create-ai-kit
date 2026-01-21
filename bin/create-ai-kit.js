@@ -333,6 +333,11 @@ async function runInit(targetDir, options) {
   const projectRoot = targetDir ? path.resolve(process.cwd(), targetDir) : process.cwd();
   const outputMode = getOutputMode(options);
   const logger = createLogger(outputMode);
+  const minimalInstall = options.minimal || options.zeroConfig;
+  if (options.zeroConfig && !options.minimal) {
+    logger.warn(chalk.yellow('⚠️  --zero-config is deprecated. Use --minimal instead.'));
+  }
+  options.zeroConfig = minimalInstall;
   const isCompact = outputMode === OUTPUT_MODES.COMPACT;
   const cursorDirName = resolveCursorDirName(projectRoot, options, { dryRun: options.dryRun });
   const cursorRulesDir = `${cursorDirName}/rules`;
@@ -396,7 +401,7 @@ async function runInit(targetDir, options) {
       if (options.zeroConfig && hasExistingFiles) {
         logger.warn(
           chalk.yellow(
-            '⚠️  Zero-config requested on an existing install. Keeping manifest entries to avoid data loss.'
+            '⚠️  Minimal install requested on an existing install. Keeping manifest entries to avoid data loss.'
           )
         );
         manifest = {
@@ -1111,7 +1116,8 @@ async function main() {
     .option('--quiet', 'Limit output (CI-friendly)')
     .option('--ci', 'Disable prompts and clipboard output')
     .option('--cursor-dir <dir>', 'Use custom Cursor directory (default: .cursor)')
-    .option('--zero-config', 'Install only cursor rules + minimal docs (respects --cursor-dir)')
+    .option('--minimal', 'Install only cursor rules + minimal docs (respects --cursor-dir)')
+    .option('--zero-config', 'Deprecated: use --minimal')
     .option('--print-prompt', 'Print full hydration prompt to stdout')
     .argument('[targetDir]', 'Target directory (defaults to current)')
     .action(async (targetDir, options) => {

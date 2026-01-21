@@ -1,14 +1,14 @@
-Here is a rewritten version of the README.
 
-I have applied your preference for **fewer bullet points** by converting lists into narrative paragraphs or tables where appropriate. I also reorganized the structure to prioritize the "Happy Path" (the standard user flow) while moving edge cases (manual ESLint, folder fallbacks) to the end.
-
----
 
 # create-ai-kit
+
+[![npm version](https://img.shields.io/npm/v/create-ai-kit)](https://www.npmjs.com/package/create-ai-kit)
 
 **Scaffold a self-documenting workflow for Cursor IDE.**
 
 AI Kit creates a bridge between your codebase and your AI editor. Instead of writing long, repetitive prompts to explain your project context, AI Kit installs a structured documentation system (`AGENTS.md`, rules, and keyword pointers) that allows the AI to "read" your project's intent automatically.
+
+You get a ready-to-use command set, rules, and docs structure in minutes.
 
 ## Quick Start
 
@@ -31,7 +31,7 @@ The installation generates a prompt specifically designed to teach the AI about 
 
 1. Open **Cursor Composer** (`Cmd+Shift+I`) in "Plan" mode.
 2. Paste the content of `docs/hydration-prompt.md` (it is automatically copied to your clipboard during install).
-3. Let the AI run. It will fill in all `` blocks in your configuration.
+3. Let the AI run. It will fill in all `<!-- AI_FILL: ... -->` blocks in your configuration.
 4. Once finished, verify the setup:
 
 ```bash
@@ -43,6 +43,18 @@ npm run ai-kit:verify
 ```bash
 npx create-ai-kit eslint-setup
 ```
+
+If `.cursor/` is not writable, the installer falls back to `cursor-copy/`. Move it to `.cursor/` after hydration.
+
+## Files Created
+
+The installer scaffolds the following structure:
+
+* **`.cursor/commands/`**: The workflow engines (`/plan`, `/build`, etc.).
+* **`.cursor/rules/`**: Contextual rules (`.mdc` files) that trigger based on file types.
+* **`AGENTS.md`**: The master instruction file for the AI.
+* **`scripts/docs-update/`**: Tooling to manage the documentation lifecycle.
+* **`docs/hydration-prompt.md`**: The initial setup prompt (safe to delete after hydration).
 
 ## How It Works
 
@@ -91,8 +103,11 @@ You do not need to context-switch to update documentation immediately. Weekly, y
 | --- | --- |
 | `--dry-run` | Preview which files will be created without writing them. |
 | `--force` | Upgrade an existing installation. Creates `.new` files if conflicts exist. |
-| `--zero-config` | Minimal install. Skips maintenance scripts and only installs rules. |
+| `--minimal` | Minimal install. Skips maintenance scripts and only installs rules. |
 | `--print-prompt` | Outputs the hydration prompt to stdout (useful for piping). |
+| `--help` | Show all commands and options. |
+
+Deprecated: `--zero-config` is now `--minimal` (alias supported).
 
 ### Advanced Subcommands
 
@@ -112,15 +127,5 @@ If the CLI cannot write to `.cursor/` (common in some restricted environments), 
 
 **Performance**
 On very large repositories, the hydration verification scan might be slow. You can edit `.cursor/ai-kit.config.json` to exclude heavy directories via `excludePatterns` or limit the scan scope using `sourceRoots`.
-
-## Files Created
-
-The installer scaffolds the following structure:
-
-* **`.cursor/commands/`**: The workflow engines (`/plan`, `/build`, etc.).
-* **`.cursor/rules/`**: Contextual rules (`.mdc` files) that trigger based on file types.
-* **`AGENTS.md`**: The master instruction file for the AI.
-* **`scripts/docs-update/`**: Tooling to manage the documentation lifecycle.
-* **`docs/hydration-prompt.md`**: The initial setup prompt (safe to delete after hydration).
 
 ---
