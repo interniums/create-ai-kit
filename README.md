@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/create-ai-kit)](https://www.npmjs.com/package/create-ai-kit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Scaffold **AI Kit** — an AI-friendly documentation and workflow system for [Cursor IDE](https://cursor.sh).
+Scaffold **AI Kit** — a small, AI-ready docs + workflow system for [Cursor IDE](https://cursor.sh). It gives you a complete structure: `AGENTS.md` and rules guide the agent, keywords point to the right docs, and commands reduce prompt boilerplate.
 
 ## Quick Start
 
@@ -16,15 +16,17 @@ npx create-ai-kit
 npx create-ai-kit ./apps/my-project
 ```
 
-## What It Does
+## The System It Creates
 
-1. **Scaffolds** `.cursor/commands/` (or `--cursor-dir`) with 11 workflow commands (plan, build, verify, etc.)
-2. **Creates** `AGENTS.md` skeleton with AI_FILL tokens for project-specific content
-3. **Installs** docs-update scripts for weekly documentation maintenance
-4. **Adds** a hydration placeholder check script
-5. **Adds** a hydration verification script (files + config + placeholders)
-6. **Saves** a copyable hydration prompt to `docs/hydration-prompt.md` and copies to clipboard when possible
-7. **Lints** hydration prompts for size, repetition, and bloat (`npx create-ai-kit lint`)
+- **Commands:** `.cursor/commands/` with clear workflows (`/plan`, `/build`, `/verify`, etc.).
+- **Docs layers:** `AGENTS.md` keyword index → `.cursor/rules/*.mdc` → `docs/` baseline.
+- **Docs maintenance:** markers + scripts for weekly updates.
+
+## How It Helps
+
+- **Faster context:** the agent follows `AGENTS.md` pointers to the right docs quickly.
+- **Smaller prompts:** commands replace boilerplate instructions and keep outputs consistent.
+- **Safer upgrades:** manifest tracking and `.new` files avoid overwrites.
 
 ## What It Does NOT Do
 
@@ -32,24 +34,14 @@ npx create-ai-kit ./apps/my-project
 - It does **not** run AI hydration for you (you paste the prompt in Cursor).
 - `docs:update` uses **git history only** (no uncommitted changes).
 
-## Docs System (3-Layer)
-
-AI Kit sets up a 3-layer documentation system designed for fast, targeted context:
-
-- **Entry:** `AGENTS.md` with a keyword-driven Documentation Index
-- **Rules:** `.cursor/rules/*.mdc` for auto-loaded conventions (or your `--cursor-dir`)
-- **Baseline:** `docs/*.md` and `docs/domains/*.md` for architecture and flows
-
-The index is keyword-first: match what the user asked to the right doc quickly.
-
 ## Using Commands
 
 Commands live in `.cursor/commands/` (or your `--cursor-dir`) and are invoked in Cursor by typing `/`.
 
-- Use `/plan` for ambiguous or multi-file work
-- Use `/build` for implementation
-- Use `/verify` before committing
-- Each command file includes a clear protocol and output format
+- Suggested flow: `/discuss` → `/plan` → `/review` → `/build` → `/verify` → `/commit`
+- Helpers: `/fix`, `/debug`, `/explain`
+- Commands guide the agent to relevant docs, so it pulls the right context fast
+- Outputs are structured and clear (sections, checklists, next steps)
 
 ## Usage (Simple Path)
 
@@ -124,14 +116,13 @@ For `.eslintrc.js`, the CLI prints instructions — apply the changes manually.
 npx create-ai-kit --help
 ```
 
-## How It Works (Simple)
+## How It Works
 
-1. Run `npx create-ai-kit` in your project.
-2. The CLI copies templates, renames `_cursor` → `.cursor` (or `--cursor-dir` / `AI_KIT_CURSOR_DIR`), and writes files.
-3. A manifest (`.ai-kit-manifest.json`) tracks checksums for safe upgrades.
-4. If a file was modified, the CLI writes a `.new` version instead of overwriting.
-5. Your hydration prompt is saved to `docs/hydration-prompt.md` and copied to the clipboard when possible.
-6. To print the full prompt to stdout, use `--print-prompt`.
+1. **Scaffold:** run `npx create-ai-kit` to copy templates and create `.cursor/` (or `--cursor-dir` / `AI_KIT_CURSOR_DIR`).
+2. **Hydrate:** paste the prompt in Cursor; the AI fills `<!-- AI_FILL: ... -->` blocks.
+3. **Track:** a manifest (`.ai-kit-manifest.json`) keeps upgrades safe; edited files get `.new` copies.
+4. **Reuse:** the prompt is saved to `docs/hydration-prompt.md` and copied to the clipboard when possible.
+5. **Print (optional):** use `--print-prompt` to send it to stdout.
 
 ## What You Get (Output)
 
@@ -229,19 +220,6 @@ It still writes `docs/hydration-prompt.md` as a fallback prompt source.
 - Default install at the repo root. This keeps rules and docs consistent across packages.
 - For per-package installs, run `npx create-ai-kit ./packages/<name>` explicitly.
 - Mixed mode is OK: keep root rules + add package-specific rules only when needed.
-
-## How It Works
-
-AI Kit uses a **two-phase setup**:
-
-1. **Scaffold** — CLI creates generic templates with `<!-- AI_FILL: ... -->` placeholders
-2. **Hydrate** — You paste a prompt in Cursor, and AI fills in project-specific details
-
-This approach means:
-
-- No manual configuration needed
-- AI understands your specific tech stack
-- Templates stay updatable without losing customizations
 
 ## Docs Update Markers
 
