@@ -1,7 +1,3 @@
-Here is a rewritten version of the README.
-
-I have applied your preference for **fewer bullet points** by converting lists into narrative paragraphs or tables where appropriate. I also reorganized the structure to prioritize the "Happy Path" (the standard user flow) while moving edge cases (manual ESLint, folder fallbacks) to the end.
-
 ---
 
 # create-ai-kit
