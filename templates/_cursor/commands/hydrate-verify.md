@@ -11,7 +11,7 @@ Unified hydration check (files + config + placeholders).
 ## Notes
 
 - Large projects can take a while to scan. Let the check finish.
-- If the agent cannot write to `.cursor/`, run the steps locally or grant the required permission.
+- If the agent cannot write to `.cursor/`, the CLI falls back to `cursor-copy/`. You can also set `--cursor-dir cursor` (or `AI_KIT_CURSOR_DIR=cursor`), hydrate there, then copy it to `.cursor/` locally.
 
 ## Protocol
 
@@ -30,7 +30,7 @@ Unified hydration check (files + config + placeholders).
 2. **Fix failures:**
    - Create any missing required files
    - Remove or rename template-only files
-   - Ensure `.cursor/ai-kit.config.json` has real `sourceRoots`
+   - Ensure `.cursor/ai-kit.config.json` (or `${AI_KIT_CURSOR_DIR}/ai-kit.config.json` when overridden) has real `sourceRoots`
    - Resolve any placeholders reported by the placeholder check
 
 ## Scope

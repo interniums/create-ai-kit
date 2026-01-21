@@ -19,6 +19,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { resolveCursorDir } = require('../ai-kit-paths');
 let picomatch = null;
 try {
   picomatch = require('picomatch');
@@ -96,10 +97,11 @@ Options:
 }
 
 /**
- * Load config from .cursor/ai-kit.config.json
+ * Load config from the cursor config directory
  */
 function loadConfig() {
-  const configPath = path.join(process.cwd(), '.cursor/ai-kit.config.json');
+  const cursorDir = resolveCursorDir();
+  const configPath = path.join(process.cwd(), cursorDir, 'ai-kit.config.json');
 
   if (fs.existsSync(configPath)) {
     try {

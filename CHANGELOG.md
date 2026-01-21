@@ -7,11 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] - 2026-01-20
+
+### Added
+
+- `--cursor-dir <dir>` CLI flag to override the default `.cursor` location.
+- Auto-fallback to `cursor-copy/` when `.cursor/` is not writable.
+- CLI messaging and tests covering the fallback behavior.
+
+### Changed
+
+- Hydration and docs tooling now resolve cursor paths from the active folder.
+- README and template docs updated to reflect custom cursor folders.
+
+---
+
 ## [2.0.0] - 2026-01-20
 
 ### Added
 
 - `--print-prompt` CLI flag to print the full hydration prompt.
+- `--cursor-dir <dir>` CLI flag to override the default `.cursor` location.
 - Domain docs entry point at `docs/domains/README.md`.
 
 ### Changed
@@ -19,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hydration prompt output is suppressed by default; prompt file remains the fallback source.
 - README now documents the 3-layer docs system and keyword-based index usage.
 - Hydration guidance recommends Plan mode and reviewing hydrated docs for accuracy.
+- Installer auto-falls back to `cursor-copy/` when `.cursor/` is not writable, with clear messaging.
 - Updated dependencies to latest CJS-compatible versions (commander 10, fs-extra 11, chalk 4, clipboardy 2).
 
 ### Breaking Changes

@@ -16,12 +16,15 @@
 
 const fs = require('fs');
 const path = require('path');
+const { resolveCursorDir } = require('./ai-kit-paths');
 let picomatch = null;
 try {
   picomatch = require('picomatch');
 } catch {
   picomatch = null;
 }
+
+const CURSOR_DIR = resolveCursorDir();
 
 const DEFAULT_EXCLUDE_PATTERNS = [
   '**/node_modules/**',
@@ -31,7 +34,7 @@ const DEFAULT_EXCLUDE_PATTERNS = [
   '**/.git/**',
   '.git',
   '**/coverage/**',
-  '**/.cursor/**',
+  `**/${CURSOR_DIR}/**`,
   '**/docs/templates/**',
   '.ai-kit-manifest.json',
   'docs/hydration-prompt.md',
@@ -45,7 +48,7 @@ const INTERNAL_IGNORE_PREFIXES = [
   'scripts/docs-update/',
   'scripts/placeholder-check.js',
   'scripts/hydrate-verify.js',
-  '.cursor/commands/',
+  `${CURSOR_DIR}/commands/`,
 ];
 
 const TEXT_EXTENSIONS = new Set([
@@ -87,10 +90,10 @@ const LOCK_TIMEOUT_MS = 30 * 60 * 1000;
 const PROGRESS_INTERVAL_MS = 750;
 
 /**
- * Load config from .cursor/ai-kit.config.json
+ * Load config from the cursor config directory
  */
 function loadConfig() {
-  const configPath = path.join(process.cwd(), '.cursor/ai-kit.config.json');
+  const configPath = path.join(process.cwd(), CURSOR_DIR, 'ai-kit.config.json');
 
   if (fs.existsSync(configPath)) {
     try {
@@ -318,7 +321,7 @@ function buildRemediationPrompt(results) {
   lines.push(
     '- Remove or rename template-only files (DOCS-TEMPLATE.md, _template.mdc, .template.*).'
   );
-  lines.push('- Delete .cursor/HYDRATE.md after hydration is complete.');
+  lines.push(`- Delete ${CURSOR_DIR}/HYDRATE.md after hydration is complete.`);
   lines.push('- If you intentionally keep a template file, explain why.');
   lines.push('');
   lines.push('Files to fix:');

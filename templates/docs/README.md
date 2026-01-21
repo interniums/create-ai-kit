@@ -12,7 +12,7 @@
 ## 3-Layer Docs System
 
 - **Entry:** `AGENTS.md` (keyword index + quick reference)
-- **Rules:** `.cursor/rules/*.mdc` (auto-loaded conventions)
+- **Rules:** `.cursor/rules/*.mdc` (auto-loaded conventions; use `cursor-copy/` fallback or your `--cursor-dir` folder)
 - **Baseline:** `docs/*.md` and `docs/domains/*.md` (architecture and flows)
 
 **How to use:**

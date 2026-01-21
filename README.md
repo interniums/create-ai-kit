@@ -18,7 +18,7 @@ npx create-ai-kit ./apps/my-project
 
 ## What It Does
 
-1. **Scaffolds** `.cursor/commands/` with 11 workflow commands (plan, build, verify, etc.)
+1. **Scaffolds** `.cursor/commands/` (or `--cursor-dir`) with 11 workflow commands (plan, build, verify, etc.)
 2. **Creates** `AGENTS.md` skeleton with AI_FILL tokens for project-specific content
 3. **Installs** docs-update scripts for weekly documentation maintenance
 4. **Adds** a hydration placeholder check script
@@ -31,14 +31,14 @@ npx create-ai-kit ./apps/my-project
 AI Kit sets up a 3-layer documentation system designed for fast, targeted context:
 
 - **Entry:** `AGENTS.md` with a keyword-driven Documentation Index
-- **Rules:** `.cursor/rules/*.mdc` for auto-loaded conventions
+- **Rules:** `.cursor/rules/*.mdc` for auto-loaded conventions (or your `--cursor-dir`)
 - **Baseline:** `docs/*.md` and `docs/domains/*.md` for architecture and flows
 
 The index is keyword-first: match what the user asked to the right doc quickly.
 
 ## Using Commands
 
-Commands live in `.cursor/commands/` and are invoked in Cursor by typing `/`.
+Commands live in `.cursor/commands/` (or your `--cursor-dir`) and are invoked in Cursor by typing `/`.
 
 - Use `/plan` for ambiguous or multi-file work
 - Use `/build` for implementation
@@ -78,7 +78,7 @@ npx create-ai-kit --force
 ```
 
 User-modified files will create `.new` versions instead of overwriting.
-If a `.cursor` folder already exists without a manifest, running without `--force` will do a safe upgrade.
+If the cursor folder already exists without a manifest, running without `--force` will do a safe upgrade.
 
 ### Minimal Install (Zero-Config)
 
@@ -86,7 +86,7 @@ If a `.cursor` folder already exists without a manifest, running without `--forc
 npx create-ai-kit --zero-config
 ```
 
-Installs `.cursor/rules/`, `.cursor/HYDRATE.md`, and minimal docs (AGENTS.md + generated `docs/hydration-prompt.md`).
+Installs `.cursor/rules/` and `.cursor/HYDRATE.md` (or your `--cursor-dir`), plus minimal docs (AGENTS.md + generated `docs/hydration-prompt.md`).
 Docs-update scripts and hydration verification are skipped in this mode.
 
 ### Lint the Hydration Prompt
@@ -101,6 +101,8 @@ Optional file override:
 npx create-ai-kit lint --file .cursor/HYDRATE.md
 ```
 
+If you use `--cursor-dir` or the CLI fell back to `cursor-copy/`, point to that folder instead.
+
 ### Show Help
 
 ```bash
@@ -110,7 +112,7 @@ npx create-ai-kit --help
 ## How It Works (Simple)
 
 1. Run `npx create-ai-kit` in your project.
-2. The CLI copies templates, renames `_cursor` → `.cursor`, and writes files.
+2. The CLI copies templates, renames `_cursor` → `.cursor` (or `--cursor-dir` / `AI_KIT_CURSOR_DIR`), and writes files.
 3. A manifest (`.ai-kit-manifest.json`) tracks checksums for safe upgrades.
 4. If a file was modified, the CLI writes a `.new` version instead of overwriting.
 5. Your hydration prompt is saved to `docs/hydration-prompt.md` and copied to the clipboard when possible.
@@ -131,15 +133,15 @@ npx create-ai-kit --help
 4. Let the AI configure your project by filling in `<!-- AI_FILL: ... -->` blocks
 5. Review hydrated docs for accuracy (AI can make mistakes)
 6. Note: hydration on large projects can take a while — let it finish
-7. If the agent cannot write to `.cursor/`, run the steps locally or grant permission
+7. If the agent cannot write to `.cursor/`, the CLI falls back to `cursor-copy/`. You can also force a folder with `--cursor-dir` (or `AI_KIT_CURSOR_DIR=cursor`). After hydration, copy the folder to `.cursor/` locally.
 8. Run `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`) to confirm required files, config, and placeholders
 9. If you installed with `--zero-config`, skip step 8 (scripts are not installed)
-10. `.gitignore` is updated by default to ignore `.cursor/HYDRATE.md` and `docs/hydration-prompt.md` (use `--no-gitignore` to skip)
+10. `.gitignore` is updated by default to ignore `.cursor/HYDRATE.md` (or your `--cursor-dir` / `cursor-copy/`) and `docs/hydration-prompt.md` (use `--no-gitignore` to skip)
 
 ## Files Created
 
 ```
-.cursor/
+<cursor-dir>/  # default: .cursor/ (fallback: cursor-copy/)
 ├── commands/          # Workflow commands
 │   ├── build.md
 │   ├── commit.md
@@ -181,22 +183,23 @@ docs/
     └── WEEKLY-UPDATE-INPUT.md   # Weekly update input template
 ```
 
-Zero-config installs `.cursor/rules/`, `.cursor/HYDRATE.md`, and `AGENTS.md`.
+Zero-config installs `.cursor/rules/` and `.cursor/HYDRATE.md` (or your `--cursor-dir` / `cursor-copy/`), plus `AGENTS.md`.
 It still writes `docs/hydration-prompt.md` as a fallback prompt source.
 
 ## CLI Options
 
-| Option           | Description                                 |
-| ---------------- | ------------------------------------------- |
-| `--dry-run`      | Preview changes without writing files       |
-| `--force`        | Overwrite/upgrade existing installation     |
-| `--yes`          | Skip confirmation prompts                   |
-| `--no-gitignore` | Skip `.gitignore` updates                   |
-| `--zero-config`  | Install only `.cursor/rules` + minimal docs |
-| `--quiet`        | Limit output (CI-friendly)                  |
-| `--ci`           | Non-interactive, compact output             |
-| `--print-prompt` | Print full hydration prompt to stdout       |
-| `[targetDir]`    | Optional target directory                   |
+| Option               | Description                                                                      |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `--dry-run`          | Preview changes without writing files                                            |
+| `--force`            | Overwrite/upgrade existing installation                                          |
+| `--yes`              | Skip confirmation prompts                                                        |
+| `--no-gitignore`     | Skip `.gitignore` updates                                                        |
+| `--cursor-dir <dir>` | Use a custom Cursor directory                                                    |
+| `--zero-config`      | Install only `.cursor/rules` (or `--cursor-dir` / `cursor-copy/`) + minimal docs |
+| `--quiet`            | Limit output (CI-friendly)                                                       |
+| `--ci`               | Non-interactive, compact output                                                  |
+| `--print-prompt`     | Print full hydration prompt to stdout                                            |
+| `[targetDir]`        | Optional target directory                                                        |
 
 ## Monorepo Guidance
 
@@ -255,7 +258,7 @@ As your project grows, extend the docs system in three places:
 
 1. **Add docs:** Create new `docs/*.md` files or `DOCS.md` in feature folders.
 2. **Map code → docs:** Update `scripts/docs-update/file-doc-map.json` with new patterns.
-3. **Add rules (optional):** Create `.cursor/rules/<feature>.mdc` for conventions.
+3. **Add rules (optional):** Create `<cursor-dir>/rules/<feature>.mdc` for conventions (default: `.cursor/`).
 
 This keeps the update workflow accurate without making it heavier.
 
@@ -306,7 +309,7 @@ Observed issues that this kit now documents, but does not enforce:
 
 If you want to undo an install:
 
-1. Remove `.cursor/`
+1. Remove `<cursor-dir>/` (default: `.cursor/`, fallback: `cursor-copy/`)
 2. Delete `.ai-kit-manifest.json`
 3. Delete `docs/hydration-prompt.md`
 4. Remove any `.new` files created during upgrades
@@ -315,7 +318,7 @@ Tip: if you want to keep docs, only remove the generated prompt file.
 
 ## Performance Notes (Large Repos)
 
-If hydration checks are slow, adjust these in `.cursor/ai-kit.config.json`:
+If hydration checks are slow, adjust these in `.cursor/ai-kit.config.json` (or your `--cursor-dir`):
 
 - `sourceRoots`: limit to the directories you want scanned
 - `excludePatterns`: add large folders that shouldn’t be scanned

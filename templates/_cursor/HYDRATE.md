@@ -11,8 +11,8 @@ modes keep output compact, so rely on the file fallback.
 
 - Hydration on large projects can take a long time. Let the agent finish its scan.
 - Run this prompt in Plan mode for better hydration quality.
-- Some `.cursor/` folders can be write-protected. If the agent cannot write there, run hydration locally or grant write access.
-- Some environments block writing to `.cursor/`. If that happens, run the hydration steps locally or grant the agent permission to write to `.cursor/`.
+- Some `.cursor/` folders can be write-protected. If the agent cannot write there, the CLI falls back to `cursor-copy/`. You can also set `--cursor-dir cursor` (or `AI_KIT_CURSOR_DIR=cursor`), hydrate there, then copy it to `.cursor/` locally.
+- If you set `--cursor-dir` or `AI_KIT_CURSOR_DIR`, replace `.cursor` references below with that folder.
 - If AI Kit was installed with `--zero-config`, docs-update and verification scripts are not included.
 - During hydration, the agent may ask for confirmation before making changes. Approve when ready.
 
@@ -28,8 +28,8 @@ modes keep output compact, so rely on the file fallback.
 ### 2. Hydrate the templates
 
 - Open `AGENTS.md` and replace all `<!-- AI_FILL: ... -->` blocks with specific content for this project
-- Fill `.cursor/rules/app-context.mdc` with a minimal app snapshot (keep it minimal)
-- The `.cursor/rules/main.mdc` file has `alwaysApply: true` - it loads for every conversation. Keep it focused on navigation (pointing to AGENTS.md) and available commands
+- Fill `.cursor/rules/app-context.mdc` with a minimal app snapshot (keep it minimal). If using `--cursor-dir` or `AI_KIT_CURSOR_DIR`, replace `.cursor` with that value.
+- The `.cursor/rules/main.mdc` file has `alwaysApply: true` - it loads for every conversation. Keep it focused on navigation (pointing to AGENTS.md) and available commands. If using `--cursor-dir` or `AI_KIT_CURSOR_DIR`, update that folder instead.
 - If you identify major features (auth, payments, API), create corresponding `.cursor/rules/<feature>.mdc` files **only** when there is clear evidence in code or docs
 - Domain examples when applicable: `payments.mdc`, `analytics.mdc`, `api-routes.mdc`, `database.mdc`, `react.mdc`, `typescript.mdc`
 
@@ -76,7 +76,7 @@ Create inline `DOCS.md` only for complex modules. Keep each doc short, link to t
 
 ### 5. Configure source roots
 
-- Open `.cursor/ai-kit.config.json`
+- Open `.cursor/ai-kit.config.json` (or `${AI_KIT_CURSOR_DIR}/ai-kit.config.json` when overridden; same path as `--cursor-dir`)
 - Replace the `sourceRoots` placeholder with actual project directories (e.g., `["src/", "app/", "lib/"]`)
 - Adjust `excludePatterns` if needed for your project structure
 - This config is used by the docs-update scripts to scan for changes

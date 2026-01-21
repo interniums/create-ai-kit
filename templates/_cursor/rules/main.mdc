@@ -7,7 +7,8 @@ alwaysApply: true
 # AI Kit
 
 On first interaction with a new task, read `AGENTS.md` in the project root.
-If present, read `.cursor/rules/app-context.mdc` for a minimal app snapshot.
+If present, read `rules/app-context.mdc` in the cursor rules folder for a minimal app snapshot.
+If you use a custom cursor dir or the `cursor-copy/` fallback, treat paths here as relative to that folder.
 After hydration, run `/hydrate-verify` to confirm files, config, and placeholders.
 
 It contains:
@@ -34,7 +35,7 @@ Use native Cursor commands (type `/` in chat) for common workflows:
 - `/discuss` - Technical debate
 - `/explain` - Code walkthrough
 
-Commands are defined in `.cursor/commands/` (not included in `--zero-config`) and load only when invoked.
+Commands are defined in the cursor commands folder (default `.cursor/commands/`, not included in `--zero-config`) and load only when invoked.
 
 ## Documentation Policy
 

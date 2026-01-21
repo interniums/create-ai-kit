@@ -17,6 +17,7 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const { resolveCursorDir } = require('../ai-kit-paths');
 let picomatch = null;
 try {
   picomatch = require('picomatch');
@@ -70,11 +71,12 @@ const DEFAULT_CONFIG = {
 };
 
 /**
- * Load AI Kit config from .cursor/ai-kit.config.json
+ * Load AI Kit config from the cursor config directory
  * Falls back to sensible defaults if not found
  */
 function loadConfig() {
-  const configPath = path.join(process.cwd(), '.cursor/ai-kit.config.json');
+  const cursorDir = resolveCursorDir();
+  const configPath = path.join(process.cwd(), cursorDir, 'ai-kit.config.json');
 
   if (fs.existsSync(configPath)) {
     try {

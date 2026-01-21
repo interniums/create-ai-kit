@@ -6,7 +6,7 @@
  * Verifies hydration completeness:
  * - Required docs exist
  * - Template-only files removed
- * - .cursor/ai-kit.config.json has non-empty sourceRoots
+ * - Cursor config directory has non-empty sourceRoots
  * - Placeholder check passes
  *
  * Exit codes:
@@ -19,19 +19,22 @@
 const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
+const { resolveCursorDir } = require('./ai-kit-paths');
+
+const CURSOR_DIR = resolveCursorDir();
 
 const DEFAULT_REQUIRED_DOCS = [
   'AGENTS.md',
   'docs/domains/README.md',
-  '.cursor/ai-kit.config.json',
-  '.cursor/rules/app-context.mdc',
-  '.cursor/rules/main.mdc',
+  `${CURSOR_DIR}/ai-kit.config.json`,
+  `${CURSOR_DIR}/rules/app-context.mdc`,
+  `${CURSOR_DIR}/rules/main.mdc`,
   'scripts/docs-update/file-doc-map.json',
 ];
 
 const DEFAULT_FORBIDDEN_FILES = [
-  '.cursor/HYDRATE.md',
-  '.cursor/rules/_template.mdc',
+  `${CURSOR_DIR}/HYDRATE.md`,
+  `${CURSOR_DIR}/rules/_template.mdc`,
   'docs/templates/DOCS-TEMPLATE.md',
   'scripts/docs-update/file-doc-map.template.json',
 ];
@@ -41,7 +44,7 @@ function normalizePath(filePath) {
 }
 
 function readConfig() {
-  const configPath = path.join(process.cwd(), '.cursor/ai-kit.config.json');
+  const configPath = path.join(process.cwd(), CURSOR_DIR, 'ai-kit.config.json');
   if (!fs.existsSync(configPath)) {
     return { configPath, config: null, parseError: null };
   }
@@ -134,7 +137,7 @@ function main() {
   printList('Template-only files to remove or rename:', forbiddenFiles);
 
   if (!hasValidSourceRoots) {
-    console.log('Missing or empty sourceRoots in .cursor/ai-kit.config.json.');
+    console.log(`Missing or empty sourceRoots in ${CURSOR_DIR}/ai-kit.config.json.`);
     console.log('Add real source directories (e.g., "src/", "app/").');
     console.log('');
   }

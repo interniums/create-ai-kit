@@ -11,6 +11,40 @@ const readline = require('readline');
 // Version from package.json (single source of truth)
 const pkg = require('../package.json');
 
+const DEFAULT_CURSOR_DIR = '.cursor';
+const FALLBACK_CURSOR_DIR = 'cursor-copy';
+
+function normalizeCursorDirName(value) {
+  const trimmed = value.trim().replace(/\\/g, '/').replace(/\/+$/, '');
+  return trimmed.length > 0 ? trimmed : DEFAULT_CURSOR_DIR;
+}
+
+function resolveCursorDirName(projectRoot, options = {}, { dryRun } = {}) {
+  if (options.cursorDir && options.cursorDir.trim().length > 0) {
+    return normalizeCursorDirName(options.cursorDir);
+  }
+  const envValue = process.env.AI_KIT_CURSOR_DIR;
+  if (envValue && envValue.trim().length > 0) {
+    return normalizeCursorDirName(envValue);
+  }
+  const cursorConfigPath = path.join(projectRoot, DEFAULT_CURSOR_DIR, 'ai-kit.config.json');
+  if (fs.existsSync(cursorConfigPath)) {
+    return DEFAULT_CURSOR_DIR;
+  }
+  const fallbackConfigPath = path.join(projectRoot, FALLBACK_CURSOR_DIR, 'ai-kit.config.json');
+  if (fs.existsSync(fallbackConfigPath)) {
+    return FALLBACK_CURSOR_DIR;
+  }
+  if (dryRun) {
+    return DEFAULT_CURSOR_DIR;
+  }
+  const preferredPath = path.join(projectRoot, DEFAULT_CURSOR_DIR);
+  if (isWritableDir(preferredPath)) {
+    return DEFAULT_CURSOR_DIR;
+  }
+  return FALLBACK_CURSOR_DIR;
+}
+
 // Optional clipboard support - gracefully degrade if unavailable
 let clipboardy = null;
 try {
@@ -35,42 +69,42 @@ const PROJECT_SIGNATURES = {
     files: ['next.config.js', 'next.config.mjs', 'next.config.ts'],
     deps: ['next'],
     label: 'Next.js',
-    hints: [
-      'Consider creating .cursor/rules/app-router.mdc for App Router conventions',
-      'Consider creating .cursor/rules/pages-router.mdc for Pages Router conventions',
-    ],
+    hintCandidates: {
+      app: { file: 'app-router.mdc', description: 'App Router conventions' },
+      pages: { file: 'pages-router.mdc', description: 'Pages Router conventions' },
+    },
   },
   react: {
     files: ['src/App.tsx', 'src/App.jsx'],
     deps: ['react', 'react-dom'],
     label: 'React',
-    hints: ['Consider creating .cursor/rules/components.mdc for component conventions'],
+    hintCandidate: { file: 'components.mdc', description: 'component conventions' },
   },
   express: {
     files: ['app.js', 'server.js', 'src/server.ts'],
     deps: ['express'],
     label: 'Express',
-    hints: ['Consider creating .cursor/rules/api-routes.mdc for route conventions'],
+    hintCandidate: { file: 'api-routes.mdc', description: 'route conventions' },
   },
   nestjs: {
     deps: ['@nestjs/core'],
     label: 'NestJS',
-    hints: ['Consider creating .cursor/rules/modules.mdc for module conventions'],
+    hintCandidate: { file: 'modules.mdc', description: 'module conventions' },
   },
   python: {
     files: ['requirements.txt', 'pyproject.toml', 'setup.py', 'main.py'],
     label: 'Python',
-    hints: ['Consider creating .cursor/rules/python.mdc for Python conventions'],
+    hintCandidate: { file: 'python.mdc', description: 'Python conventions' },
   },
   go: {
     files: ['go.mod', 'main.go'],
     label: 'Go',
-    hints: ['Consider creating .cursor/rules/go.mdc for Go conventions'],
+    hintCandidate: { file: 'go.mdc', description: 'Go conventions' },
   },
   rust: {
     files: ['Cargo.toml'],
     label: 'Rust',
-    hints: ['Consider creating .cursor/rules/rust.mdc for Rust conventions'],
+    hintCandidate: { file: 'rust.mdc', description: 'Rust conventions' },
   },
 };
 
@@ -143,12 +177,21 @@ function detectNextRouter(projectRoot) {
   return null;
 }
 
-// Files to always preserve during upgrade (never overwrite with template)
-const PRESERVE_LIST = [
-  'AGENTS.md',
-  '.cursor/rules/main.mdc',
-  '.cursor/HYDRATE.md', // Should not exist usually, but if it does
-];
+function formatHint(cursorRulesDir, hint) {
+  return `Consider creating ${cursorRulesDir}/${hint.file} for ${hint.description}`;
+}
+
+function isWritableDir(targetPath) {
+  try {
+    fse.ensureDirSync(targetPath);
+    const testFile = path.join(targetPath, `.ai-kit-write-test-${Date.now()}`);
+    fs.writeFileSync(testFile, 'ok');
+    fs.unlinkSync(testFile);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function getOutputMode(options) {
   if (options.quiet) {
@@ -191,9 +234,9 @@ function shouldIncludeTemplate(relPath, options) {
   return ZERO_CONFIG_ALLOWLIST.some((allowed) => relPath.startsWith(allowed));
 }
 
-function resolveHydrationPromptPath(projectRoot) {
+function resolveHydrationPromptPath(projectRoot, cursorDirName) {
   const preferred = path.join(projectRoot, 'docs', 'hydration-prompt.md');
-  const fallback = path.join(projectRoot, '.cursor', 'HYDRATE.md');
+  const fallback = path.join(projectRoot, cursorDirName, 'HYDRATE.md');
   if (fs.existsSync(preferred)) {
     return preferred;
   }
@@ -263,8 +306,16 @@ async function runInit(targetDir, options) {
   const outputMode = getOutputMode(options);
   const logger = createLogger(outputMode);
   const isCompact = outputMode === OUTPUT_MODES.COMPACT;
+  const cursorDirName = resolveCursorDirName(projectRoot, options, { dryRun: options.dryRun });
+  const cursorRulesDir = `${cursorDirName}/rules`;
 
   logger.log(chalk.blue('🚀 Initializing AI Kit...'));
+  if (cursorDirName !== DEFAULT_CURSOR_DIR && !isCompact) {
+    logger.log(chalk.gray(`  Using cursor directory: ${cursorDirName}`));
+    if (!options.cursorDir && !process.env.AI_KIT_CURSOR_DIR) {
+      logger.log(chalk.gray('  Auto-selected because .cursor is not writable.'));
+    }
+  }
 
   if (!fs.existsSync(projectRoot)) {
     fse.ensureDirSync(projectRoot);
@@ -281,14 +332,14 @@ async function runInit(targetDir, options) {
   }
 
   // 1. Check for collision
-  const cursorDir = path.join(projectRoot, '.cursor');
+  const cursorDir = path.join(projectRoot, cursorDirName);
   const manifestPath = path.join(projectRoot, MANIFEST_FILE);
   const hasCursor = fs.existsSync(cursorDir);
   const hasManifest = fs.existsSync(manifestPath);
   const safeUpgradeWithoutManifest = hasCursor && !hasManifest && !options.force;
 
   if (safeUpgradeWithoutManifest) {
-    logger.warn(chalk.yellow('⚠️  A .cursor folder already exists without a manifest.'));
+    logger.warn(chalk.yellow(`⚠️  A ${cursorDirName} folder already exists without a manifest.`));
     logger.log(chalk.gray('   Proceeding with a safe upgrade (no overwrites).'));
     logger.log(chalk.gray('   Conflicts will be written as .new files.'));
   }
@@ -369,13 +420,18 @@ async function runInit(targetDir, options) {
   const creations = [];
   const skips = [];
   const newFiles = [];
+  const preserveList = [
+    'AGENTS.md',
+    `${cursorRulesDir}/main.mdc`,
+    `${cursorDirName}/HYDRATE.md`, // Should not exist usually, but if it does
+  ];
 
   for (const relPath of filesToProcess) {
     let targetRelPath = relPath;
 
-    // Rename _cursor to .cursor
+    // Rename _cursor to the target cursor directory
     if (targetRelPath.startsWith('_cursor')) {
-      targetRelPath = targetRelPath.replace('_cursor', '.cursor');
+      targetRelPath = targetRelPath.replace('_cursor', cursorDirName);
     }
     // Rename file-doc-map.template.json
     if (targetRelPath.includes('file-doc-map.template.json')) {
@@ -385,11 +441,20 @@ async function runInit(targetDir, options) {
     const templatePath = path.join(TEMPLATES_DIR, relPath);
     const targetPath = path.join(projectRoot, targetRelPath);
 
-    const templateContent = fs.readFileSync(templatePath);
+    let templateContent = fs.readFileSync(templatePath);
+    if (
+      cursorDirName !== DEFAULT_CURSOR_DIR &&
+      targetRelPath === 'scripts/docs-update/file-doc-map.json'
+    ) {
+      const updated = templateContent
+        .toString('utf-8')
+        .replace('.cursor/rules/**', `${cursorDirName}/rules/**`);
+      templateContent = Buffer.from(updated, 'utf-8');
+    }
     const templateChecksum = calculateChecksum(templateContent);
 
     // Check preserve list
-    if (PRESERVE_LIST.some((p) => targetRelPath.endsWith(p)) && fs.existsSync(targetPath)) {
+    if (preserveList.some((p) => targetRelPath.endsWith(p)) && fs.existsSync(targetPath)) {
       skips.push({ path: targetRelPath, reason: 'Preserved' });
       // Update manifest with CURRENT file checksum to avoid future diffs
       const currentContent = fs.readFileSync(targetPath);
@@ -451,41 +516,70 @@ async function runInit(targetDir, options) {
     newFiles.forEach((f) => logger.log(chalk.yellow(`  ? Create: ${f.path}`)));
     skips.forEach((f) => logger.log(chalk.gray(`  - Skip: ${f.path} (${f.reason})`)));
   } else {
+    const criticalFailures = [];
+    const optionalFailures = [];
+    const recordFailure = (bucket, filePath, error) => {
+      bucket.push({ path: filePath, message: error?.message || 'Check file permissions.' });
+    };
+
     // Write creations
     for (const f of creations) {
-      fse.outputFileSync(path.join(projectRoot, f.path), f.content);
-      manifest.files[f.path] = f.checksum;
-      logger.log(chalk.green(`  Created: ${f.path}`));
+      const outputPath = path.join(projectRoot, f.path);
+      try {
+        fse.outputFileSync(outputPath, f.content);
+        manifest.files[f.path] = f.checksum;
+        logger.log(chalk.green(`  Created: ${f.path}`));
+      } catch (error) {
+        recordFailure(criticalFailures, f.path, error);
+      }
     }
     // Write updates
     for (const f of updates) {
-      fse.outputFileSync(path.join(projectRoot, f.path), f.content);
-      manifest.files[f.path] = f.checksum;
-      logger.log(chalk.blue(`  Updated: ${f.path}`));
+      const outputPath = path.join(projectRoot, f.path);
+      try {
+        fse.outputFileSync(outputPath, f.content);
+        manifest.files[f.path] = f.checksum;
+        logger.log(chalk.blue(`  Updated: ${f.path}`));
+      } catch (error) {
+        recordFailure(criticalFailures, f.path, error);
+      }
     }
     // Write .new files
     for (const f of newFiles) {
-      fse.outputFileSync(path.join(projectRoot, f.path), f.content);
-      logger.log(chalk.yellow(`  Created: ${f.path}`));
+      const outputPath = path.join(projectRoot, f.path);
+      try {
+        fse.outputFileSync(outputPath, f.content);
+        logger.log(chalk.yellow(`  Created: ${f.path}`));
+      } catch (error) {
+        recordFailure(criticalFailures, f.path, error);
+      }
     }
 
     // Write Manifest
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+    try {
+      fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
+    } catch (error) {
+      recordFailure(criticalFailures, path.relative(projectRoot, manifestPath), error);
+    }
 
     // Update .gitignore
     if (options.gitignore) {
       const gitignorePath = path.join(projectRoot, '.gitignore');
-      const ignoreEntries = ['.cursor/HYDRATE.md', 'docs/hydration-prompt.md'];
-      if (fs.existsSync(gitignorePath)) {
-        const content = fs.readFileSync(gitignorePath, 'utf-8');
-        const missingEntries = ignoreEntries.filter((entry) => !content.includes(entry));
-        if (missingEntries.length > 0) {
-          fs.appendFileSync(gitignorePath, `\n${missingEntries.join('\n')}\n`);
-          logger.log(chalk.gray('  Updated .gitignore'));
+      const ignoreEntries = [`${cursorDirName}/HYDRATE.md`, 'docs/hydration-prompt.md'];
+      try {
+        if (fs.existsSync(gitignorePath)) {
+          const content = fs.readFileSync(gitignorePath, 'utf-8');
+          const missingEntries = ignoreEntries.filter((entry) => !content.includes(entry));
+          if (missingEntries.length > 0) {
+            fs.appendFileSync(gitignorePath, `\n${missingEntries.join('\n')}\n`);
+            logger.log(chalk.gray('  Updated .gitignore'));
+          }
+        } else {
+          fs.writeFileSync(gitignorePath, `${ignoreEntries.join('\n')}\n`);
+          logger.log(chalk.green('  Created .gitignore'));
         }
-      } else {
-        fs.writeFileSync(gitignorePath, `${ignoreEntries.join('\n')}\n`);
-        logger.log(chalk.green('  Created .gitignore'));
+      } catch (error) {
+        recordFailure(optionalFailures, path.relative(projectRoot, gitignorePath), error);
       }
     }
 
@@ -493,32 +587,57 @@ async function runInit(targetDir, options) {
     if (!options.zeroConfig) {
       const pkgPath = path.join(projectRoot, 'package.json');
       if (fs.existsSync(pkgPath)) {
-        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-        pkg.scripts = pkg.scripts || {};
+        try {
+          const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+          pkg.scripts = pkg.scripts || {};
 
-        const newScripts = {
-          'ai-kit:verify': 'node scripts/hydrate-verify.js',
-          'docs:update': 'node scripts/docs-update/generate-context.js',
-          'docs:check': 'node scripts/docs-update/check-markers.js',
-          'docs:check:ci': 'node scripts/docs-update/check-markers.js --ci',
-          'docs:verify-inline': 'node scripts/docs-update/verify-inline.js',
-        };
+          const newScripts = {
+            'ai-kit:verify': 'node scripts/hydrate-verify.js',
+            'docs:update': 'node scripts/docs-update/generate-context.js',
+            'docs:check': 'node scripts/docs-update/check-markers.js',
+            'docs:check:ci': 'node scripts/docs-update/check-markers.js --ci',
+            'docs:verify-inline': 'node scripts/docs-update/verify-inline.js',
+          };
 
-        let scriptsAdded = false;
-        for (const [key, val] of Object.entries(newScripts)) {
-          if (!pkg.scripts[key]) {
-            pkg.scripts[key] = val;
-            scriptsAdded = true;
-          } else if (pkg.scripts[key] !== val) {
-            logger.warn(chalk.yellow(`  Skipping script "${key}": already exists`));
+          let scriptsAdded = false;
+          for (const [key, val] of Object.entries(newScripts)) {
+            if (!pkg.scripts[key]) {
+              pkg.scripts[key] = val;
+              scriptsAdded = true;
+            } else if (pkg.scripts[key] !== val) {
+              logger.warn(chalk.yellow(`  Skipping script "${key}": already exists`));
+            }
           }
-        }
 
-        if (scriptsAdded) {
-          fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
-          logger.log(chalk.gray('  Updated package.json scripts'));
+          if (scriptsAdded) {
+            fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+            logger.log(chalk.gray('  Updated package.json scripts'));
+          }
+        } catch (error) {
+          recordFailure(optionalFailures, path.relative(projectRoot, pkgPath), error);
         }
       }
+    }
+
+    if (criticalFailures.length > 0) {
+      logger.error(chalk.red('\n❌ Some required files could not be written:'));
+      criticalFailures.forEach((failure) => {
+        logger.error(chalk.red(`- ${failure.path}: ${failure.message}`));
+      });
+      logger.error(
+        chalk.gray(
+          `\n💡 If ${cursorDirName} is locked, retry with --cursor-dir <dir> or AI_KIT_CURSOR_DIR.`
+        )
+      );
+      process.exit(1);
+    }
+
+    if (optionalFailures.length > 0) {
+      logger.warn(chalk.yellow('\n⚠️  Optional files could not be written:'));
+      optionalFailures.forEach((failure) => {
+        logger.warn(chalk.yellow(`- ${failure.path}: ${failure.message}`));
+      });
+      logger.warn(chalk.gray('   You can update these files manually.'));
     }
 
     // Success Message & Clipboard
@@ -534,15 +653,10 @@ async function runInit(targetDir, options) {
       const hints = detectedProjects.flatMap((p) => {
         if (p.key === 'nextjs') {
           const router = detectNextRouter(projectRoot);
-          if (router === 'app') {
-            return [p.hints[0]];
-          }
-          if (router === 'pages') {
-            return [p.hints[1]];
-          }
-          return [];
+          const candidate = router ? p.hintCandidates?.[router] : null;
+          return candidate ? [formatHint(cursorRulesDir, candidate)] : [];
         }
-        return p.hints || [];
+        return p.hintCandidate ? [formatHint(cursorRulesDir, p.hintCandidate)] : [];
       });
       if (hints.length > 0 && !isCompact) {
         logger.log(chalk.gray('\nSuggestions based on your stack:'));
@@ -553,7 +667,7 @@ async function runInit(targetDir, options) {
     }
 
     // Read Hydration prompt, save fallback, and copy to clipboard
-    const hydratePath = path.join(projectRoot, '.cursor/HYDRATE.md');
+    const hydratePath = path.join(projectRoot, cursorDirName, 'HYDRATE.md');
     if (fs.existsSync(hydratePath)) {
       const hydrateContent = fs.readFileSync(hydratePath, 'utf-8');
       const docsHydratePath = path.join(projectRoot, 'docs', 'hydration-prompt.md');
@@ -561,7 +675,7 @@ async function runInit(targetDir, options) {
         '# Hydration Prompt (Generated)',
         '',
         'This file is generated by create-ai-kit.',
-        'Source of truth: .cursor/HYDRATE.md.',
+        `Source of truth: ${cursorDirName}/HYDRATE.md.`,
         'Use this if your clipboard is empty.',
         'Not part of the docs-update workflow.',
         '',
@@ -623,9 +737,10 @@ async function runInit(targetDir, options) {
 async function runLint(options) {
   const outputMode = getOutputMode(options);
   const logger = createLogger(outputMode);
+  const cursorDirName = resolveCursorDirName(process.cwd(), options, { dryRun: true });
   const targetPath = options.file
     ? path.resolve(process.cwd(), options.file)
-    : resolveHydrationPromptPath(process.cwd());
+    : resolveHydrationPromptPath(process.cwd(), cursorDirName);
 
   if (!fs.existsSync(targetPath)) {
     logger.error(chalk.red('❌ Hydration prompt not found.'));
@@ -665,7 +780,8 @@ async function main() {
     .option('--no-gitignore', 'Skip .gitignore updates')
     .option('--quiet', 'Limit output (CI-friendly)')
     .option('--ci', 'Disable prompts and clipboard output')
-    .option('--zero-config', 'Install only .cursor/rules + minimal docs')
+    .option('--cursor-dir <dir>', 'Use custom Cursor directory (default: .cursor)')
+    .option('--zero-config', 'Install only cursor rules + minimal docs (respects --cursor-dir)')
     .option('--print-prompt', 'Print full hydration prompt to stdout')
     .argument('[targetDir]', 'Target directory (defaults to current)')
     .action(async (targetDir, options) => {
@@ -678,6 +794,7 @@ async function main() {
     .option('--quiet', 'Limit output (CI-friendly)')
     .option('--ci', 'Disable prompts and clipboard output')
     .option('--file <path>', 'Prompt file to lint')
+    .option('--cursor-dir <dir>', 'Use custom Cursor directory (default: .cursor)')
     .option('--max-lines <number>', 'Maximum line count', (val) => Number.parseInt(val, 10))
     .option('--max-chars <number>', 'Maximum character count', (val) => Number.parseInt(val, 10))
     .option('--max-repeated-lines <number>', 'Minimum repeats to flag a line', (val) =>

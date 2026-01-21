@@ -1,5 +1,5 @@
 {
-  "description": "Maps file patterns to related documentation files. Used by generate-context.js to identify which docs need updating based on changed files.",
+  "description": "Maps file patterns to related documentation files. Used by generate-context.js to identify which docs need updating based on changed files. The installer rewrites cursor paths when --cursor-dir is set.",
   "mappings": [
     {
       "pattern": ".cursor/rules/**",

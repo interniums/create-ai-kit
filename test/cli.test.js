@@ -40,11 +40,11 @@ function cleanupDir(dir) {
 /**
  * Helper to run CLI in a directory
  */
-function runCLI(cwd, args = []) {
+function runCLI(cwd, args = [], extraEnv = {}) {
   const result = spawnSync('node', [CLI_PATH, ...args], {
     cwd,
     encoding: 'utf-8',
-    env: { ...process.env, NO_COLOR: '1' },
+    env: { ...process.env, NO_COLOR: '1', ...extraEnv },
   });
 
   return {
@@ -305,6 +305,57 @@ describe('AI Kit CLI', () => {
       const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
       assert.ok(Array.isArray(config.sourceRoots), 'Config should have sourceRoots array');
       assert.ok(Array.isArray(config.excludePatterns), 'Config should have excludePatterns array');
+    });
+  });
+
+  describe('Custom Cursor Directory', () => {
+    let tempDir;
+
+    beforeEach(() => {
+      tempDir = createTempDir();
+      fs.writeFileSync(
+        path.join(tempDir, 'package.json'),
+        JSON.stringify({ name: 'test-project' }, null, 2)
+      );
+    });
+
+    afterEach(() => {
+      cleanupDir(tempDir);
+    });
+
+    it('should write files to a custom cursor directory', () => {
+      runCLI(tempDir, ['--yes', '--cursor-dir', 'cursor']);
+
+      const customConfigPath = path.join(tempDir, 'cursor/ai-kit.config.json');
+      assert.ok(fs.existsSync(customConfigPath), 'Config should be written to cursor/');
+      assert.ok(!fs.existsSync(path.join(tempDir, '.cursor')), '.cursor should not be created');
+    });
+
+    it('should prefer --cursor-dir over AI_KIT_CURSOR_DIR', () => {
+      runCLI(tempDir, ['--yes', '--cursor-dir', 'cursor'], { AI_KIT_CURSOR_DIR: 'other' });
+
+      const customConfigPath = path.join(tempDir, 'cursor/ai-kit.config.json');
+      assert.ok(fs.existsSync(customConfigPath), 'Config should use --cursor-dir value');
+      assert.ok(!fs.existsSync(path.join(tempDir, 'other')), 'Env cursor dir should be ignored');
+    });
+
+    it('should fall back to cursor-copy when .cursor is not writable', () => {
+      if (process.platform === 'win32') {
+        return;
+      }
+      const cursorPath = path.join(tempDir, '.cursor');
+      fs.mkdirSync(cursorPath, { recursive: true });
+      fs.chmodSync(cursorPath, 0o555);
+      try {
+        const result = runCLI(tempDir, ['--yes']);
+        assert.strictEqual(result.exitCode, 0, 'Should still exit with code 0');
+        assert.ok(
+          fs.existsSync(path.join(tempDir, 'cursor-copy/ai-kit.config.json')),
+          'Fallback cursor-copy config should be created'
+        );
+      } finally {
+        fs.chmodSync(cursorPath, 0o755);
+      }
     });
   });
 });

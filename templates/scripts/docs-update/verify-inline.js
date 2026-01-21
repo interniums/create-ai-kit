@@ -14,6 +14,9 @@
 
 const fs = require('fs');
 const path = require('path');
+const { resolveCursorDir } = require('../ai-kit-paths');
+
+const CURSOR_DIR = resolveCursorDir();
 
 const ROOT_DIR = path.resolve(__dirname, '../..');
 const DOCS_DIR = path.join(ROOT_DIR, 'docs');
@@ -49,7 +52,7 @@ function extractReferences(content) {
 }
 
 function loadConfig() {
-  const configPath = path.join(ROOT_DIR, '.cursor', 'ai-kit.config.json');
+  const configPath = path.join(ROOT_DIR, CURSOR_DIR, 'ai-kit.config.json');
   if (!fs.existsSync(configPath)) {
     return { sourceRoots: ['src/'] };
   }
@@ -128,8 +131,8 @@ function verifyReferences() {
     docsFiles.push(agentsPath);
   }
 
-  // Check .cursor/rules/*.mdc
-  const rulesDir = path.join(ROOT_DIR, '.cursor', 'rules');
+  // Check cursor rules/*.mdc
+  const rulesDir = path.join(ROOT_DIR, CURSOR_DIR, 'rules');
   if (fs.existsSync(rulesDir)) {
     const ruleFiles = fs.readdirSync(rulesDir).filter((f) => f.endsWith('.mdc'));
     for (const file of ruleFiles) {
