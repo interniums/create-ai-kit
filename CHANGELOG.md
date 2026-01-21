@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.0] - 2026-01-21
+
+### Added
+
+- Hydration tips now call out that large projects can take longer.
+- Hydration prompt instructs users to run `npx create-ai-kit eslint-setup` themselves.
+
+### Changed
+
+- CLI output removes a duplicate hydration warning line.
+
+---
+
 ## [2.3.0] - 2026-01-21
 
 ### Added
@@ -273,6 +286,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date       | Highlights                              |
 | ------- | ---------- | --------------------------------------- |
+| 2.4.0   | 2026-01-21 | Hydration tips + eslint-setup note      |
 | 2.3.0   | 2026-01-21 | Docs/CLI alignment, markers, tests      |
 | 2.2.0   | 2026-01-21 | eslint-setup command, auto sourceRoots  |
 | 2.1.0   | 2026-01-20 | Custom cursor-dir, fallback support     |
@@ -290,7 +304,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v2.3.0...HEAD
+[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v2.4.0...HEAD
+[2.4.0]: https://github.com/interniums/create-ai-kit/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/interniums/create-ai-kit/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/interniums/create-ai-kit/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/interniums/create-ai-kit/compare/v2.0.0...v2.1.0

@@ -142,7 +142,7 @@ npx create-ai-kit --help
 
 ## After Installation
 
-Tip: Open Cursor Composer (Cmd+Shift+I) in Plan mode and paste the hydration prompt (`docs/hydration-prompt.md` or clipboard). The agent may ask for confirmation on some changes. Review hydrated docs after.
+Tip: Open Cursor Composer (Cmd+Shift+I) in Plan mode and paste the hydration prompt (`docs/hydration-prompt.md` or clipboard). Hydration can take a while on large projects. The agent may ask for confirmation on some changes. Review hydrated docs after.
 
 Verify: `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`). This now checks `.cursor` placeholders and manifest drift.
 

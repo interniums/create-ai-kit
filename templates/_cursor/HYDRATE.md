@@ -15,6 +15,7 @@ modes keep output compact, so rely on the file fallback.
 - If you set `--cursor-dir` or `AI_KIT_CURSOR_DIR`, replace `.cursor` references below with that folder.
 - If AI Kit was installed with `--zero-config`, docs-update and verification scripts are not included.
 - During hydration, the agent may ask for confirmation before making changes. Approve when ready.
+- After hydration, run `npx create-ai-kit eslint-setup` yourself (do not ask the agent to run it).
 
 ## Your Tasks
 

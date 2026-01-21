@@ -759,7 +759,6 @@ async function runInit(targetDir, options) {
         logger.log(chalk.gray('--- HYDRATION PROMPT END ---\n'));
       } else if (outputMode === OUTPUT_MODES.FULL) {
         logger.log(chalk.gray('\n📎 Prompt output suppressed (use --print-prompt to show it).'));
-        logger.log(chalk.gray('   Note: AI hydration can make mistakes. Review docs after.'));
       }
     }
 
@@ -768,6 +767,7 @@ async function runInit(targetDir, options) {
         chalk.cyan('\n💡 Paste the prompt in Cursor Composer (Cmd+Shift+I) in Plan mode.')
       );
       logger.log(chalk.gray('   The agent may ask for confirmation on some changes.'));
+      logger.log(chalk.gray('   Hydration can take a while on large projects.'));
       logger.log(chalk.gray('   Review hydrated docs after — AI can make mistakes.'));
       if (!options.zeroConfig) {
         logger.log(chalk.gray('\n   Verify: npm run ai-kit:verify'));
