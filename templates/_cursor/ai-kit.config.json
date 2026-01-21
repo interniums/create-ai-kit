@@ -1,7 +1,7 @@
 {
-  "sourceRoots": [
-    "<!-- AI_FILL: Add your source directories, e.g. 'src/', 'app/', 'lib/', 'packages/' -->"
-  ],
+  "$schema": "https://ai-kit.dev/schema/config.json",
+  "$comment": "Replace PLACEHOLDER values with your project paths (e.g. 'src/', 'app/')",
+  "sourceRoots": ["PLACEHOLDER"],
   "excludePatterns": [
     "**/node_modules/**",
     "**/dist/**",

@@ -81,6 +81,7 @@ const TEXT_EXTENSIONS = new Set([
 
 const PLACEHOLDER_PATTERNS = [
   { id: 'AI_FILL', regex: /AI_FILL/ },
+  { id: 'PLACEHOLDER', regex: /["']PLACEHOLDER["']/ },
   { id: '_TEMPLATE', regex: /_TEMPLATE/ },
   { id: 'DOCS-TEMPLATE', regex: /DOCS-TEMPLATE/ },
 ];
@@ -100,9 +101,11 @@ function loadConfig() {
       const content = fs.readFileSync(configPath, 'utf-8');
       const config = JSON.parse(content);
 
-      // Filter out AI_FILL placeholders
+      // Filter out placeholder values
       if (config.sourceRoots) {
-        config.sourceRoots = config.sourceRoots.filter((root) => !root.includes('AI_FILL'));
+        config.sourceRoots = config.sourceRoots.filter(
+          (root) => !root.includes('AI_FILL') && root !== 'PLACEHOLDER'
+        );
       }
 
       if (config.excludePatterns) {
@@ -317,7 +320,7 @@ function buildRemediationPrompt(results) {
   lines.push('You are finishing AI Kit hydration. Resolve all placeholders below.');
   lines.push('');
   lines.push('Instructions:');
-  lines.push('- Replace every AI_FILL block with real project content.');
+  lines.push('- Replace every AI_FILL block and PLACEHOLDER value with real project content.');
   lines.push(
     '- Remove or rename template-only files (DOCS-TEMPLATE.md, _template.mdc, .template.*).'
   );

@@ -2,6 +2,14 @@
 
 Custom ESLint rules to enforce documentation workflow discipline.
 
+## Quick Setup
+
+```bash
+npx create-ai-kit eslint-setup
+```
+
+This command auto-detects your ESLint config format and adds the rules. Supports `.eslintrc.json`, `.eslintrc.js`, `eslint.config.js`, `package.json` eslintConfig, and YAML configs (with manual instructions).
+
 ## Rules
 
 ### `docs-marker-expiry` (error)

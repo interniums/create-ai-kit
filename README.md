@@ -103,6 +103,14 @@ npx create-ai-kit lint --file .cursor/HYDRATE.md
 
 If you use `--cursor-dir` or the CLI fell back to `cursor-copy/`, point to that folder instead.
 
+### Add ESLint Rules (Optional)
+
+```bash
+npx create-ai-kit eslint-setup
+```
+
+Automatically detects your ESLint config format and adds the AI Kit docs-marker rules. Supports `.eslintrc.json`, `.eslintrc.js`, `eslint.config.js`, and `package.json` eslintConfig.
+
 ### Show Help
 
 ```bash
@@ -127,16 +135,17 @@ npx create-ai-kit --help
 
 ## After Installation
 
-1. Open Cursor (Cmd+Shift+I for Composer)
-2. Paste the hydration prompt (`docs/hydration-prompt.md` or clipboard)
-3. Run it in Plan mode for better hydration
-4. Let the AI configure your project by filling in `<!-- AI_FILL: ... -->` blocks
-5. Review hydrated docs for accuracy (AI can make mistakes)
-6. Note: hydration on large projects can take a while — let it finish
-7. If the agent cannot write to `.cursor/`, the CLI falls back to `cursor-copy/`. You can also force a folder with `--cursor-dir` (or `AI_KIT_CURSOR_DIR=cursor`). After hydration, copy the folder to `.cursor/` locally.
-8. Run `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`) to confirm required files, config, and placeholders
-9. If you installed with `--zero-config`, skip step 8 (scripts are not installed)
-10. `.gitignore` is updated by default to ignore `.cursor/HYDRATE.md` (or your `--cursor-dir` / `cursor-copy/`) and `docs/hydration-prompt.md` (use `--no-gitignore` to skip)
+Tip: Open Cursor Composer (Cmd+Shift+I) in Plan mode and paste the hydration prompt (`docs/hydration-prompt.md` or clipboard). The agent may ask for confirmation on some changes. Review hydrated docs after.
+
+Verify: `npm run ai-kit:verify` (or `node scripts/hydrate-verify.js`).
+
+If ESLint is configured, run: `npx create-ai-kit eslint-setup`.
+
+Notes:
+
+- If the agent cannot write to `.cursor/`, the CLI falls back to `cursor-copy/`. You can force a folder with `--cursor-dir` (or `AI_KIT_CURSOR_DIR=cursor`). After hydration, copy the folder to `.cursor/` locally.
+- If you installed with `--zero-config`, skip verification (scripts are not installed).
+- `.gitignore` is updated by default to ignore `.cursor/HYDRATE.md` (or your `--cursor-dir` / `cursor-copy/`) and `docs/hydration-prompt.md` (use `--no-gitignore` to skip).
 
 ## Files Created
 
@@ -200,6 +209,13 @@ It still writes `docs/hydration-prompt.md` as a fallback prompt source.
 | `--ci`               | Non-interactive, compact output                                                  |
 | `--print-prompt`     | Print full hydration prompt to stdout                                            |
 | `[targetDir]`        | Optional target directory                                                        |
+
+## Subcommands
+
+| Command        | Description                                     |
+| -------------- | ----------------------------------------------- |
+| `lint`         | Lint hydration prompt for size and repetition   |
+| `eslint-setup` | Add AI Kit ESLint rules to your existing config |
 
 ## Monorepo Guidance
 

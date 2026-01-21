@@ -32,6 +32,7 @@ modes keep output compact, so rely on the file fallback.
 - The `.cursor/rules/main.mdc` file has `alwaysApply: true` - it loads for every conversation. Keep it focused on navigation (pointing to AGENTS.md) and available commands. If using `--cursor-dir` or `AI_KIT_CURSOR_DIR`, update that folder instead.
 - If you identify major features (auth, payments, API), create corresponding `.cursor/rules/<feature>.mdc` files **only** when there is clear evidence in code or docs
 - Domain examples when applicable: `payments.mdc`, `analytics.mdc`, `api-routes.mdc`, `database.mdc`, `react.mdc`, `typescript.mdc`
+- For each major domain identified, create `docs/domains/<domain>.md` (use the template structure in `docs/domains/README.md`) and update the domains table
 
 **Plan mode note:** Hydrate `AGENTS.md` and `.cursor/rules/app-context.mdc` first to improve context coverage.
 
@@ -74,13 +75,13 @@ Create inline `DOCS.md` only for complex modules. Keep each doc short, link to t
 
 </details>
 
-### 5. Configure source roots
+### 5. Review source roots (auto-detected)
 
-- Open `.cursor/ai-kit.config.json` (or `${AI_KIT_CURSOR_DIR}/ai-kit.config.json` when overridden; same path as `--cursor-dir`)
-- Replace the `sourceRoots` placeholder with actual project directories (e.g., `["src/", "app/", "lib/"]`)
+The CLI auto-detects source directories and pre-fills `.cursor/ai-kit.config.json`.
+
+- **Usually no action needed** — verify the detected `sourceRoots` are correct
 - Adjust `excludePatterns` if needed for your project structure
-- This config is used by the docs-update scripts to scan for changes
-- Optional: set `requiredDocs` to override the default required files for hydration verification
+- Optional: set `requiredDocs` to override default required files for hydration verification
 
 ### 6. Configure file-doc mappings
 
@@ -88,33 +89,13 @@ Create inline `DOCS.md` only for complex modules. Keep each doc short, link to t
 - Fill in `mappings` based on this project's structure (e.g. mapping `src/features/*` to docs)
 - Ensure the JSON is valid
 
-### 7. Configure ESLint rules (optional, strict mode)
+### 7. Configure ESLint rules (optional — skip if no ESLint)
 
-Add the docs marker rules to enforce documentation hygiene:
+**SKIP this step** if the project does not have ESLint configured (no `eslint.config.js`, `.eslintrc.*`, or eslint in package.json).
 
-```javascript
-// eslint.config.js (flat config)
-const localRules = require('./eslint-rules');
+If ESLint IS configured, run: `npx create-ai-kit eslint-setup`
 
-module.exports = [
-  {
-    plugins: { 'local-rules': localRules },
-    rules: {
-      'local-rules/docs-marker-expiry': ['error', { maxDays: 14 }],
-      'local-rules/docs-marker-expiring': ['warn', { maxDays: 14, warnDays: 7 }],
-    },
-  },
-];
-```
-
-These rules:
-
-- Error on `@docs-update` markers older than `maxDays`
-- Error on missing/invalid timestamps
-- Warn when markers are close to expiring
-- Use format: `@docs-update(2024-01-15): path/to/doc.md - description`
-
-See `eslint-rules/README.md` for more options.
+This will automatically detect your ESLint config format and add the AI Kit rules.
 
 ### 8. Populate anti-patterns
 

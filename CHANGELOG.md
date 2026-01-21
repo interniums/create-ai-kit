@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.2.0] - 2026-01-21
+
+### Added
+
+- `eslint-setup` subcommand to auto-add AI Kit ESLint rules to existing configs.
+- Auto-detection of source directories (`src/`, `app/`, `lib/`, etc.) for `ai-kit.config.json`.
+- Domain docs creation instruction in HYDRATE.md.
+
+### Changed
+
+- CLI terminal output changed from 6 numbered steps to concise tip format.
+- HYDRATE.md sourceRoots step now shows "auto-detected" since CLI pre-fills values.
+- ESLint hydration step now uses `npx create-ai-kit eslint-setup` command.
+- eslint-rules README updated with quick setup section.
+
+### Fixed
+
+- Commander subcommand options now properly parsed with `enablePositionalOptions()`.
+
+---
+
 ## [2.1.0] - 2026-01-20
 
 ### Added
@@ -228,21 +249,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History Summary
 
-| Version | Date       | Highlights                          |
-| ------- | ---------- | ----------------------------------- |
-| 1.7.0   | 2026-01-20 | Target dir, glob fixes, packaging   |
-| 1.6.1   | 2026-01-19 | Updated npm badge source            |
-| 1.5.0   | 2026-01-19 | Hydration fallback + app context    |
-| 1.4.0   | 2026-01-19 | Marker rules + CI check             |
-| 1.3.1   | 2026-01-18 | Cleaned npm bin config              |
-| 1.3.0   | 2026-01-18 | Hydration check + docs improvements |
-| 1.2.0   | 2026-01-18 | Safe upgrade without manifest       |
-| 1.1.0   | 2026-01-XX | ESLint rules, marker scripts, tests |
-| 1.0.0   | 2026-01-XX | Initial release                     |
+| Version | Date       | Highlights                              |
+| ------- | ---------- | --------------------------------------- |
+| 2.2.0   | 2026-01-21 | eslint-setup command, auto sourceRoots  |
+| 2.1.0   | 2026-01-20 | Custom cursor-dir, fallback support     |
+| 2.0.0   | 2026-01-20 | 3-layer docs, domain docs, print-prompt |
+| 1.8.0   | 2026-01-20 | ai-kit:verify, zero-config mode         |
+| 1.7.0   | 2026-01-20 | Target dir, glob fixes, packaging       |
+| 1.6.1   | 2026-01-19 | Updated npm badge source                |
+| 1.5.0   | 2026-01-19 | Hydration fallback + app context        |
+| 1.4.0   | 2026-01-19 | Marker rules + CI check                 |
+| 1.3.1   | 2026-01-18 | Cleaned npm bin config                  |
+| 1.3.0   | 2026-01-18 | Hydration check + docs improvements     |
+| 1.2.0   | 2026-01-18 | Safe upgrade without manifest           |
+| 1.1.0   | 2026-01-XX | ESLint rules, marker scripts, tests     |
+| 1.0.0   | 2026-01-XX | Initial release                         |
 
 ---
 
-[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/interniums/create-ai-kit/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/interniums/create-ai-kit/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/interniums/create-ai-kit/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/interniums/create-ai-kit/compare/v1.8.0...v2.0.0
+[1.8.0]: https://github.com/interniums/create-ai-kit/compare/v1.7.0...v1.8.0
 [1.7.0]: https://github.com/interniums/create-ai-kit/compare/v1.6.1...v1.7.0
 [1.6.1]: https://github.com/interniums/create-ai-kit/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/interniums/create-ai-kit/compare/v1.5.0...v1.6.0

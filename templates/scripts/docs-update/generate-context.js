@@ -83,9 +83,11 @@ function loadConfig() {
       const content = fs.readFileSync(configPath, 'utf-8');
       const config = JSON.parse(content);
 
-      // Filter out AI_FILL placeholder entries
+      // Filter out placeholder values
       if (config.sourceRoots) {
-        config.sourceRoots = config.sourceRoots.filter((root) => !root.includes('AI_FILL'));
+        config.sourceRoots = config.sourceRoots.filter(
+          (root) => !root.includes('AI_FILL') && root !== 'PLACEHOLDER'
+        );
         // Fall back to defaults if all entries were placeholders
         if (config.sourceRoots.length === 0) {
           console.warn('⚠️  No source roots configured in ai-kit.config.json. Using defaults.');

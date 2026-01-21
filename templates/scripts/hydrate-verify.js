@@ -75,7 +75,10 @@ function filterSourceRoots(sourceRoots) {
       return false;
     }
     const trimmed = root.trim().replace(/\\/g, '/');
-    return trimmed.length > 0 && !trimmed.includes('AI_FILL');
+    // Filter out placeholder values
+    const isPlaceholder =
+      trimmed.includes('AI_FILL') || trimmed === 'PLACEHOLDER' || trimmed.length === 0;
+    return !isPlaceholder;
   });
 }
 

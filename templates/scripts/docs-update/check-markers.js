@@ -108,9 +108,11 @@ function loadConfig() {
       const content = fs.readFileSync(configPath, 'utf-8');
       const config = JSON.parse(content);
 
-      // Filter out AI_FILL placeholders
+      // Filter out placeholder values
       if (config.sourceRoots) {
-        config.sourceRoots = config.sourceRoots.filter((root) => !root.includes('AI_FILL'));
+        config.sourceRoots = config.sourceRoots.filter(
+          (root) => !root.includes('AI_FILL') && root !== 'PLACEHOLDER'
+        );
         if (config.sourceRoots.length === 0) {
           config.sourceRoots = DEFAULT_CONFIG.sourceRoots;
         }
